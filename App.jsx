@@ -73,6 +73,10 @@ const playerKey = (code, pid) => `qz:${code}:player:${pid}`;
 const answerKey = (code, qIdx, pid) => `qz:${code}:answer:${qIdx}:${pid}`;
 const scoreKey = (code, pid) => `qz:${code}:score:${pid}`;
 const timeKey = (code, pid) => `qz:${code}:time:${pid}`;
+const killerKey = (code, pid) => `qz:${code}:killer:${pid}`;
+const victimKey = (code, pid) => `qz:${code}:victim:${pid}`;
+const targetedKey = (code, qIdx, targetId, attackerId) => `qz:${code}:targeted:${qIdx}:${targetId}:${attackerId}`;
+const speedChronoKey = (code, qIdx, targetId) => `qz:${code}:speedchrono:${qIdx}:${targetId}`;
 const debuffKeyPrefix = (code, qIdx, targetId) => `qz:${code}:debuff:${qIdx}:${targetId}:`;
 
 /* ---------------------------------------------------------
@@ -537,6 +541,51 @@ const KIDS_QB = {
   ],
 };
 
+/* ---------------------------------------------------------
+   BLIND TEST — via iTunes Search API (extraits 30s, gratuit, sans clé)
+--------------------------------------------------------- */
+const BLIND_CATEGORIES = [
+  { id: "annees80", label: "Années 80", emoji: "📻", terms: ["Michael Jackson", "Madonna", "Queen", "Daniel Balavoine", "Indochine", "Jean-Jacques Goldman", "Cyndi Lauper", "Eurythmics"] },
+  { id: "annees2000blind", label: "Années 2000", emoji: "💿", terms: ["Britney Spears", "Black Eyed Peas", "Lorie", "Star Academy", "Shakira", "Beyoncé", "Linkin Park", "Christina Aguilera"] },
+  { id: "karaoke", label: "Best Karaoké", emoji: "🎤", terms: ["Queen", "ABBA", "Celine Dion", "Jean-Jacques Goldman", "France Gall", "Whitney Houston", "Michel Sardou", "Johnny Hallyday"] },
+  { id: "girlspower", label: "Girls Power", emoji: "💅", terms: ["Beyoncé", "Rihanna", "Spice Girls", "Dua Lipa", "Angèle", "Adele", "Lady Gaga", "Ariana Grande"] },
+  { id: "duosgroupes", label: "Duos & Groupes", emoji: "🎶", terms: ["Daft Punk", "Fréro Delavega", "ABBA", "Simon & Garfunkel", "Bigflo et Oli", "Wejdene", "Kids United", "Fugees"] },
+  { id: "rapfr", label: "Rap Français", emoji: "🎧", terms: ["Nekfeu", "PNL", "Jul", "Booba", "Orelsan", "Bigflo et Oli", "Ninho", "Damso"] },
+  { id: "rnb", label: "RnB", emoji: "🎷", terms: ["Beyoncé", "Usher", "Alicia Keys", "Ne-Yo", "Aya Nakamura", "Chris Brown", "Rihanna", "The Weeknd"] },
+  { id: "varfr", label: "Variété Française", emoji: "🇫🇷", terms: ["Charles Aznavour", "Francis Cabrel", "Patrick Bruel", "Vanessa Paradis", "Zaz", "Julien Doré", "Louane", "Christophe Maé"] },
+];
+
+async function itunesSearchTracks(term) {
+  try {
+    const url = `https://itunes.apple.com/search?term=${encodeURIComponent(term)}&media=music&entity=song&limit=15&country=FR`;
+    const res = await fetch(url);
+    if (!res.ok) return [];
+    const data = await res.json();
+    return (data.results || []).filter((r) => r.previewUrl);
+  } catch {
+    return [];
+  }
+}
+
+async function pickBlindTracks(categoryIds, count) {
+  const cats = BLIND_CATEGORIES.filter((c) => categoryIds.includes(c.id));
+  const allTerms = cats.flatMap((c) => c.terms);
+  const shuffledTerms = [...allTerms].sort(() => Math.random() - 0.5).slice(0, Math.max(6, Math.ceil(count / 1.5)));
+  const results = await Promise.all(shuffledTerms.map((t) => itunesSearchTracks(t)));
+  const pool = [];
+  const seen = new Set();
+  results.flat().forEach((r) => {
+    if (!seen.has(r.trackId)) { seen.add(r.trackId); pool.push(r); }
+  });
+  for (let i = pool.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [pool[i], pool[j]] = [pool[j], pool[i]]; }
+  return pool.slice(0, count).map((r) => ({
+    trackName: r.trackName,
+    artistName: r.artistName,
+    previewUrl: r.previewUrl,
+    artworkUrl: (r.artworkUrl100 || "").replace("100x100", "300x300"),
+  }));
+}
+
 function findCategory(id) {
   return CATEGORIES.find((c) => c.id === id) || KIDS_CATEGORIES.find((c) => c.id === id) || null;
 }
@@ -559,6 +608,9 @@ function buildJoinUrl(code) {
   if (typeof window === "undefined") return "";
   return `${window.location.origin}${window.location.pathname}?code=${code}`;
 }
+function qrCodeSrc(url) {
+  return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&margin=8&data=${encodeURIComponent(url)}`;
+}
 
 /* ---------------------------------------------------------
    JOKERS
@@ -568,7 +620,7 @@ const JOKERS = [
   { id: "x2", label: "x2", icon: Zap, emoji: "⚡", desc: "Double tes points si tu réponds juste à cette question.", targeted: false },
   { id: "steal", label: "Vol de points", icon: Swords, emoji: "🗡️", desc: "Si tu réponds juste, vole 30 points à l'adversaire de ton choix.", targeted: true },
   { id: "block", label: "Blocage", icon: Shield, emoji: "🛡️", desc: "Si tu réponds juste, l'adversaire ciblé ne marque aucun point sur cette question.", targeted: true },
-  { id: "flou", label: "Joker flou", icon: EyeOff, emoji: "🌫️", desc: "Floute l'écran de l'adversaire ciblé pendant la moitié du temps restant.", targeted: true },
+  { id: "speedchrono", label: "Speed Chrono", icon: Clock, emoji: "⏱️", desc: "Divise par deux le temps restant d'un adversaire pour répondre à cette question.", targeted: true },
 ];
 const CARD_BACK_COLORS = [C.pink, C.teal, C.gold, C.violet, "#4ADE80", "#FF8C42"];
 
@@ -663,7 +715,7 @@ function CategoryPicker({ cats, setCats, kidsMode, setKidsMode }) {
 /* ---------------------------------------------------------
    HOME
 --------------------------------------------------------- */
-function Home({ onCreate, onJoin, onSolo, onMatchAmor, onTestLab }) {
+function Home({ onCreate, onJoin, onSolo, onMatchAmor, onTestLab, onBlindTest }) {
   return (
     <Stage>
       <Logo />
@@ -673,6 +725,7 @@ function Home({ onCreate, onJoin, onSolo, onMatchAmor, onTestLab }) {
       <div className="flex flex-col gap-4">
         <BigButton onClick={onCreate} color={C.gold} icon={Crown}>Créer une partie (hôte)</BigButton>
         <BigButton onClick={onJoin} color={C.teal} icon={Users}>Rejoindre une partie</BigButton>
+        <BigButton onClick={onBlindTest} color={C.violet}>🎧 Blind Test musical</BigButton>
         <BigButton onClick={onMatchAmor} color={C.pink} icon={Skull}>Match Amor (élimination) 💔</BigButton>
         <BigButton onClick={onSolo} color={C.violet} icon={Skull}>Jouer seul / tester</BigButton>
         <GhostButton onClick={onTestLab}>🧪 Espace test (simuler 2 joueurs)</GhostButton>
@@ -754,7 +807,7 @@ function SoloSetup({ onBack, onStart, crash }) {
 function QuestionInput({ q, onSubmit, scaleVal, setScaleVal }) {
   if (q.type === "qcm") return (
     <div className="grid grid-cols-1 gap-3">
-      {q.options.map((o, i) => (<button key={i} onClick={() => onSubmit(i)} className="rounded-xl py-3 px-4 text-left" style={{ background: "rgba(255,255,255,0.08)", fontFamily: F.body, fontWeight: 700, color: C.cream }}>{o}</button>))}
+      {q.options.map((o, i) => (<button key={i} onClick={() => onSubmit(i)} className="rounded-xl py-3 px-4 text-left" style={{ background: "rgba(255,255,255,0.08)", fontFamily: F.body, fontWeight: 700, color: C.cream, fontSize: 17 }}>{o}</button>))}
     </div>
   );
   if (q.type === "vf") return (
@@ -776,6 +829,7 @@ function QuestionInput({ q, onSubmit, scaleVal, setScaleVal }) {
           type="number"
           inputMode="decimal"
           value={scaleVal}
+          onFocus={() => { if (scaleVal === 0) setScaleVal(""); }}
           onChange={(e) => setScaleVal(e.target.value === "" ? "" : Number(e.target.value))}
           className="text-center rounded-xl px-4 py-2"
           style={{ fontFamily: F.mono, fontSize: 28, color: C.cream, background: "rgba(255,255,255,0.08)", border: `2px solid rgba(255,255,255,0.2)`, width: 140 }}
@@ -830,8 +884,8 @@ function SoloQuiz({ config, profile, onExit }) {
         <span style={{ fontFamily: F.mono, fontSize: 18, color: left <= 5 ? C.pink : C.gold }}>{left}s</span>
       </div>
       <div className="rounded-2xl p-5 mb-5" style={{ background: "rgba(255,255,255,0.06)" }}>
-        <p className="text-xs uppercase tracking-widest opacity-50 mb-1">{findCategory(q.category)?.emoji} {findCategory(q.category)?.label}</p>
-        <p style={{ fontFamily: F.display, fontSize: 20 }}>{q.text}</p>
+        <p className="uppercase tracking-widest mb-2" style={{ fontSize: 16, fontWeight: 800, color: C.gold }}>{findCategory(q.category)?.emoji} {findCategory(q.category)?.label}</p>
+        <p style={{ fontFamily: F.display, fontSize: 26 }}>{q.text}</p>
       </div>
       {!answered ? (
         <QuestionInput q={q} onSubmit={checkAnswer} scaleVal={scaleVal} setScaleVal={setScaleVal} />
@@ -882,7 +936,7 @@ function CrashTest({ config, profile, onExit }) {
         </div>
       ) : (
         <>
-          <div className="rounded-2xl p-5 mb-5" style={{ background: "rgba(255,255,255,0.06)" }}><p className="text-xs uppercase tracking-widest opacity-50 mb-1">{findCategory(q.category)?.emoji} {findCategory(q.category)?.label}</p><p style={{ fontFamily: F.display, fontSize: 20 }}>{q.text}</p></div>
+          <div className="rounded-2xl p-5 mb-5" style={{ background: "rgba(255,255,255,0.06)" }}><p className="uppercase tracking-widest mb-2" style={{ fontSize: 16, fontWeight: 800, color: C.gold }}>{findCategory(q.category)?.emoji} {findCategory(q.category)?.label}</p><p style={{ fontFamily: F.display, fontSize: 26 }}>{q.text}</p></div>
           {!answered ? (
             <QuestionInput q={q} onSubmit={checkAnswer} scaleVal={scaleVal} setScaleVal={setScaleVal} />
           ) : (
@@ -920,13 +974,16 @@ function CreateRoom({ onCreated, onBack }) {
   const [cats, setCats] = useState(["animaux", "geo", "films"]);
   const [nbQuestions, setNbQuestions] = useState(10);
   const [types, setTypes] = useState({ qcm: true, vf: true, carte: true, echelle: true });
-  const [jokers, setJokers] = useState({ "5050": true, x2: true, steal: true, block: false, flou: true });
+  const [jokers, setJokers] = useState({ "5050": true, x2: true, steal: true, block: false, speedchrono: true });
   const [seconds, setSeconds] = useState(20);
   const [teamsMode, setTeamsMode] = useState(1);
   const [malus, setMalus] = useState(0);
   const [jokerRandom, setJokerRandom] = useState(false);
   const [jokerRandomCount, setJokerRandomCount] = useState(2);
   const [kidsMode, setKidsMode] = useState(false);
+  const [hostPlays, setHostPlays] = useState(false);
+  const [hostAnimal, setHostAnimal] = useState(null);
+  const [hostPseudo, setHostPseudo] = useState("");
   function toggleType(t) { setTypes((s) => ({ ...s, [t]: !s[t] })); }
   function toggleJoker(j) { setJokers((s) => ({ ...s, [j]: !s[j] })); }
 
@@ -937,9 +994,16 @@ function CreateRoom({ onCreated, onBack }) {
     let pool = pickQuestions(cats.length ? cats : catOptions.map((c) => c.id), 500, bank).filter((q) => activeTypes.includes(q.type));
     const questions = pool.slice(0, nbQuestions);
     const code = genCode();
-    const state = { phase: "lobby", code, settings: { seconds, jokers, teamsMode, malus, jokerRandom, jokerRandomCount, kidsMode }, questions, currentIndex: -1, questionStartedAt: null, createdAt: Date.now() };
+    const state = { phase: "lobby", code, settings: { seconds, jokers, teamsMode, malus, jokerRandom, jokerRandomCount, kidsMode, hostPlays }, questions, currentIndex: -1, questionStartedAt: null, createdAt: Date.now() };
     await sSet(roomKey(code), state);
-    onCreated(code, state);
+    let hostPid = null;
+    if (hostPlays && hostAnimal) {
+      hostPid = uid();
+      const pseudo = hostPseudo.trim() || "L'hôte";
+      await sSet(playerKey(code, hostPid), { id: hostPid, pseudo, animal: hostAnimal, team: 1, joinedAt: Date.now() });
+      await sSet(scoreKey(code, hostPid), 0);
+    }
+    onCreated(code, state, hostPid);
   }
 
   return (
@@ -992,11 +1056,24 @@ function CreateRoom({ onCreated, onBack }) {
       )}
 
       <p className="text-sm opacity-70 mb-2 font-bold">Malus en cas de mauvaise réponse (bonus max toujours 100 pts)</p>
-      <div className="flex flex-wrap gap-2 mb-8">
+      <div className="flex flex-wrap gap-2 mb-6">
         {[0, -25, -50, -100].map((m) => (<Chip key={m} active={malus === m} onClick={() => setMalus(m)}>{m === 0 ? "Aucun" : `${m} pts`}</Chip>))}
       </div>
 
-      <BigButton onClick={create} color={C.pink} icon={Play}>Créer la salle</BigButton>
+      <p className="text-sm opacity-70 mb-2 font-bold">L'hôte joue aussi ?</p>
+      <div className="flex flex-wrap gap-2 mb-3">
+        <Chip active={!hostPlays} onClick={() => setHostPlays(false)}>Non, juste animateur</Chip>
+        <Chip active={hostPlays} onClick={() => setHostPlays(true)}>Oui, je participe aussi</Chip>
+      </div>
+      {hostPlays && (
+        <div className="mb-4 rounded-2xl p-4" style={{ background: "rgba(255,255,255,0.04)" }}>
+          <p className="text-xs opacity-60 mb-2">⚠️ Sans jokers pour toi, pour garder le jeu simple depuis l'écran d'hôte.</p>
+          <input value={hostPseudo} onChange={(e) => setHostPseudo(e.target.value)} placeholder="Ton pseudo (optionnel)" className="w-full mb-3 rounded-xl px-4 py-2" style={{ background: "rgba(255,255,255,0.08)", color: C.cream, border: "2px solid rgba(255,255,255,0.15)" }} />
+          <AvatarPicker animal={hostAnimal} onPick={setHostAnimal} taken={[]} />
+        </div>
+      )}
+
+      <BigButton onClick={create} color={C.pink} icon={Play} disabled={hostPlays && !hostAnimal}>Créer la salle</BigButton>
     </Stage>
   );
 }
@@ -1246,7 +1323,13 @@ function AdminLobby({ code, room, onStart, buildExtraOnStart, onBack }) {
           <GhostButton onClick={() => { navigator.clipboard?.writeText(buildJoinUrl(code)); setLinkCopied(true); setTimeout(() => setLinkCopied(false), 1500); }}>
             {linkCopied ? "Lien copié ✓" : "📋 Copier le lien de la partie"}
           </GhostButton>
-          <p className="text-[11px] opacity-50 mt-2 max-w-xs text-center">À coller dans un SMS/WhatsApp — ouvre l'appli avec le code déjà rempli (fonctionne si cette appli est ouverte via un lien partagé, sinon donne le code à la main)</p>
+          <p className="text-[11px] opacity-50 mt-2 max-w-xs text-center">À coller dans un SMS/WhatsApp — ouvre l'appli avec le code déjà rempli</p>
+        </div>
+        <div className="flex flex-col items-center mt-4">
+          <div className="rounded-2xl p-2" style={{ background: C.cream }}>
+            <img src={qrCodeSrc(buildJoinUrl(code))} alt="QR code pour rejoindre la partie" width={140} height={140} style={{ display: "block" }} />
+          </div>
+          <p className="text-[11px] opacity-50 mt-2">📷 Ou scanne pour rejoindre directement</p>
         </div>
       </div>
       <div className="rounded-2xl p-4 mb-6" style={{ background: "rgba(255,255,255,0.05)", minHeight: 140 }}>
@@ -1271,7 +1354,7 @@ function AdminLobby({ code, room, onStart, buildExtraOnStart, onBack }) {
           ))}
         </div>
       </div>
-      <BigButton onClick={start} color={C.pink} disabled={players.length === 0} icon={Play}>Lancer la partie ({room.questions.length} questions)</BigButton>
+      <BigButton onClick={start} color={C.pink} disabled={players.length === 0} icon={Play}>Lancer la partie ({(room.questions || room.tracks || []).length} {room.mode === "blindtest" ? "morceaux" : "questions"})</BigButton>
     </Stage>
   );
 }
@@ -1308,11 +1391,15 @@ function useCountdown(startedAt, seconds) {
 /* ---------------------------------------------------------
    ADMIN GAME
 --------------------------------------------------------- */
-function AdminGame({ code, room, onRoomChange, onFinished }) {
+function AdminGame({ code, room, onRoomChange, onFinished, hostPid }) {
   const q = room.questions[room.currentIndex];
   const left = useCountdown(room.questionStartedAt, room.settings.seconds);
   const [answersCount, setAnswersCount] = useState(0);
   const [revealed, setRevealed] = useState(false);
+  const [playerAnswers, setPlayerAnswers] = useState([]);
+  const [autoLeft, setAutoLeft] = useState(5);
+  const [hostScaleVal, setHostScaleVal] = useState(0);
+  const [hostSubmitted, setHostSubmitted] = useState(false);
   const advancingRef = useRef(false);
 
   const collectAndScore = useCallback(async () => {
@@ -1348,7 +1435,8 @@ function AdminGame({ code, room, onRoomChange, onFinished }) {
       }
     });
 
-    answers.forEach((a) => { if (a.jokerUsed?.id === "block" && correctness[a.pid] && a.jokerUsed.targetId) gained[a.jokerUsed.targetId] = 0; });
+    const blockedDamage = {};
+    answers.forEach((a) => { if (a.jokerUsed?.id === "block" && correctness[a.pid] && a.jokerUsed.targetId) { blockedDamage[a.jokerUsed.targetId] = gained[a.jokerUsed.targetId] || 0; gained[a.jokerUsed.targetId] = 0; } });
 
     for (const p of players) { const prev = (await sGet(scoreKey(code, p.id))) || 0; await sSet(scoreKey(code, p.id), prev + (gained[p.id] || 0)); }
 
@@ -1365,12 +1453,26 @@ function AdminGame({ code, room, onRoomChange, onFinished }) {
       await sSet(scoreKey(code, op.jokerUsed.targetId), targetScore - steal);
       const attackerScore = (await sGet(scoreKey(code, op.pid))) || 0;
       await sSet(scoreKey(code, op.pid), attackerScore + steal);
+      const prevKiller = (await sGet(killerKey(code, op.pid))) || 0;
+      await sSet(killerKey(code, op.pid), prevKiller + steal);
+      const prevVictim = (await sGet(victimKey(code, op.jokerUsed.targetId))) || 0;
+      await sSet(victimKey(code, op.jokerUsed.targetId), prevVictim + steal);
     }
+    for (const [targetId, dmg] of Object.entries(blockedDamage)) {
+      if (dmg > 0) { const prevVictim = (await sGet(victimKey(code, targetId))) || 0; await sSet(victimKey(code, targetId), prevVictim + dmg); }
+    }
+
+    const withPlayers = answers.map((a) => {
+      const p = players.find((pp) => pp.id === a.pid);
+      return { ...a, pseudo: p?.pseudo || "?", animal: p?.animal || "❓", correct: correctness[a.pid] };
+    });
+    setPlayerAnswers(withPlayers);
+    setAutoLeft(5);
     setRevealed(true);
   }, [code, q, room]);
 
   useEffect(() => {
-    setRevealed(false); advancingRef.current = false;
+    setRevealed(false); advancingRef.current = false; setPlayerAnswers([]); setHostSubmitted(false); setHostScaleVal(0);
     const t = setInterval(async () => { const keys = await sList(`qz:${code}:answer:${room.currentIndex}:`); setAnswersCount(keys.length); }, 1000);
     return () => clearInterval(t);
   }, [room.currentIndex, code]);
@@ -1382,6 +1484,22 @@ function AdminGame({ code, room, onRoomChange, onFinished }) {
     else { const next = { ...room, currentIndex: room.currentIndex + 1, questionStartedAt: Date.now() }; await sSet(roomKey(code), next); onRoomChange(next); }
   }
 
+  useEffect(() => {
+    if (!revealed) return;
+    if (autoLeft <= 0) { next(); return; }
+    const t = setTimeout(() => setAutoLeft((n) => n - 1), 1000);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [revealed, autoLeft]);
+
+  function answerLabel(a) {
+    if (q.type === "qcm") return q.options[a.value] ?? "?";
+    if (q.type === "vf") return a.value ? "Vrai" : "Faux";
+    if (q.type === "carte") return MAP_ZONES.find((z) => z.id === a.value)?.label || "?";
+    if (q.type === "echelle") return String(a.value);
+    return "?";
+  }
+
   const cat = findCategory(q.category);
   return (
     <Stage wide>
@@ -1391,14 +1509,44 @@ function AdminGame({ code, room, onRoomChange, onFinished }) {
         <span className="flex items-center gap-1" style={{ fontFamily: F.mono, fontSize: 20, color: left <= 5 ? C.pink : C.gold }}><Clock size={18} /> {left}s</span>
       </div>
       <div className="rounded-3xl p-8 mb-6 text-center" style={{ background: "rgba(255,255,255,0.06)" }}>
-        <p className="text-xs uppercase tracking-widest opacity-50 mb-2">{cat?.emoji} {cat?.label}</p>
-        <p style={{ fontFamily: F.display, fontSize: 28 }}>{q.text}</p>
-        {q.type === "qcm" && (<div className="grid grid-cols-2 gap-3 mt-6">{q.options.map((o, i) => (<div key={i} className="rounded-xl p-3" style={{ background: revealed && i === q.answer ? C.teal : "rgba(255,255,255,0.08)", color: revealed && i === q.answer ? "#1B1030" : C.cream, fontFamily: F.body, fontWeight: 700 }}>{o}</div>))}</div>)}
+        <p className="uppercase tracking-widest mb-3" style={{ fontSize: 20, fontWeight: 800, color: C.gold }}>{cat?.emoji} {cat?.label}</p>
+        <p style={{ fontFamily: F.display, fontSize: 32 }}>{q.text}</p>
+        {q.type === "qcm" && (<div className="grid grid-cols-2 gap-3 mt-6">{q.options.map((o, i) => (<div key={i} className="rounded-xl p-3" style={{ background: revealed && i === q.answer ? C.teal : "rgba(255,255,255,0.08)", color: revealed && i === q.answer ? "#1B1030" : C.cream, fontFamily: F.body, fontWeight: 700, fontSize: 18 }}>{o}</div>))}</div>)}
         {q.type === "vf" && (<div className="flex gap-4 justify-center mt-6"><div className="rounded-xl px-6 py-3" style={{ background: revealed && q.answer === true ? C.teal : "rgba(255,255,255,0.08)" }}>Vrai</div><div className="rounded-xl px-6 py-3" style={{ background: revealed && q.answer === false ? C.teal : "rgba(255,255,255,0.08)" }}>Faux</div></div>)}
         {q.type === "carte" && (<div className="relative rounded-xl mt-6 mx-auto" style={{ width: "100%", maxWidth: 420, height: 220, background: "rgba(255,255,255,0.06)" }}>{MAP_ZONES.map((z) => (<div key={z.id} className="absolute rounded-full px-2 py-1 text-xs" style={{ left: `${z.x}%`, top: `${z.y}%`, transform: "translate(-50%,-50%)", background: revealed && z.id === q.answer ? C.teal : "rgba(255,255,255,0.12)", color: revealed && z.id === q.answer ? "#1B1030" : C.cream }}>{z.label}</div>))}</div>)}
         {q.type === "echelle" && revealed && <p className="mt-6" style={{ fontFamily: F.mono, fontSize: 26, color: C.teal }}>Réponse : {q.answer} {q.unit || ""} — le(s) plus proche(s) marquent les points</p>}
       </div>
-      {revealed ? (<BigButton onClick={next} color={C.pink} icon={ArrowRight}>{room.currentIndex >= room.questions.length - 1 ? "Voir le classement final" : "Question suivante"}</BigButton>) : (<BigButton onClick={collectAndScore} color={C.violet}>Révéler maintenant</BigButton>)}
+      {room.settings.hostPlays && hostPid && !revealed && (
+        <div className="rounded-2xl p-4 mb-6" style={{ background: "rgba(255,255,255,0.05)", border: `2px solid ${C.violet}` }}>
+          <p className="text-sm font-bold mb-3" style={{ color: C.violet }}>🎤 Ta réponse (hôte)</p>
+          {hostSubmitted ? (
+            <p className="text-sm opacity-70">Réponse envoyée ✅</p>
+          ) : (
+            <QuestionInput
+              q={q}
+              scaleVal={hostScaleVal}
+              setScaleVal={setHostScaleVal}
+              onSubmit={async (value) => { setHostSubmitted(true); await sSet(answerKey(code, room.currentIndex, hostPid), { pid: hostPid, value, jokerUsed: null, submittedAt: Date.now() }); }}
+            />
+          )}
+        </div>
+      )}
+      {revealed && playerAnswers.length > 0 && (
+        <div className="rounded-2xl p-4 mb-6" style={{ background: "rgba(255,255,255,0.05)" }}>
+          <p className="text-sm font-bold mb-2 opacity-70">Réponses des joueurs</p>
+          <div className="flex flex-col gap-2">
+            {playerAnswers.map((a) => (
+              <div key={a.pid} className="flex items-center gap-2 text-sm">
+                <span>{a.animal}</span>
+                <span className="flex-1">{a.pseudo}</span>
+                <span style={{ color: a.correct ? C.teal : C.pink, fontWeight: 700 }}>{answerLabel(a)}</span>
+                {a.correct ? <Check size={16} color={C.teal} /> : <span style={{ color: C.pink }}>✕</span>}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+      {revealed ? (<BigButton onClick={next} color={C.pink} icon={ArrowRight}>{room.currentIndex >= room.questions.length - 1 ? "Voir le classement final" : `Question suivante (${autoLeft}s)`}</BigButton>) : (<BigButton onClick={collectAndScore} color={C.violet}>Révéler maintenant</BigButton>)}
     </Stage>
   );
 }
@@ -1408,28 +1556,42 @@ function AdminGame({ code, room, onRoomChange, onFinished }) {
 --------------------------------------------------------- */
 function PlayerGame({ code, pid, room, assignedJokers, usedJokersEver, setUsedJokersEver }) {
   const q = room.questions[room.currentIndex];
-  const left = useCountdown(room.questionStartedAt, room.settings.seconds);
+  const globalLeft = useCountdown(room.questionStartedAt, room.settings.seconds);
+  const [speedDeadline, setSpeedDeadline] = useState(null);
   const [submitted, setSubmitted] = useState(false);
   const [hiddenOptions, setHiddenOptions] = useState([]);
   const [jokerUsed, setJokerUsed] = useState(null);
   const [scaleVal, setScaleVal] = useState(0);
   const [pickingTargetFor, setPickingTargetFor] = useState(null);
   const [otherPlayers, setOtherPlayers] = useState([]);
-  const [blurred, setBlurred] = useState(false);
+  const [targeters, setTargeters] = useState([]);
 
-  useEffect(() => { setSubmitted(false); setHiddenOptions([]); setJokerUsed(null); setScaleVal(0); setPickingTargetFor(null); setBlurred(false); }, [room.currentIndex]);
+  const left = speedDeadline != null ? Math.max(0, Math.ceil((speedDeadline - Date.now()) / 1000)) : globalLeft;
+
+  useEffect(() => { setSubmitted(false); setHiddenOptions([]); setJokerUsed(null); setScaleVal(0); setPickingTargetFor(null); setSpeedDeadline(null); setTargeters([]); }, [room.currentIndex]);
 
   useEffect(() => {
     let stop = false;
     const t = setInterval(async () => {
-      const keys = await sList(debuffKeyPrefix(code, room.currentIndex, pid));
+      const v = await sGet(speedChronoKey(code, room.currentIndex, pid));
       if (stop) return;
-      if (keys.length === 0) { setBlurred(false); return; }
-      const debuffs = (await Promise.all(keys.map((k) => sGet(k)))).filter(Boolean);
-      setBlurred(debuffs.some((d) => Date.now() - d.appliedAt < d.duration));
+      if (v?.deadline) setSpeedDeadline(v.deadline);
     }, 600);
     return () => { stop = true; clearInterval(t); };
   }, [code, room.currentIndex, pid]);
+
+  useEffect(() => {
+    if (!(submitted || left === 0)) return;
+    let stop = false;
+    (async () => {
+      const keys = await sList(`qz:${code}:targeted:${room.currentIndex}:${pid}:`);
+      if (stop || keys.length === 0) return;
+      const attackerIds = keys.map((k) => k.split(":").pop());
+      const attackers = (await Promise.all(attackerIds.map((aid) => sGet(playerKey(code, aid))))).filter(Boolean);
+      setTargeters(attackers.map((a) => a.pseudo));
+    })();
+    return () => { stop = true; };
+  }, [submitted, left, code, room.currentIndex, pid]);
 
   async function submit(value) { if (submitted || left === 0) return; setSubmitted(true); await sSet(answerKey(code, room.currentIndex, pid), { pid, value, jokerUsed, submittedAt: Date.now() }); }
 
@@ -1445,7 +1607,12 @@ function PlayerGame({ code, pid, room, assignedJokers, usedJokersEver, setUsedJo
     setUsedJokersEver(nextUsed);
     sSet(`qz:${code}:jokerused:${pid}`, nextUsed);
     setPickingTargetFor(null);
-    if (jokerId === "flou") await sSet(`${debuffKeyPrefix(code, room.currentIndex, targetId)}${pid}`, { appliedAt: Date.now(), duration: (room.settings.seconds * 1000) / 2 });
+    await sSet(targetedKey(code, room.currentIndex, targetId, pid), true);
+    if (jokerId === "speedchrono") {
+      const elapsed = (Date.now() - room.questionStartedAt) / 1000;
+      const remaining = Math.max(0, room.settings.seconds - elapsed);
+      await sSet(speedChronoKey(code, room.currentIndex, targetId), { deadline: Date.now() + (remaining * 1000) / 2 });
+    }
   }
   function useJoker(id) {
     if (jokerUsed || submitted) return;
@@ -1466,15 +1633,28 @@ function PlayerGame({ code, pid, room, assignedJokers, usedJokersEver, setUsedJo
         <span className="text-xs opacity-60">Q{room.currentIndex + 1}/{room.questions.length}</span>
         <span style={{ fontFamily: F.mono, fontSize: 20, color: left <= 5 ? C.pink : C.gold }}>{left}s</span>
       </div>
-      <div style={{ filter: blurred ? "blur(8px)" : "none", transition: "filter 0.3s" }}>
-        <div className="rounded-2xl p-5 mb-5" style={{ background: "rgba(255,255,255,0.06)" }}><p className="text-xs uppercase tracking-widest opacity-50 mb-1">{findCategory(q.category)?.emoji} {findCategory(q.category)?.label}</p><p style={{ fontFamily: F.display, fontSize: 20 }}>{q.text}</p></div>
+      {speedDeadline != null && <p className="text-xs text-center mb-2" style={{ color: C.pink }}>⏱️ Ton temps a été réduit par un adversaire !</p>}
+      <div>
+        <div className="rounded-2xl p-5 mb-5" style={{ background: "rgba(255,255,255,0.06)" }}><p className="uppercase tracking-widest mb-2" style={{ fontSize: 16, fontWeight: 800, color: C.gold }}>{findCategory(q.category)?.emoji} {findCategory(q.category)?.label}</p><p style={{ fontFamily: F.display, fontSize: 26 }}>{q.text}</p></div>
         {!submitted && left > 0 && !pickingTargetFor && (
           <>
-            {q.type === "qcm" && (<div className="grid grid-cols-1 gap-3 mb-5">{q.options.map((o, i) => hiddenOptions.includes(i) ? null : (<button key={i} onClick={() => submit(i)} className="rounded-xl py-3 px-4 text-left" style={{ background: "rgba(255,255,255,0.08)", fontFamily: F.body, fontWeight: 700 }}>{o}</button>))}</div>)}
+            {q.type === "qcm" && (<div className="grid grid-cols-1 gap-3 mb-5">{q.options.map((o, i) => hiddenOptions.includes(i) ? null : (<button key={i} onClick={() => submit(i)} className="rounded-xl py-3 px-4 text-left" style={{ background: "rgba(255,255,255,0.08)", fontFamily: F.body, fontWeight: 700, fontSize: 17 }}>{o}</button>))}</div>)}
             {q.type === "vf" && (<div className="flex gap-3 mb-5"><button onClick={() => submit(true)} className="flex-1 rounded-xl py-4" style={{ background: C.teal, color: "#1B1030", fontFamily: F.display, fontSize: 18 }}>Vrai</button><button onClick={() => submit(false)} className="flex-1 rounded-xl py-4" style={{ background: C.pink, color: "#1B1030", fontFamily: F.display, fontSize: 18 }}>Faux</button></div>)}
             {q.type === "carte" && (<div className="relative rounded-xl mb-5" style={{ width: "100%", height: 200, background: "rgba(255,255,255,0.06)" }}>{MAP_ZONES.map((z) => (<button key={z.id} onClick={() => submit(z.id)} className="absolute rounded-full px-2 py-1 text-xs" style={{ left: `${z.x}%`, top: `${z.y}%`, transform: "translate(-50%,-50%)", background: "rgba(255,255,255,0.15)" }}><MapPin size={12} className="inline mr-1" />{z.label}</button>))}</div>)}
-            {q.type === "echelle" && (<div className="mb-5"><div className="flex items-center justify-center gap-3 mb-4"><button onClick={() => setScaleVal((v) => Number(v) - 1)} className="rounded-full p-2" style={{ background: "rgba(255,255,255,0.1)" }}><Minus size={16} /></button><input type="number" inputMode="decimal" value={scaleVal} onChange={(e) => setScaleVal(e.target.value === "" ? "" : Number(e.target.value))} className="text-center rounded-xl px-4 py-2" style={{ fontFamily: F.mono, fontSize: 28, color: C.cream, background: "rgba(255,255,255,0.08)", border: "2px solid rgba(255,255,255,0.2)", width: 140 }} /><button onClick={() => setScaleVal((v) => Number(v) + 1)} className="rounded-full p-2" style={{ background: "rgba(255,255,255,0.1)" }}><Plus size={16} /></button></div><BigButton onClick={() => submit(scaleVal === "" ? 0 : scaleVal)} color={C.gold}>Valider</BigButton></div>)}
-            {enabledJokers.length > 0 && (<div className="flex flex-wrap gap-2 mt-2">{enabledJokers.map((j) => (<button key={j.id} disabled={!!jokerUsed} onClick={() => useJoker(j.id)} className="rounded-lg px-3 py-2 text-xs flex items-center gap-1 disabled:opacity-30" style={{ background: jokerUsed?.id === j.id ? C.violet : "rgba(255,255,255,0.08)" }}><j.icon size={14} /> {j.label}</button>))}</div>)}
+            {q.type === "echelle" && (<div className="mb-5"><div className="flex items-center justify-center gap-3 mb-4"><button onClick={() => setScaleVal((v) => Number(v) - 1)} className="rounded-full p-2" style={{ background: "rgba(255,255,255,0.1)" }}><Minus size={16} /></button><input type="number" inputMode="decimal" value={scaleVal} onFocus={() => { if (scaleVal === 0) setScaleVal(""); }} onChange={(e) => setScaleVal(e.target.value === "" ? "" : Number(e.target.value))} className="text-center rounded-xl px-4 py-2" style={{ fontFamily: F.mono, fontSize: 28, color: C.cream, background: "rgba(255,255,255,0.08)", border: "2px solid rgba(255,255,255,0.2)", width: 140 }} /><button onClick={() => setScaleVal((v) => Number(v) + 1)} className="rounded-full p-2" style={{ background: "rgba(255,255,255,0.1)" }}><Plus size={16} /></button></div><BigButton onClick={() => submit(scaleVal === "" ? 0 : scaleVal)} color={C.gold}>Valider</BigButton></div>)}
+            {enabledJokers.length > 0 && (
+              <div className="mt-4">
+                <p className="text-xs opacity-60 mb-2 text-center">Jokers disponibles</p>
+                <div className="grid grid-cols-2 gap-3">
+                  {enabledJokers.map((j) => (
+                    <button key={j.id} disabled={!!jokerUsed} onClick={() => useJoker(j.id)} className="rounded-2xl py-3 px-3 flex flex-col items-center gap-1 disabled:opacity-30 transition-transform active:scale-95" style={{ background: jokerUsed?.id === j.id ? C.violet : "rgba(255,255,255,0.1)", border: "2px solid rgba(255,255,255,0.15)" }}>
+                      <j.icon size={22} />
+                      <span style={{ fontFamily: F.display, fontSize: 14 }}>{j.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </>
         )}
       </div>
@@ -1485,7 +1665,17 @@ function PlayerGame({ code, pid, room, assignedJokers, usedJokersEver, setUsedJo
           <div className="mt-3"><GhostButton onClick={() => setPickingTargetFor(null)} small>Annuler</GhostButton></div>
         </div>
       )}
-      {(submitted || left === 0) && !pickingTargetFor && (<div className="text-center mt-6 opacity-70"><p style={{ fontFamily: F.display, fontSize: 20 }}>{submitted ? "Réponse envoyée ✅" : "Temps écoulé ⏱️"}</p><p className="text-sm mt-1">En attente des autres joueurs...</p></div>)}
+      {(submitted || left === 0) && !pickingTargetFor && (
+        <div className="text-center mt-6 opacity-90">
+          <p style={{ fontFamily: F.display, fontSize: 20 }}>{submitted ? "Réponse envoyée ✅" : "Temps écoulé ⏱️"}</p>
+          <p className="text-sm mt-1 opacity-70">En attente des autres joueurs...</p>
+          {targeters.length > 0 && (
+            <p className="text-sm mt-3 rounded-xl py-2 px-3 inline-block" style={{ background: "rgba(255,61,127,0.15)", color: C.pink }}>
+              🎯 {targeters.join(", ")} {targeters.length > 1 ? "t'ont" : "t'a"} ciblé sur cette question !
+            </p>
+          )}
+        </div>
+      )}
     </Stage>
   );
 }
@@ -1493,11 +1683,34 @@ function PlayerGame({ code, pid, room, assignedJokers, usedJokersEver, setUsedJo
 /* ---------------------------------------------------------
    RESULTS
 --------------------------------------------------------- */
-function Results({ code, room, isAdmin, onRestart }) {
+function Results({ code, room, isAdmin, onRestart, onPlayAgain }) {
   const [ranking, setRanking] = useState([]);
   const teamsMode = room?.settings?.teamsMode || 1;
-  useEffect(() => { (async () => { const pKeys = await sList(`qz:${code}:player:`); const players = (await Promise.all(pKeys.map((k) => sGet(k)))).filter(Boolean); const withScores = await Promise.all(players.map(async (p) => ({ ...p, score: (await sGet(scoreKey(code, p.id))) || 0, time: (await sGet(timeKey(code, p.id))) || 0 }))); withScores.sort((a, b) => b.score - a.score || a.time - b.time); setRanking(withScores); })(); }, [code]);
+  useEffect(() => { (async () => { const pKeys = await sList(`qz:${code}:player:`); const players = (await Promise.all(pKeys.map((k) => sGet(k)))).filter(Boolean); const withScores = await Promise.all(players.map(async (p) => ({ ...p, score: (await sGet(scoreKey(code, p.id))) || 0, time: (await sGet(timeKey(code, p.id))) || 0, killer: (await sGet(killerKey(code, p.id))) || 0, victim: (await sGet(victimKey(code, p.id))) || 0 }))); withScores.sort((a, b) => b.score - a.score || a.time - b.time); setRanking(withScores); })(); }, [code]);
   const medals = ["🥇", "🥈", "🥉"];
+
+  const topKiller = ranking.length ? ranking.reduce((a, b) => (b.killer > a.killer ? b : a), ranking[0]) : null;
+  const topVictim = ranking.length ? ranking.reduce((a, b) => (b.victim > a.victim ? b : a), ranking[0]) : null;
+  const awards = (
+    <>
+      {(topKiller?.killer > 0 || topVictim?.victim > 0) && (
+        <div className="flex flex-col gap-3 mt-6">
+          {topKiller?.killer > 0 && (
+            <div className="rounded-xl p-3 flex items-center gap-3" style={{ background: "rgba(255,61,127,0.12)" }}>
+              <span style={{ fontSize: 26 }}>🔪</span>
+              <div className="flex-1"><p style={{ fontFamily: F.display, fontSize: 16, color: C.pink }}>Serial Killer</p><p className="text-xs opacity-70">{topKiller.animal} {topKiller.pseudo} — {topKiller.killer} pts volés aux autres</p></div>
+            </div>
+          )}
+          {topVictim?.victim > 0 && (
+            <div className="rounded-xl p-3 flex items-center gap-3" style={{ background: "rgba(123,78,255,0.12)" }}>
+              <span style={{ fontSize: 26 }}>💀</span>
+              <div className="flex-1"><p style={{ fontFamily: F.display, fontSize: 16, color: C.violet }}>Victime</p><p className="text-xs opacity-70">{topVictim.animal} {topVictim.pseudo} — {topVictim.victim} pts subis</p></div>
+            </div>
+          )}
+        </div>
+      )}
+    </>
+  );
 
   if (teamsMode > 1) {
     const teams = {};
@@ -1515,7 +1728,8 @@ function Results({ code, room, isAdmin, onRestart }) {
             </div>
           ))}
         </div>
-        {isAdmin && <div className="mt-8"><BigButton onClick={onRestart} color={C.violet} icon={RefreshCw}>Nouvelle partie</BigButton></div>}
+        {awards}
+        {isAdmin && <div className="mt-8 flex flex-col gap-3"><BigButton onClick={onPlayAgain} color={C.teal} icon={RefreshCw}>Rejouer (mêmes joueurs)</BigButton><GhostButton onClick={onRestart}>Nouvelle partie depuis l'accueil</GhostButton></div>}
       </Stage>
     );
   }
@@ -1528,7 +1742,8 @@ function Results({ code, room, isAdmin, onRestart }) {
         {ranking.map((p, i) => (<div key={p.id} className="flex items-center gap-3 rounded-xl p-3" style={{ background: i === 0 ? "rgba(255,201,60,0.15)" : "rgba(255,255,255,0.06)" }}><span style={{ fontSize: 22, width: 32 }}>{medals[i] || `${i + 1}.`}</span><span style={{ fontSize: 28 }}>{p.animal}</span><span className="flex-1" style={{ fontFamily: F.body, fontWeight: 700 }}>{p.pseudo}</span><span style={{ fontFamily: F.mono, fontSize: 18, color: C.teal }}>{p.score}</span></div>))}
         {ranking.length === 0 && <p className="text-center opacity-60">Calcul en cours...</p>}
       </div>
-      {isAdmin && <div className="mt-8"><BigButton onClick={onRestart} color={C.violet} icon={RefreshCw}>Nouvelle partie</BigButton></div>}
+      {awards}
+      {isAdmin && <div className="mt-8 flex flex-col gap-3"><BigButton onClick={onPlayAgain} color={C.teal} icon={RefreshCw}>Rejouer (mêmes joueurs)</BigButton><GhostButton onClick={onRestart}>Nouvelle partie depuis l'accueil</GhostButton></div>}
     </Stage>
   );
 }
@@ -1628,8 +1843,8 @@ function MatchAmorAdminGame({ code, room, onRoomChange, onFinished }) {
         <span className="flex items-center gap-1" style={{ fontFamily: F.mono, fontSize: 20, color: left <= 5 ? C.pink : C.gold }}><Clock size={18} /> {left}s</span>
       </div>
       <div className="rounded-3xl p-8 mb-6 text-center" style={{ background: "rgba(255,255,255,0.06)" }}>
-        <p className="text-xs uppercase tracking-widest opacity-50 mb-2">{cat?.emoji} {cat?.label}</p>
-        <p style={{ fontFamily: F.display, fontSize: 28 }}>{q.text}</p>
+        <p className="uppercase tracking-widest mb-3" style={{ fontSize: 20, fontWeight: 800, color: C.gold }}>{cat?.emoji} {cat?.label}</p>
+        <p style={{ fontFamily: F.display, fontSize: 32 }}>{q.text}</p>
         {revealed && (
           <div className="mt-6">
             {q.type === "echelle" ? (
@@ -1680,7 +1895,7 @@ function PlayerMatchAmor({ code, pid, room }) {
         <span className="text-xs opacity-60">{room.alive.length} en course</span>
         <span style={{ fontFamily: F.mono, fontSize: 20, color: left <= 5 ? C.pink : C.gold }}>{left}s</span>
       </div>
-      <div className="rounded-2xl p-5 mb-5" style={{ background: "rgba(255,255,255,0.06)" }}><p className="text-xs uppercase tracking-widest opacity-50 mb-1">{findCategory(q.category)?.emoji} {findCategory(q.category)?.label}</p><p style={{ fontFamily: F.display, fontSize: 20 }}>{q.text}</p></div>
+      <div className="rounded-2xl p-5 mb-5" style={{ background: "rgba(255,255,255,0.06)" }}><p className="uppercase tracking-widest mb-2" style={{ fontSize: 16, fontWeight: 800, color: C.gold }}>{findCategory(q.category)?.emoji} {findCategory(q.category)?.label}</p><p style={{ fontFamily: F.display, fontSize: 26 }}>{q.text}</p></div>
       {!submitted && left > 0 ? (
         <QuestionInput q={q} onSubmit={submit} scaleVal={scaleVal} setScaleVal={setScaleVal} />
       ) : (
@@ -1707,6 +1922,238 @@ function MatchAmorResults({ code, room, isAdmin, onRestart }) {
         ) : <p className="opacity-60 mt-4">Calcul...</p>}
       </div>
       {isAdmin && <div className="mt-8"><BigButton onClick={onRestart} color={C.violet} icon={RefreshCw}>Nouvelle partie</BigButton></div>}
+    </Stage>
+  );
+}
+
+/* ---------------------------------------------------------
+   BLIND TEST
+--------------------------------------------------------- */
+function CreateBlindTest({ onCreated, onBack }) {
+  const [cats, setCats] = useState(["annees2000blind", "rapfr"]);
+  const [nbTracks, setNbTracks] = useState(10);
+  const [seconds, setSeconds] = useState(15);
+  const [effect, setEffect] = useState("normal");
+  const [questionTypes, setQuestionTypes] = useState({ titre: true, artiste: true });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  function toggleCat(id) { setCats((c) => (c.includes(id) ? c.filter((x) => x !== id) : [...c, id])); }
+  function toggleType(t) { setQuestionTypes((s) => ({ ...s, [t]: !s[t] })); }
+
+  async function create() {
+    if (cats.length === 0) return setError("Choisis au moins une catégorie musicale.");
+    const types = Object.entries(questionTypes).filter(([, v]) => v).map(([k]) => k);
+    if (types.length === 0) return setError("Choisis au moins un type de question.");
+    setLoading(true);
+    setError("");
+    const tracks = await pickBlindTracks(cats, nbTracks);
+    setLoading(false);
+    if (tracks.length < 3) return setError("Pas assez de morceaux trouvés pour ces catégories, réessaie ou change de catégories.");
+    const code = genCode();
+    const state = { mode: "blindtest", phase: "lobby", code, settings: { seconds, effect, questionTypes: types }, tracks, currentIndex: -1, questionStartedAt: null, createdAt: Date.now() };
+    await sSet(roomKey(code), state);
+    onCreated(code, state);
+  }
+
+  return (
+    <Stage wide>
+      <ScreenHeader title="🎧 Blind Test — réglages" onBack={onBack} color={C.violet} />
+      <p className="text-xs opacity-50 mb-4 text-center">Extraits fournis par l'API iTunes (30s max, gratuit). Le son se joue depuis l'écran de l'hôte — les joueurs n'ont besoin que de leur téléphone pour répondre.</p>
+      <p className="text-sm opacity-70 mb-2 font-bold">Catégories musicales</p>
+      <div className="grid grid-cols-2 gap-2 mb-6">{BLIND_CATEGORIES.map((c) => (<Chip key={c.id} active={cats.includes(c.id)} onClick={() => toggleCat(c.id)}>{c.emoji} {c.label}</Chip>))}</div>
+      <p className="text-sm opacity-70 mb-2 font-bold">Types de questions</p>
+      <div className="flex flex-wrap gap-2 mb-6">
+        <Chip active={questionTypes.titre} onClick={() => toggleType("titre")}>Quel est le titre ?</Chip>
+        <Chip active={questionTypes.artiste} onClick={() => toggleType("artiste")}>Qui chante ?</Chip>
+      </div>
+      <p className="text-sm opacity-70 mb-2 font-bold">Effet audio</p>
+      <div className="flex flex-wrap gap-2 mb-6">
+        <Chip active={effect === "normal"} onClick={() => setEffect("normal")}>Normal</Chip>
+        <Chip active={effect === "ralenti"} onClick={() => setEffect("ralenti")}>Ralenti 🐌</Chip>
+        <Chip active={effect === "accelere"} onClick={() => setEffect("accelere")}>Accéléré 🐇</Chip>
+        <Chip active={effect === "intro"} onClick={() => setEffect("intro")}>Intro très courte (2s) ⚡</Chip>
+      </div>
+      <div className="grid grid-cols-2 gap-6 mb-8">
+        <div>
+          <p className="text-sm opacity-70 mb-2 font-bold">Nombre de morceaux</p>
+          <div className="flex items-center gap-3">
+            <button onClick={() => setNbTracks((n) => Math.max(5, n - 1))} className="rounded-full p-2" style={{ background: "rgba(255,255,255,0.1)" }}><Minus size={16} /></button>
+            <span style={{ fontFamily: F.mono, fontSize: 22 }}>{nbTracks}</span>
+            <button onClick={() => setNbTracks((n) => Math.min(25, n + 1))} className="rounded-full p-2" style={{ background: "rgba(255,255,255,0.1)" }}><Plus size={16} /></button>
+          </div>
+        </div>
+        <div>
+          <p className="text-sm opacity-70 mb-2 font-bold">Secondes par question</p>
+          <div className="flex items-center gap-3">
+            <button onClick={() => setSeconds((n) => Math.max(5, n - 5))} className="rounded-full p-2" style={{ background: "rgba(255,255,255,0.1)" }}><Minus size={16} /></button>
+            <span style={{ fontFamily: F.mono, fontSize: 22 }}>{seconds}s</span>
+            <button onClick={() => setSeconds((n) => Math.min(30, n + 5))} className="rounded-full p-2" style={{ background: "rgba(255,255,255,0.1)" }}><Plus size={16} /></button>
+          </div>
+        </div>
+      </div>
+      {error && <p className="text-sm mb-4 text-center" style={{ color: C.pink }}>{error}</p>}
+      <BigButton onClick={create} color={C.violet} icon={Play} disabled={loading}>{loading ? "Recherche des morceaux..." : "Créer la salle"}</BigButton>
+    </Stage>
+  );
+}
+
+function BlindTestAdminGame({ code, room, onRoomChange, onFinished }) {
+  const track = room.tracks[room.currentIndex];
+  const [questionKind] = useState(() => {
+    const types = room.settings.questionTypes;
+    return types[Math.floor(Math.random() * types.length) % types.length] || types[0];
+  });
+  const left = useCountdown(room.questionStartedAt, room.settings.seconds);
+  const [answersCount, setAnswersCount] = useState(0);
+  const [revealed, setRevealed] = useState(false);
+  const [playerAnswers, setPlayerAnswers] = useState([]);
+  const [autoLeft, setAutoLeft] = useState(5);
+  const [options, setOptions] = useState([]);
+  const audioRef = useRef(null);
+  const advancingRef = useRef(false);
+  const correctValue = questionKind === "titre" ? track.trackName : track.artistName;
+
+  useEffect(() => {
+    const others = room.tracks.filter((_, i) => i !== room.currentIndex).map((t) => (questionKind === "titre" ? t.trackName : t.artistName)).filter((v, i, arr) => v !== correctValue && arr.indexOf(v) === i);
+    const distractors = others.sort(() => Math.random() - 0.5).slice(0, 3);
+    const opts = [...distractors, correctValue].sort(() => Math.random() - 0.5);
+    setOptions(opts);
+    sSet(`qz:${code}:blindoptions:${room.currentIndex}`, opts);
+  }, [room.currentIndex]);
+
+  useEffect(() => {
+    setRevealed(false); advancingRef.current = false; setPlayerAnswers([]); setAutoLeft(5);
+    const t = setInterval(async () => { const keys = await sList(`qz:${code}:answer:${room.currentIndex}:`); setAnswersCount(keys.length); }, 1000);
+    const audio = audioRef.current;
+    if (audio) {
+      audio.currentTime = 0;
+      audio.playbackRate = room.settings.effect === "ralenti" ? 0.7 : room.settings.effect === "accelere" ? 1.4 : 1;
+      audio.play().catch(() => {});
+      if (room.settings.effect === "intro") { setTimeout(() => { if (audio && !audio.paused) audio.pause(); }, 2000); }
+    }
+    return () => { clearInterval(t); if (audio) audio.pause(); };
+  }, [room.currentIndex, code]);
+
+  const collectAndScore = useCallback(async () => {
+    if (advancingRef.current) return;
+    advancingRef.current = true;
+    if (audioRef.current) audioRef.current.pause();
+    const answerKeys = await sList(`qz:${code}:answer:${room.currentIndex}:`);
+    const answers = (await Promise.all(answerKeys.map((k) => sGet(k)))).filter(Boolean);
+    const playerKeys = await sList(`qz:${code}:player:`);
+    const players = (await Promise.all(playerKeys.map((k) => sGet(k)))).filter(Boolean);
+    for (const a of answers) {
+      const correct = a.value === correctValue;
+      let pts = 0;
+      if (correct) {
+        const elapsed = (a.submittedAt - room.questionStartedAt) / 1000;
+        const remaining = Math.max(0, room.settings.seconds - elapsed);
+        pts = Math.round(50 + 50 * (room.settings.seconds > 0 ? remaining / room.settings.seconds : 0));
+      }
+      const prev = (await sGet(scoreKey(code, a.pid))) || 0;
+      await sSet(scoreKey(code, a.pid), prev + pts);
+    }
+    const withPlayers = answers.map((a) => { const p = players.find((pp) => pp.id === a.pid); return { ...a, pseudo: p?.pseudo || "?", animal: p?.animal || "❓", correct: a.value === correctValue }; });
+    setPlayerAnswers(withPlayers);
+    setRevealed(true);
+  }, [code, room, correctValue]);
+
+  useEffect(() => { if (left === 0 && !revealed) collectAndScore(); }, [left, revealed, collectAndScore]);
+
+  async function next() {
+    const isLast = room.currentIndex >= room.tracks.length - 1;
+    if (isLast) { const nextRoom = { ...room, phase: "results" }; await sSet(roomKey(code), nextRoom); onFinished(nextRoom); }
+    else { const nextRoom = { ...room, currentIndex: room.currentIndex + 1, questionStartedAt: Date.now() }; await sSet(roomKey(code), nextRoom); onRoomChange(nextRoom); }
+  }
+
+  useEffect(() => {
+    if (!revealed) return;
+    if (autoLeft <= 0) { next(); return; }
+    const t = setTimeout(() => setAutoLeft((n) => n - 1), 1000);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [revealed, autoLeft]);
+
+  return (
+    <Stage wide>
+      <audio ref={audioRef} src={track.previewUrl} />
+      <div className="flex items-center justify-between mb-4">
+        <span className="text-sm opacity-60">Morceau {room.currentIndex + 1} / {room.tracks.length}</span>
+        <span className="flex items-center gap-1 text-sm opacity-60"><Users size={14} /> {answersCount} réponses</span>
+        <span className="flex items-center gap-1" style={{ fontFamily: F.mono, fontSize: 20, color: left <= 5 ? C.pink : C.gold }}><Clock size={18} /> {left}s</span>
+      </div>
+      <div className="rounded-3xl p-8 mb-6 text-center" style={{ background: "rgba(255,255,255,0.06)" }}>
+        <p className="uppercase tracking-widest mb-3" style={{ fontSize: 20, fontWeight: 800, color: C.gold }}>🎧 {questionKind === "titre" ? "Quel est le titre ?" : "Qui chante cette chanson ?"}</p>
+        <div className="flex justify-center mb-4">
+          <div className="rounded-2xl overflow-hidden" style={{ width: 160, height: 160, background: "rgba(255,255,255,0.1)", filter: revealed ? "none" : "blur(20px)", transition: "filter 0.4s" }}>
+            {track.artworkUrl && <img src={track.artworkUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />}
+          </div>
+        </div>
+        {revealed && <p style={{ fontFamily: F.display, fontSize: 26, color: C.teal }}>{track.trackName} — {track.artistName}</p>}
+        {!revealed && <p className="text-sm opacity-60">🔊 Écoutez sur cet écran...</p>}
+      </div>
+      {!revealed && options.length > 0 && (
+        <div className="grid grid-cols-2 gap-3 mb-6">{options.map((o, i) => (<div key={i} className="rounded-xl p-3 text-center" style={{ background: "rgba(255,255,255,0.08)", fontFamily: F.body, fontWeight: 700 }}>{o}</div>))}</div>
+      )}
+      {revealed && playerAnswers.length > 0 && (
+        <div className="rounded-2xl p-4 mb-6" style={{ background: "rgba(255,255,255,0.05)" }}>
+          <p className="text-sm font-bold mb-2 opacity-70">Réponses des joueurs</p>
+          <div className="flex flex-col gap-2">
+            {playerAnswers.map((a) => (
+              <div key={a.pid} className="flex items-center gap-2 text-sm">
+                <span>{a.animal}</span>
+                <span className="flex-1">{a.pseudo}</span>
+                <span style={{ color: a.correct ? C.teal : C.pink, fontWeight: 700 }}>{a.value}</span>
+                {a.correct ? <Check size={16} color={C.teal} /> : <span style={{ color: C.pink }}>✕</span>}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+      {revealed ? (<BigButton onClick={next} color={C.pink} icon={ArrowRight}>{room.currentIndex >= room.tracks.length - 1 ? "Voir le classement final" : `Morceau suivant (${autoLeft}s)`}</BigButton>) : (<BigButton onClick={collectAndScore} color={C.violet}>Révéler maintenant</BigButton>)}
+    </Stage>
+  );
+}
+
+function BlindTestPlayerGame({ code, pid, room }) {
+  const left = useCountdown(room.questionStartedAt, room.settings.seconds);
+  const [submitted, setSubmitted] = useState(false);
+  const [options, setOptions] = useState([]);
+
+  useEffect(() => {
+    setSubmitted(false); setOptions([]);
+    let stop = false;
+    const t = setInterval(async () => {
+      const opts = await sGet(`qz:${code}:blindoptions:${room.currentIndex}`);
+      if (!stop && opts) { setOptions(opts); clearInterval(t); }
+    }, 400);
+    return () => { stop = true; clearInterval(t); };
+  }, [room.currentIndex, code]);
+
+  async function submit(value) { if (submitted || left === 0) return; setSubmitted(true); await sSet(answerKey(code, room.currentIndex, pid), { pid, value, submittedAt: Date.now() }); }
+
+  return (
+    <Stage>
+      <div className="flex items-center justify-between mb-4">
+        <span className="text-xs opacity-60">Morceau {room.currentIndex + 1}/{room.tracks.length}</span>
+        <span style={{ fontFamily: F.mono, fontSize: 20, color: left <= 5 ? C.pink : C.gold }}>{left}s</span>
+      </div>
+      <div className="rounded-2xl p-5 mb-5 text-center" style={{ background: "rgba(255,255,255,0.06)" }}>
+        <p style={{ fontFamily: F.display, fontSize: 22 }}>🎧 Écoute sur l'écran principal !</p>
+      </div>
+      {!submitted && left > 0 ? (
+        options.length > 0 ? (
+          <div className="grid grid-cols-1 gap-3">{options.map((o, i) => (<button key={i} onClick={() => submit(o)} className="rounded-xl py-4 px-4 text-left" style={{ background: "rgba(255,255,255,0.08)", fontFamily: F.body, fontWeight: 700, fontSize: 17 }}>{o}</button>))}</div>
+        ) : (
+          <p className="text-center opacity-60 mt-6">Chargement des options...</p>
+        )
+      ) : (
+        <div className="text-center mt-6 opacity-90">
+          <p style={{ fontFamily: F.display, fontSize: 20 }}>{submitted ? "Réponse envoyée ✅" : "Temps écoulé ⏱️"}</p>
+          <p className="text-sm mt-1 opacity-70">En attente des autres joueurs...</p>
+        </div>
+      )}
     </Stage>
   );
 }
@@ -1792,7 +2239,7 @@ function TestPlayerColumn({ label, room }) {
 
 function TestLab({ onBack }) {
   const [jokerRandom, setJokerRandom] = useState(true);
-  const testRoom = { settings: { jokers: { "5050": true, x2: true, steal: true, block: true, flou: true }, jokerRandom, jokerRandomCount: 2, seconds: 20 } };
+  const testRoom = { settings: { jokers: { "5050": true, x2: true, steal: true, block: true, speedchrono: true }, jokerRandom, jokerRandomCount: 2, seconds: 20 } };
   return (
     <Stage wide>
       <ScreenHeader title="🧪 Espace test" onBack={onBack} color={C.violet} />
@@ -1842,8 +2289,10 @@ export default function QuizApp() {
       if (r && !stop) {
         setRoom(r);
         const isMatchAmor = r.mode === "matchamor";
-        if (r.phase === "question") setView(isAdmin ? (isMatchAmor ? "admin-matchamor" : "admin-game") : (isMatchAmor ? "player-matchamor" : "player-game"));
+        const isBlindTest = r.mode === "blindtest";
+        if (r.phase === "question") setView(isAdmin ? (isMatchAmor ? "admin-matchamor" : isBlindTest ? "admin-blindgame" : "admin-game") : (isMatchAmor ? "player-matchamor" : isBlindTest ? "player-blindgame" : "player-game"));
         else if (r.phase === "results") setView(isMatchAmor ? "results-matchamor" : "results");
+        else if (r.phase === "lobby") setView(isAdmin ? "admin-lobby" : "player-lobby");
       }
     };
     poll();
@@ -1851,9 +2300,27 @@ export default function QuizApp() {
     return () => { stop = true; clearInterval(t); };
   }, [code, isAdmin]);
 
-  function resetAll() { setCode(null); setRoom(null); setUsedJokersEver([]); setAssignedJokers([]); setView("home"); }
+  function resetAll() { setCode(null); setRoom(null); setUsedJokersEver([]); setAssignedJokers([]); setPid(null); setView("home"); }
 
-  if (view === "home") return <Home onCreate={() => setView("admin-create")} onJoin={() => setView("player-join")} onSolo={() => setView("solo-home")} onMatchAmor={() => setView("matchamor-create")} onTestLab={() => setView("testlab")} />;
+  async function playAgain() {
+    const playerKeysList = await sList(`qz:${code}:player:`);
+    for (const k of playerKeysList) {
+      const p = await sGet(k);
+      if (p) {
+        await sSet(scoreKey(code, p.id), 0);
+        await sSet(timeKey(code, p.id), 0);
+        await sSet(killerKey(code, p.id), 0);
+        await sSet(victimKey(code, p.id), 0);
+      }
+    }
+    const resetRoom = { ...room, phase: "lobby", currentIndex: -1, questionStartedAt: null };
+    await sSet(roomKey(code), resetRoom);
+    setRoom(resetRoom);
+    setUsedJokersEver([]);
+    setView(isAdmin ? "admin-lobby" : "player-lobby");
+  }
+
+  if (view === "home") return <Home onCreate={() => setView("admin-create")} onJoin={() => setView("player-join")} onSolo={() => setView("solo-home")} onMatchAmor={() => setView("matchamor-create")} onTestLab={() => setView("testlab")} onBlindTest={() => setView("blindtest-create")} />;
   if (view === "testlab") return <TestLab onBack={() => setView("home")} />;
   if (view === "solo-home") return <SoloHome onBack={() => setView("home")} onNormal={() => { setSoloMode("normal"); setView("solo-profile"); }} onCrash={() => { setSoloMode("crash"); setView("solo-profile"); }} />;
   if (view === "solo-profile") return <SoloProfile onBack={() => setView("solo-home")} onNext={(p) => { setSoloProfile(p); setView(soloMode === "crash" ? "crash-setup" : "solo-setup"); }} />;
@@ -1864,7 +2331,9 @@ export default function QuizApp() {
 
   if (view === "matchamor-create") return <CreateMatchAmor onBack={() => setView("home")} onCreated={(c, r) => { setCode(c); setRoom(r); setView("admin-lobby"); }} />;
 
-  if (view === "admin-create") return <CreateRoom onBack={() => setView("home")} onCreated={(c, r) => { setCode(c); setRoom(r); setView("admin-lobby"); }} />;
+  if (view === "blindtest-create") return <CreateBlindTest onBack={() => setView("home")} onCreated={(c, r) => { setCode(c); setRoom(r); setView("admin-lobby"); }} />;
+
+  if (view === "admin-create") return <CreateRoom onBack={() => setView("home")} onCreated={(c, r, hostPid) => { setCode(c); setRoom(r); setPid(hostPid || null); setView("admin-lobby"); }} />;
 
   if (view === "player-join") return (
     <JoinRoom
@@ -1872,7 +2341,7 @@ export default function QuizApp() {
       initialCode={urlCode}
       onJoined={(c, p, prof, r, reconnectInfo) => {
         setCode(c); setPid(p); setProfile(prof); setRoom(r);
-        if (r.mode === "matchamor") { setView("player-lobby"); return; }
+        if (r.mode === "matchamor" || r.mode === "blindtest") { setView("player-lobby"); return; }
         if (reconnectInfo?.isReconnect) {
           setAssignedJokers(reconnectInfo.assignedJokers || []);
           setUsedJokersEver(reconnectInfo.usedJokersEver || []);
@@ -1904,7 +2373,7 @@ export default function QuizApp() {
     <AdminLobby
       code={code}
       room={room}
-      onStart={(r) => { setRoom(r); setView(r.mode === "matchamor" ? "admin-matchamor" : "admin-game"); }}
+      onStart={(r) => { setRoom(r); setView(r.mode === "matchamor" ? "admin-matchamor" : r.mode === "blindtest" ? "admin-blindgame" : "admin-game"); }}
       buildExtraOnStart={room.mode === "matchamor" ? (players) => ({ alive: players.map((p) => p.id) }) : undefined}
       onBack={resetAll}
     />
@@ -1912,11 +2381,13 @@ export default function QuizApp() {
 
   if (view === "player-lobby" && profile) return <PlayerLobby profile={profile} code={code} />;
 
-  if (view === "admin-game" && room) return <AdminGame code={code} room={room} onRoomChange={(r) => setRoom(r)} onFinished={(r) => { setRoom(r); setView("results"); }} />;
+  if (view === "admin-game" && room) return <AdminGame code={code} room={room} onRoomChange={(r) => setRoom(r)} onFinished={(r) => { setRoom(r); setView("results"); }} hostPid={pid} />;
   if (view === "player-game" && room) return <PlayerGame code={code} pid={pid} room={room} assignedJokers={assignedJokers} usedJokersEver={usedJokersEver} setUsedJokersEver={setUsedJokersEver} />;
-  if (view === "results") return <Results code={code} room={room} isAdmin={isAdmin} onRestart={resetAll} />;
+  if (view === "results") return <Results code={code} room={room} isAdmin={isAdmin} onRestart={resetAll} onPlayAgain={playAgain} />;
 
   if (view === "admin-matchamor" && room) return <MatchAmorAdminGame code={code} room={room} onRoomChange={(r) => setRoom(r)} onFinished={(r) => { setRoom(r); setView("results-matchamor"); }} />;
+  if (view === "admin-blindgame" && room) return <BlindTestAdminGame code={code} room={room} onRoomChange={(r) => setRoom(r)} onFinished={(r) => { setRoom(r); setView("results"); }} />;
+  if (view === "player-blindgame" && room) return <BlindTestPlayerGame code={code} pid={pid} room={room} />;
   if (view === "player-matchamor" && room) return <PlayerMatchAmor code={code} pid={pid} room={room} />;
   if (view === "results-matchamor") return <MatchAmorResults code={code} room={room} isAdmin={isAdmin} onRestart={resetAll} />;
 
