@@ -555,6 +555,67 @@ const BLIND_CATEGORIES = [
   { id: "varfr", label: "Variété Française", emoji: "🇫🇷", terms: ["Charles Aznavour", "Francis Cabrel", "Patrick Bruel", "Vanessa Paradis", "Zaz", "Julien Doré", "Louane", "Christophe Maé"] },
 ];
 
+// type: "solo_h" (homme seul), "solo_f" (femme seule), "groupe" (duo/groupe)
+const ARTIST_META = {
+  "Michael Jackson": { type: "solo_h", origin: "États-Unis" },
+  "Madonna": { type: "solo_f", origin: "États-Unis" },
+  "Queen": { type: "groupe", origin: "Royaume-Uni" },
+  "Daniel Balavoine": { type: "solo_h", origin: "France" },
+  "Indochine": { type: "groupe", origin: "France" },
+  "Jean-Jacques Goldman": { type: "solo_h", origin: "France" },
+  "Cyndi Lauper": { type: "solo_f", origin: "États-Unis" },
+  "Eurythmics": { type: "groupe", origin: "Royaume-Uni" },
+  "Britney Spears": { type: "solo_f", origin: "États-Unis" },
+  "Black Eyed Peas": { type: "groupe", origin: "États-Unis" },
+  "Lorie": { type: "solo_f", origin: "France" },
+  "Star Academy": { type: "groupe", origin: "France" },
+  "Shakira": { type: "solo_f", origin: "Colombie" },
+  "Beyoncé": { type: "solo_f", origin: "États-Unis" },
+  "Linkin Park": { type: "groupe", origin: "États-Unis" },
+  "Christina Aguilera": { type: "solo_f", origin: "États-Unis" },
+  "Celine Dion": { type: "solo_f", origin: "Canada" },
+  "France Gall": { type: "solo_f", origin: "France" },
+  "Whitney Houston": { type: "solo_f", origin: "États-Unis" },
+  "Michel Sardou": { type: "solo_h", origin: "France" },
+  "Johnny Hallyday": { type: "solo_h", origin: "France" },
+  "ABBA": { type: "groupe", origin: "Suède" },
+  "Rihanna": { type: "solo_f", origin: "Barbade" },
+  "Spice Girls": { type: "groupe", origin: "Royaume-Uni" },
+  "Dua Lipa": { type: "solo_f", origin: "Royaume-Uni" },
+  "Angèle": { type: "solo_f", origin: "Belgique" },
+  "Adele": { type: "solo_f", origin: "Royaume-Uni" },
+  "Lady Gaga": { type: "solo_f", origin: "États-Unis" },
+  "Ariana Grande": { type: "solo_f", origin: "États-Unis" },
+  "Daft Punk": { type: "groupe", origin: "France" },
+  "Fréro Delavega": { type: "groupe", origin: "France" },
+  "Simon & Garfunkel": { type: "groupe", origin: "États-Unis" },
+  "Bigflo et Oli": { type: "groupe", origin: "France" },
+  "Wejdene": { type: "solo_f", origin: "France" },
+  "Kids United": { type: "groupe", origin: "France" },
+  "Fugees": { type: "groupe", origin: "États-Unis" },
+  "Nekfeu": { type: "solo_h", origin: "France" },
+  "PNL": { type: "groupe", origin: "France" },
+  "Jul": { type: "solo_h", origin: "France" },
+  "Booba": { type: "solo_h", origin: "France" },
+  "Orelsan": { type: "solo_h", origin: "France" },
+  "Ninho": { type: "solo_h", origin: "France" },
+  "Damso": { type: "solo_h", origin: "Belgique" },
+  "Usher": { type: "solo_h", origin: "États-Unis" },
+  "Alicia Keys": { type: "solo_f", origin: "États-Unis" },
+  "Ne-Yo": { type: "solo_h", origin: "États-Unis" },
+  "Aya Nakamura": { type: "solo_f", origin: "France" },
+  "Chris Brown": { type: "solo_h", origin: "États-Unis" },
+  "The Weeknd": { type: "solo_h", origin: "Canada" },
+  "Charles Aznavour": { type: "solo_h", origin: "France" },
+  "Francis Cabrel": { type: "solo_h", origin: "France" },
+  "Patrick Bruel": { type: "solo_h", origin: "France" },
+  "Vanessa Paradis": { type: "solo_f", origin: "France" },
+  "Zaz": { type: "solo_f", origin: "France" },
+  "Julien Doré": { type: "solo_h", origin: "France" },
+  "Louane": { type: "solo_f", origin: "France" },
+  "Christophe Maé": { type: "solo_h", origin: "France" },
+};
+
 async function itunesSearchTracks(term) {
   try {
     const url = `https://itunes.apple.com/search?term=${encodeURIComponent(term)}&media=music&entity=song&limit=15&country=FR`;
@@ -578,12 +639,20 @@ async function pickBlindTracks(categoryIds, count) {
     if (!seen.has(r.trackId)) { seen.add(r.trackId); pool.push(r); }
   });
   for (let i = pool.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [pool[i], pool[j]] = [pool[j], pool[i]]; }
-  return pool.slice(0, count).map((r) => ({
-    trackName: r.trackName,
-    artistName: r.artistName,
-    previewUrl: r.previewUrl,
-    artworkUrl: (r.artworkUrl100 || "").replace("100x100", "300x300"),
-  }));
+  return pool.slice(0, count).map((r) => {
+    const meta = ARTIST_META[r.artistName] || null;
+    let releaseYear = null;
+    if (r.releaseDate) { const y = new Date(r.releaseDate).getFullYear(); if (!Number.isNaN(y)) releaseYear = y; }
+    return {
+      trackName: r.trackName,
+      artistName: r.artistName,
+      previewUrl: r.previewUrl,
+      artworkUrl: (r.artworkUrl100 || "").replace("100x100", "300x300"),
+      artistType: meta?.type || null,
+      artistOrigin: meta?.origin || null,
+      releaseYear,
+    };
+  });
 }
 
 function findCategory(id) {
@@ -1397,6 +1466,7 @@ function AdminGame({ code, room, onRoomChange, onFinished, hostPid }) {
   const [answersCount, setAnswersCount] = useState(0);
   const [revealed, setRevealed] = useState(false);
   const [playerAnswers, setPlayerAnswers] = useState([]);
+  const [provisional, setProvisional] = useState([]);
   const [autoLeft, setAutoLeft] = useState(5);
   const [hostScaleVal, setHostScaleVal] = useState(0);
   const [hostSubmitted, setHostSubmitted] = useState(false);
@@ -1467,12 +1537,15 @@ function AdminGame({ code, room, onRoomChange, onFinished, hostPid }) {
       return { ...a, pseudo: p?.pseudo || "?", animal: p?.animal || "❓", correct: correctness[a.pid] };
     });
     setPlayerAnswers(withPlayers);
+    const withScores = await Promise.all(players.map(async (p) => ({ ...p, score: (await sGet(scoreKey(code, p.id))) || 0 })));
+    withScores.sort((a, b) => b.score - a.score);
+    setProvisional(withScores);
     setAutoLeft(5);
     setRevealed(true);
   }, [code, q, room]);
 
   useEffect(() => {
-    setRevealed(false); advancingRef.current = false; setPlayerAnswers([]); setHostSubmitted(false); setHostScaleVal(0);
+    setRevealed(false); advancingRef.current = false; setPlayerAnswers([]); setProvisional([]); setHostSubmitted(false); setHostScaleVal(0);
     const t = setInterval(async () => { const keys = await sList(`qz:${code}:answer:${room.currentIndex}:`); setAnswersCount(keys.length); }, 1000);
     return () => clearInterval(t);
   }, [room.currentIndex, code]);
@@ -1532,7 +1605,7 @@ function AdminGame({ code, room, onRoomChange, onFinished, hostPid }) {
         </div>
       )}
       {revealed && playerAnswers.length > 0 && (
-        <div className="rounded-2xl p-4 mb-6" style={{ background: "rgba(255,255,255,0.05)" }}>
+        <div className="rounded-2xl p-4 mb-4" style={{ background: "rgba(255,255,255,0.05)" }}>
           <p className="text-sm font-bold mb-2 opacity-70">Réponses des joueurs</p>
           <div className="flex flex-col gap-2">
             {playerAnswers.map((a) => (
@@ -1541,6 +1614,21 @@ function AdminGame({ code, room, onRoomChange, onFinished, hostPid }) {
                 <span className="flex-1">{a.pseudo}</span>
                 <span style={{ color: a.correct ? C.teal : C.pink, fontWeight: 700 }}>{answerLabel(a)}</span>
                 {a.correct ? <Check size={16} color={C.teal} /> : <span style={{ color: C.pink }}>✕</span>}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+      {revealed && provisional.length > 0 && (
+        <div className="rounded-2xl p-4 mb-6" style={{ background: "rgba(255,201,60,0.08)" }}>
+          <p className="text-sm font-bold mb-2" style={{ color: C.gold }}>🏆 Classement provisoire</p>
+          <div className="flex flex-col gap-1">
+            {provisional.map((p, i) => (
+              <div key={p.id} className="flex items-center gap-2 text-sm">
+                <span className="opacity-60" style={{ width: 20 }}>{i + 1}.</span>
+                <span>{p.animal}</span>
+                <span className="flex-1">{p.pseudo}</span>
+                <span style={{ fontFamily: F.mono, color: C.teal }}>{p.score}</span>
               </div>
             ))}
           </div>
@@ -1934,7 +2022,7 @@ function CreateBlindTest({ onCreated, onBack }) {
   const [nbTracks, setNbTracks] = useState(10);
   const [seconds, setSeconds] = useState(15);
   const [effect, setEffect] = useState("normal");
-  const [questionTypes, setQuestionTypes] = useState({ titre: true, artiste: true });
+  const [questionTypes, setQuestionTypes] = useState({ titre: true, artiste: true, annee: false, origine: false });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -1966,7 +2054,10 @@ function CreateBlindTest({ onCreated, onBack }) {
       <div className="flex flex-wrap gap-2 mb-6">
         <Chip active={questionTypes.titre} onClick={() => toggleType("titre")}>Quel est le titre ?</Chip>
         <Chip active={questionTypes.artiste} onClick={() => toggleType("artiste")}>Qui chante ?</Chip>
+        <Chip active={questionTypes.annee} onClick={() => toggleType("annee")}>Quelle année ?</Chip>
+        <Chip active={questionTypes.origine} onClick={() => toggleType("origine")}>Origine de l'artiste ?</Chip>
       </div>
+      <p className="text-xs opacity-50 mb-4 text-center">Pour "Qui chante ?", les propositions restent cohérentes (groupe vs groupe, homme vs homme, femme vs femme) quand l'info est connue.</p>
       <p className="text-sm opacity-70 mb-2 font-bold">Effet audio</p>
       <div className="flex flex-wrap gap-2 mb-6">
         <Chip active={effect === "normal"} onClick={() => setEffect("normal")}>Normal</Chip>
@@ -1998,32 +2089,67 @@ function CreateBlindTest({ onCreated, onBack }) {
   );
 }
 
+const FALLBACK_ORIGINS = ["France", "États-Unis", "Royaume-Uni", "Belgique", "Canada", "Suède"];
+
 function BlindTestAdminGame({ code, room, onRoomChange, onFinished }) {
   const track = room.tracks[room.currentIndex];
   const [questionKind] = useState(() => {
     const types = room.settings.questionTypes;
-    return types[Math.floor(Math.random() * types.length) % types.length] || types[0];
+    const valid = types.filter((t) => {
+      if (t === "annee") return !!track.releaseYear;
+      if (t === "origine") return !!track.artistOrigin;
+      return true;
+    });
+    const pool = valid.length > 0 ? valid : ["titre"];
+    return pool[Math.floor(Math.random() * pool.length)];
   });
   const left = useCountdown(room.questionStartedAt, room.settings.seconds);
   const [answersCount, setAnswersCount] = useState(0);
   const [revealed, setRevealed] = useState(false);
   const [playerAnswers, setPlayerAnswers] = useState([]);
+  const [provisional, setProvisional] = useState([]);
   const [autoLeft, setAutoLeft] = useState(5);
   const [options, setOptions] = useState([]);
   const audioRef = useRef(null);
   const advancingRef = useRef(false);
-  const correctValue = questionKind === "titre" ? track.trackName : track.artistName;
+
+  const correctValue =
+    questionKind === "titre" ? track.trackName :
+    questionKind === "artiste" ? track.artistName :
+    questionKind === "annee" ? String(track.releaseYear) :
+    track.artistOrigin;
+
+  const questionLabel =
+    questionKind === "titre" ? "Quel est le titre ?" :
+    questionKind === "artiste" ? "Qui chante cette chanson ?" :
+    questionKind === "annee" ? "En quelle année est sortie cette chanson ?" :
+    "D'où vient cet artiste ?";
 
   useEffect(() => {
-    const others = room.tracks.filter((_, i) => i !== room.currentIndex).map((t) => (questionKind === "titre" ? t.trackName : t.artistName)).filter((v, i, arr) => v !== correctValue && arr.indexOf(v) === i);
-    const distractors = others.sort(() => Math.random() - 0.5).slice(0, 3);
+    let pool = [];
+    if (questionKind === "artiste") {
+      const sameType = room.tracks.filter((t, i) => i !== room.currentIndex && t.artistName !== track.artistName && (!track.artistType || t.artistType === track.artistType));
+      pool = sameType.map((t) => t.artistName);
+      if (pool.length < 3) pool = room.tracks.filter((t, i) => i !== room.currentIndex && t.artistName !== track.artistName).map((t) => t.artistName);
+    } else if (questionKind === "titre") {
+      pool = room.tracks.filter((_, i) => i !== room.currentIndex).map((t) => t.trackName);
+    } else if (questionKind === "annee") {
+      const years = room.tracks.filter((t, i) => i !== room.currentIndex && t.releaseYear && t.releaseYear !== track.releaseYear).map((t) => String(t.releaseYear));
+      pool = years;
+      while (pool.length < 3) { const fake = track.releaseYear + (Math.floor(Math.random() * 10) - 5) * (Math.random() > 0.5 ? 1 : -1); pool.push(String(fake)); }
+    } else {
+      const origins = room.tracks.filter((t, i) => i !== room.currentIndex && t.artistOrigin && t.artistOrigin !== track.artistOrigin).map((t) => t.artistOrigin);
+      pool = [...origins, ...FALLBACK_ORIGINS.filter((o) => o !== track.artistOrigin)];
+    }
+    const uniquePool = [...new Set(pool)].filter((v) => v !== correctValue);
+    const distractors = uniquePool.sort(() => Math.random() - 0.5).slice(0, 3);
     const opts = [...distractors, correctValue].sort(() => Math.random() - 0.5);
     setOptions(opts);
     sSet(`qz:${code}:blindoptions:${room.currentIndex}`, opts);
   }, [room.currentIndex]);
 
   useEffect(() => {
-    setRevealed(false); advancingRef.current = false; setPlayerAnswers([]); setAutoLeft(5);
+    setRevealed(false); advancingRef.current = false; setPlayerAnswers([]); setAutoLeft(5); setProvisional([]);
     const t = setInterval(async () => { const keys = await sList(`qz:${code}:answer:${room.currentIndex}:`); setAnswersCount(keys.length); }, 1000);
     const audio = audioRef.current;
     if (audio) {
@@ -2056,6 +2182,9 @@ function BlindTestAdminGame({ code, room, onRoomChange, onFinished }) {
     }
     const withPlayers = answers.map((a) => { const p = players.find((pp) => pp.id === a.pid); return { ...a, pseudo: p?.pseudo || "?", animal: p?.animal || "❓", correct: a.value === correctValue }; });
     setPlayerAnswers(withPlayers);
+    const withScores = await Promise.all(players.map(async (p) => ({ ...p, score: (await sGet(scoreKey(code, p.id))) || 0 })));
+    withScores.sort((a, b) => b.score - a.score);
+    setProvisional(withScores);
     setRevealed(true);
   }, [code, room, correctValue]);
 
@@ -2084,7 +2213,7 @@ function BlindTestAdminGame({ code, room, onRoomChange, onFinished }) {
         <span className="flex items-center gap-1" style={{ fontFamily: F.mono, fontSize: 20, color: left <= 5 ? C.pink : C.gold }}><Clock size={18} /> {left}s</span>
       </div>
       <div className="rounded-3xl p-8 mb-6 text-center" style={{ background: "rgba(255,255,255,0.06)" }}>
-        <p className="uppercase tracking-widest mb-3" style={{ fontSize: 20, fontWeight: 800, color: C.gold }}>🎧 {questionKind === "titre" ? "Quel est le titre ?" : "Qui chante cette chanson ?"}</p>
+        <p className="uppercase tracking-widest mb-3" style={{ fontSize: 20, fontWeight: 800, color: C.gold }}>🎧 {questionLabel}</p>
         <div className="flex justify-center mb-4">
           <div className="rounded-2xl overflow-hidden" style={{ width: 160, height: 160, background: "rgba(255,255,255,0.1)", filter: revealed ? "none" : "blur(20px)", transition: "filter 0.4s" }}>
             {track.artworkUrl && <img src={track.artworkUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />}
@@ -2097,7 +2226,7 @@ function BlindTestAdminGame({ code, room, onRoomChange, onFinished }) {
         <div className="grid grid-cols-2 gap-3 mb-6">{options.map((o, i) => (<div key={i} className="rounded-xl p-3 text-center" style={{ background: "rgba(255,255,255,0.08)", fontFamily: F.body, fontWeight: 700 }}>{o}</div>))}</div>
       )}
       {revealed && playerAnswers.length > 0 && (
-        <div className="rounded-2xl p-4 mb-6" style={{ background: "rgba(255,255,255,0.05)" }}>
+        <div className="rounded-2xl p-4 mb-4" style={{ background: "rgba(255,255,255,0.05)" }}>
           <p className="text-sm font-bold mb-2 opacity-70">Réponses des joueurs</p>
           <div className="flex flex-col gap-2">
             {playerAnswers.map((a) => (
@@ -2106,6 +2235,21 @@ function BlindTestAdminGame({ code, room, onRoomChange, onFinished }) {
                 <span className="flex-1">{a.pseudo}</span>
                 <span style={{ color: a.correct ? C.teal : C.pink, fontWeight: 700 }}>{a.value}</span>
                 {a.correct ? <Check size={16} color={C.teal} /> : <span style={{ color: C.pink }}>✕</span>}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+      {revealed && provisional.length > 0 && (
+        <div className="rounded-2xl p-4 mb-6" style={{ background: "rgba(255,201,60,0.08)" }}>
+          <p className="text-sm font-bold mb-2" style={{ color: C.gold }}>🏆 Classement provisoire</p>
+          <div className="flex flex-col gap-1">
+            {provisional.map((p, i) => (
+              <div key={p.id} className="flex items-center gap-2 text-sm">
+                <span className="opacity-60" style={{ width: 20 }}>{i + 1}.</span>
+                <span>{p.animal}</span>
+                <span className="flex-1">{p.pseudo}</span>
+                <span style={{ fontFamily: F.mono, color: C.teal }}>{p.score}</span>
               </div>
             ))}
           </div>
