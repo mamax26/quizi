@@ -1546,9 +1546,13 @@ function AdminGame({ code, room, onRoomChange, onFinished, hostPid }) {
 
   useEffect(() => {
     setRevealed(false); advancingRef.current = false; setPlayerAnswers([]); setProvisional([]); setHostSubmitted(false); setHostScaleVal(0);
-    const t = setInterval(async () => { const keys = await sList(`qz:${code}:answer:${room.currentIndex}:`); setAnswersCount(keys.length); }, 1000);
+    const t = setInterval(async () => {
+      const [keys, playerKeys] = await Promise.all([sList(`qz:${code}:answer:${room.currentIndex}:`), sList(`qz:${code}:player:`)]);
+      setAnswersCount(keys.length);
+      if (playerKeys.length > 0 && keys.length >= playerKeys.length && !advancingRef.current) collectAndScore();
+    }, 1000);
     return () => clearInterval(t);
-  }, [room.currentIndex, code]);
+  }, [room.currentIndex, code, collectAndScore]);
   useEffect(() => { if (left === 0 && !revealed) collectAndScore(); }, [left, revealed, collectAndScore]);
 
   async function next() {
@@ -1730,7 +1734,7 @@ function PlayerGame({ code, pid, room, assignedJokers, usedJokersEver, setUsedJo
             {q.type === "vf" && (<div className="flex gap-3 mb-5"><button onClick={() => submit(true)} className="flex-1 rounded-xl py-4" style={{ background: C.teal, color: "#1B1030", fontFamily: F.display, fontSize: 18 }}>Vrai</button><button onClick={() => submit(false)} className="flex-1 rounded-xl py-4" style={{ background: C.pink, color: "#1B1030", fontFamily: F.display, fontSize: 18 }}>Faux</button></div>)}
             {q.type === "carte" && (<div className="relative rounded-xl mb-5" style={{ width: "100%", height: 200, background: "rgba(255,255,255,0.06)" }}>{MAP_ZONES.map((z) => (<button key={z.id} onClick={() => submit(z.id)} className="absolute rounded-full px-2 py-1 text-xs" style={{ left: `${z.x}%`, top: `${z.y}%`, transform: "translate(-50%,-50%)", background: "rgba(255,255,255,0.15)" }}><MapPin size={12} className="inline mr-1" />{z.label}</button>))}</div>)}
             {q.type === "echelle" && (<div className="mb-5"><div className="flex items-center justify-center gap-3 mb-4"><button onClick={() => setScaleVal((v) => Number(v) - 1)} className="rounded-full p-2" style={{ background: "rgba(255,255,255,0.1)" }}><Minus size={16} /></button><input type="number" inputMode="decimal" value={scaleVal} onFocus={() => { if (scaleVal === 0) setScaleVal(""); }} onChange={(e) => setScaleVal(e.target.value === "" ? "" : Number(e.target.value))} className="text-center rounded-xl px-4 py-2" style={{ fontFamily: F.mono, fontSize: 28, color: C.cream, background: "rgba(255,255,255,0.08)", border: "2px solid rgba(255,255,255,0.2)", width: 140 }} /><button onClick={() => setScaleVal((v) => Number(v) + 1)} className="rounded-full p-2" style={{ background: "rgba(255,255,255,0.1)" }}><Plus size={16} /></button></div><BigButton onClick={() => submit(scaleVal === "" ? 0 : scaleVal)} color={C.gold}>Valider</BigButton></div>)}
-            {enabledJokers.length > 0 && (
+            {enabledJokers.length > 0 ? (
               <div className="mt-4">
                 <p className="text-xs opacity-60 mb-2 text-center">Jokers disponibles</p>
                 <div className="grid grid-cols-2 gap-3">
@@ -1742,6 +1746,10 @@ function PlayerGame({ code, pid, room, assignedJokers, usedJokersEver, setUsedJo
                   ))}
                 </div>
               </div>
+            ) : (
+              <p className="text-xs opacity-40 mt-4 text-center">
+                {assignedJokers.length === 0 ? "Aucun joker activé pour cette partie." : "Tu as déjà utilisé tous tes jokers."}
+              </p>
             )}
           </>
         )}
@@ -2150,7 +2158,11 @@ function BlindTestAdminGame({ code, room, onRoomChange, onFinished }) {
 
   useEffect(() => {
     setRevealed(false); advancingRef.current = false; setPlayerAnswers([]); setAutoLeft(5); setProvisional([]);
-    const t = setInterval(async () => { const keys = await sList(`qz:${code}:answer:${room.currentIndex}:`); setAnswersCount(keys.length); }, 1000);
+    const t = setInterval(async () => {
+      const [keys, playerKeys] = await Promise.all([sList(`qz:${code}:answer:${room.currentIndex}:`), sList(`qz:${code}:player:`)]);
+      setAnswersCount(keys.length);
+      if (playerKeys.length > 0 && keys.length >= playerKeys.length && !advancingRef.current) collectAndScore();
+    }, 1000);
     const audio = audioRef.current;
     if (audio) {
       audio.currentTime = 0;
