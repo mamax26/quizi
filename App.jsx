@@ -72,6 +72,39 @@ function FallingEmojis({ emojis, count = 24, side }) {
 }
 
 /* ---------------------------------------------------------
+   EXPLICATION DE MODE (page ludique avant chaque mode)
+--------------------------------------------------------- */
+function ModeExplainer({ emoji, title, color, bullets, example, onContinue, onBack }) {
+  return (
+    <Stage wide>
+      <ScreenHeader title={`${emoji} ${title}`} onBack={onBack} color={color} />
+      <div className="flex flex-col gap-3 mb-6">
+        {bullets.map((b, i) => (
+          <div key={i} className="rounded-2xl p-3 flex items-start gap-3" style={{ background: "rgba(255,255,255,0.06)" }}>
+            <span style={{ fontSize: 24, flexShrink: 0 }}>{b.emoji}</span>
+            <p className="text-sm opacity-90" style={{ lineHeight: 1.5 }}>{b.text}</p>
+          </div>
+        ))}
+      </div>
+      {example && (
+        <div className="rounded-2xl p-4 mb-6" style={{ background: "rgba(255,201,60,0.08)", border: `2px solid ${color}` }}>
+          <p className="text-xs font-bold mb-2 uppercase tracking-wide" style={{ color }}>💡 Exemple concret</p>
+          <p className="text-sm opacity-90" style={{ lineHeight: 1.6 }}>{example}</p>
+        </div>
+      )}
+      <BigButton onClick={onContinue} color={color} icon={Play}>C'est parti !</BigButton>
+    </Stage>
+  );
+}
+
+const DIFFICULTY_HINT = {
+  vf: { label: "Facile", emoji: "🟢" },
+  qcm: { label: "Moyen", emoji: "🟡" },
+  carte: { label: "Moyen", emoji: "🟡" },
+  echelle: { label: "Difficile", emoji: "🔴" },
+};
+
+/* ---------------------------------------------------------
    STORAGE (Firebase Realtime Database, même schéma de clés qu'avant)
 --------------------------------------------------------- */
 async function sGet(key) {
@@ -113,6 +146,9 @@ const killerKey = (code, pid) => `qz:${code}:killer:${pid}`;
 const victimKey = (code, pid) => `qz:${code}:victim:${pid}`;
 const targetedKey = (code, qIdx, targetId, attackerId) => `qz:${code}:targeted:${qIdx}:${targetId}:${attackerId}`;
 const speedChronoKey = (code, qIdx, targetId) => `qz:${code}:speedchrono:${qIdx}:${targetId}`;
+const revealedKey = (code, qIdx) => `qz:${code}:revealed:${qIdx}`;
+const pointsDeltaKey = (code, qIdx, pid) => `qz:${code}:pointsdelta:${qIdx}:${pid}`;
+const betKey = (code, qIdx, pid) => `qz:${code}:bet:${qIdx}:${pid}`;
 const debuffKeyPrefix = (code, qIdx, targetId) => `qz:${code}:debuff:${qIdx}:${targetId}:`;
 
 /* ---------------------------------------------------------
@@ -820,7 +856,7 @@ function CategoryPicker({ cats, setCats, kidsMode, setKidsMode }) {
 /* ---------------------------------------------------------
    HOME
 --------------------------------------------------------- */
-function Home({ onCreate, onJoin, onSolo, onMatchAmor, onBlindTest }) {
+function Home({ onCreate, onJoin, onSolo, onMatchAmor, onBlindTest, onEnchere }) {
   return (
     <Stage>
       <Logo />
@@ -831,6 +867,7 @@ function Home({ onCreate, onJoin, onSolo, onMatchAmor, onBlindTest }) {
         <BigButton onClick={onCreate} color={C.gold} icon={Crown}>Créer une partie (hôte)</BigButton>
         <BigButton onClick={onJoin} color={C.teal} icon={Users}>Rejoindre une partie</BigButton>
         <BigButton onClick={onBlindTest} color={C.violet}>🎧 Blind Test musical</BigButton>
+        <BigButton onClick={onEnchere} color={C.gold}>💰 Quitte ou Double</BigButton>
         <BigButton onClick={onMatchAmor} color={C.pink} icon={Skull}>Match Amor (élimination) 💔</BigButton>
         <BigButton onClick={onSolo} color={C.violet} icon={Skull}>Jouer seul / tester</BigButton>
       </div>
@@ -1147,17 +1184,16 @@ function CreateRoom({ onCreated, onBack }) {
 
       <p className="text-sm opacity-70 mb-2 font-bold">Attribution des jokers</p>
       <div className="flex flex-wrap gap-2 mb-3">
-        <Chip active={!jokerRandom} onClick={() => setJokerRandom(false)}>Tous les jokers activés pour tous</Chip>
-        <Chip active={jokerRandom} onClick={() => setJokerRandom(true)}>Tirage aléatoire 🎴</Chip>
+        <Chip active={!jokerRandom} onClick={() => setJokerRandom(false)}>Les joueurs choisissent eux-mêmes</Chip>
+        <Chip active={jokerRandom} onClick={() => setJokerRandom(true)}>Attribution aléatoire 🎴</Chip>
       </div>
-      {jokerRandom && (
-        <div className="flex items-center gap-3 mb-6">
-          <span className="text-sm opacity-70">Jokers par joueur :</span>
-          <button onClick={() => setJokerRandomCount((n) => Math.max(1, n - 1))} className="rounded-full p-2" style={{ background: "rgba(255,255,255,0.1)" }}><Minus size={16} /></button>
-          <span style={{ fontFamily: F.mono, fontSize: 20 }}>{jokerRandomCount}</span>
-          <button onClick={() => setJokerRandomCount((n) => Math.min(JOKERS.length, n + 1))} className="rounded-full p-2" style={{ background: "rgba(255,255,255,0.1)" }}><Plus size={16} /></button>
-        </div>
-      )}
+      <p className="text-xs opacity-50 mb-3">{jokerRandom ? "L'ordinateur tire au sort les jokers de chaque joueur." : "Chaque joueur choisira lui-même ses jokers parmi ceux activés ci-dessus (un seul de chaque type)."}</p>
+      <div className="flex items-center gap-3 mb-6">
+        <span className="text-sm opacity-70">Jokers par joueur :</span>
+        <button onClick={() => setJokerRandomCount((n) => Math.max(1, n - 1))} className="rounded-full p-2" style={{ background: "rgba(255,255,255,0.1)" }}><Minus size={16} /></button>
+        <span style={{ fontFamily: F.mono, fontSize: 20 }}>{jokerRandomCount}</span>
+        <button onClick={() => setJokerRandomCount((n) => Math.min(JOKERS.length, n + 1))} className="rounded-full p-2" style={{ background: "rgba(255,255,255,0.1)" }}><Plus size={16} /></button>
+      </div>
 
       <p className="text-sm opacity-70 mb-2 font-bold">Malus en cas de mauvaise réponse (bonus max toujours 100 pts)</p>
       <div className="flex flex-wrap gap-2 mb-6">
@@ -1227,12 +1263,9 @@ function JoinRoom({ onJoined, onBack, initialCode }) {
     const existing = players.find((p) => p.pseudo.trim().toLowerCase() === trimmed.toLowerCase());
     if (existing) {
       setLoading(true);
-      const [drawnJokers, usedJokers] = await Promise.all([
-        sGet(`qz:${code}:playerjokers:${existing.id}`),
-        sGet(`qz:${code}:jokerused:${existing.id}`),
-      ]);
-      const enabledIds = Object.entries(room.settings.jokers || {}).filter(([, v]) => v).map(([k]) => k);
-      const assigned = room.settings.jokerRandom ? (drawnJokers || []) : enabledIds;
+      const drawnJokers = await sGet(`qz:${code}:playerjokers:${existing.id}`);
+      const usedJokers = await sGet(`qz:${code}:jokerused:${existing.id}`);
+      const assigned = drawnJokers || [];
       setLoading(false);
       onJoined(code, existing.id, { pseudo: existing.pseudo, animal: existing.animal }, room, { isReconnect: true, assignedJokers: assigned, usedJokersEver: usedJokers || [] });
       return;
@@ -1247,7 +1280,7 @@ function JoinRoom({ onJoined, onBack, initialCode }) {
     const pid = uid();
     const trimmed = pseudo.trim();
     await sSet(playerKey(code, pid), { id: pid, pseudo: trimmed, animal, team: 1, joinedAt: Date.now() });
-    await sSet(scoreKey(code, pid), 0);
+    await sSet(scoreKey(code, pid), room.mode === "enchere" ? (room.settings.startingPoints || 10000) : 0);
     setLoading(false);
     onJoined(code, pid, { pseudo: trimmed, animal }, room, null);
   }
@@ -1295,7 +1328,7 @@ function JokerTuto({ room, onDone }) {
       <p className="text-sm opacity-70 mb-5 text-center">
         {isRandom
           ? `Tirage au sort ce soir : tu repartiras avec ${room.settings.jokerRandomCount || 2} joker(s) parmi la liste ci-dessous. Un seul joker par question !`
-          : "Chaque joker n'est jouable qu'une seule fois par partie, et un seul à la fois par question."}
+          : `Sur l'écran suivant, choisis toi-même ${room.settings.jokerRandomCount || 2} joker(s) parmi la liste ci-dessous. Un seul joker par question !`}
       </p>
       <div className="flex flex-col gap-3 mb-6">
         {enabled.map((j) => (
@@ -1376,6 +1409,68 @@ function JokerDraw({ room, code, pid, onDone }) {
   );
 }
 
+function JokerPick({ room, code, pid, onDone }) {
+  const enabledIds = Object.entries(room.settings.jokers || {}).filter(([, v]) => v).map(([k]) => k);
+  const jokerDefs = JOKERS.filter((j) => enabledIds.includes(j.id));
+  const [picked, setPicked] = useState([]);
+  const [confirmed, setConfirmed] = useState(false);
+  const count = Math.min(room.settings.jokerRandomCount || 2, jokerDefs.length);
+
+  function toggle(id) {
+    setPicked((p) => {
+      if (p.includes(id)) return p.filter((x) => x !== id);
+      if (p.length >= count) return p;
+      return [...p, id];
+    });
+  }
+  async function confirm() { await sSet(`qz:${code}:playerjokers:${pid}`, picked); setConfirmed(true); }
+
+  if (confirmed) {
+    return (
+      <Stage>
+        <div className="text-center mb-2" style={{ fontSize: 44 }}>🎉</div>
+        <h2 className="text-center mb-4" style={{ fontFamily: F.display, fontSize: 24, color: C.gold }}>Tes jokers pour la partie</h2>
+        <div className="flex flex-col gap-3 mb-6">
+          {picked.map((id) => { const j = JOKERS.find((x) => x.id === id); return (
+            <div key={id} className="rounded-2xl p-3 flex items-center gap-3" style={{ background: "rgba(255,255,255,0.06)", border: "2px solid rgba(255,255,255,0.12)" }}>
+              <div className="rounded-full flex items-center justify-center flex-shrink-0" style={{ width: 46, height: 46, background: "rgba(255,255,255,0.1)", fontSize: 22 }}>{j.emoji}</div>
+              <div><p style={{ fontFamily: F.display, fontSize: 17, color: C.gold }}>{j.label}</p><p className="text-xs opacity-80">{j.desc}</p></div>
+            </div>
+          ); })}
+        </div>
+        <BigButton onClick={() => onDone(picked)} color={C.gold}>Rejoindre la salle</BigButton>
+      </Stage>
+    );
+  }
+
+  return (
+    <Stage>
+      <ScreenHeader title="Choisis tes jokers 🎯" color={C.gold} />
+      <p className="text-sm opacity-70 mb-4 text-center">Sélectionne {count} joker{count > 1 ? "s" : ""} parmi {jokerDefs.length} — un seul de chaque type. Ce sera les tiens pour toute la partie.</p>
+      <div className="flex flex-col gap-3 mb-6">
+        {jokerDefs.map((j) => {
+          const isPicked = picked.includes(j.id);
+          const Icon = j.icon;
+          return (
+            <button key={j.id} onClick={() => toggle(j.id)} disabled={!isPicked && picked.length >= count} className="rounded-2xl p-3 flex items-center gap-3 text-left transition-transform active:scale-95 disabled:opacity-30" style={{ background: isPicked ? "rgba(255,201,60,0.15)" : "rgba(255,255,255,0.06)", border: `2px solid ${isPicked ? C.gold : "rgba(255,255,255,0.12)"}` }}>
+              <div className="rounded-full flex items-center justify-center flex-shrink-0" style={{ width: 46, height: 46, background: isPicked ? C.gold : "rgba(255,255,255,0.1)" }}>
+                <Icon size={22} color={isPicked ? "#1B1030" : C.cream} />
+              </div>
+              <div className="flex-1">
+                <p style={{ fontFamily: F.display, fontSize: 17, color: isPicked ? C.gold : C.cream }}>{j.label}</p>
+                <p className="text-xs opacity-80">{j.desc}</p>
+              </div>
+              {isPicked && <Check size={20} color={C.gold} />}
+            </button>
+          );
+        })}
+      </div>
+      <p className="text-xs opacity-60 mb-4 text-center">{picked.length} / {count} sélectionné{picked.length > 1 ? "s" : ""}</p>
+      <BigButton onClick={confirm} color={C.gold} disabled={picked.length < count}>Valider mes jokers</BigButton>
+    </Stage>
+  );
+}
+
 /* ---------------------------------------------------------
    LOBBIES
 --------------------------------------------------------- */
@@ -1386,13 +1481,9 @@ function AdminLobby({ code, room, onStart, buildExtraOnStart, onBack }) {
   const refresh = useCallback(async () => {
     const keys = await sList(`qz:${code}:player:`);
     const list = (await Promise.all(keys.map((k) => sGet(k)))).filter(Boolean);
-    if (room.settings.jokerRandom) {
-      const withJokers = await Promise.all(list.map(async (p) => ({ ...p, drawnJokers: await sGet(`qz:${code}:playerjokers:${p.id}`) })));
-      setPlayers(withJokers);
-    } else {
-      setPlayers(list);
-    }
-  }, [code, room.settings.jokerRandom]);
+    const withJokers = await Promise.all(list.map(async (p) => ({ ...p, drawnJokers: await sGet(`qz:${code}:playerjokers:${p.id}`) })));
+    setPlayers(withJokers);
+  }, [code]);
   useEffect(() => { refresh(); const t = setInterval(refresh, 1500); return () => clearInterval(t); }, [refresh]);
 
   async function setTeam(pid, currentTeam) {
@@ -1445,10 +1536,10 @@ function AdminLobby({ code, room, onStart, buildExtraOnStart, onBack }) {
               <div className="flex items-center justify-center rounded-full" style={{ width: 52, height: 52, background: "rgba(255,255,255,0.08)", fontSize: 26, border: room.settings.teamsMode > 1 ? `3px solid ${teamColors[(p.team - 1) % 4]}` : "none" }}>{p.animal}</div>
               <span className="text-xs text-center truncate w-full">{p.pseudo}</span>
               {room.settings.teamsMode > 1 && <span className="text-[10px] opacity-70">Équipe {p.team}</span>}
-              {room.settings.jokerRandom && (
+              {room.settings.jokers && (
                 <div className="flex gap-0.5 flex-wrap justify-center">
                   {p.drawnJokers === undefined ? null : p.drawnJokers === null ? (
-                    <span className="text-[9px] opacity-50">tirage...</span>
+                    <span className="text-[9px] opacity-50">en cours...</span>
                   ) : (
                     p.drawnJokers.map((jid) => { const j = JOKERS.find((x) => x.id === jid); return <span key={jid} title={j?.label} style={{ fontSize: 13 }}>{j?.emoji}</span>; })
                   )}
@@ -1537,7 +1628,7 @@ function AdminGame({ code, room, onRoomChange, onFinished, hostPid }) {
   const [revealed, setRevealed] = useState(false);
   const [playerAnswers, setPlayerAnswers] = useState([]);
   const [provisional, setProvisional] = useState([]);
-  const [autoLeft, setAutoLeft] = useState(5);
+  const [autoLeft, setAutoLeft] = useState(7);
   const [hostScaleVal, setHostScaleVal] = useState(0);
   const [hostSubmitted, setHostSubmitted] = useState(false);
   const advancingRef = useRef(false);
@@ -1611,10 +1702,12 @@ function AdminGame({ code, room, onRoomChange, onFinished, hostPid }) {
       return { ...a, pseudo: p?.pseudo || "?", animal: p?.animal || "❓", correct: correctness[a.pid], points: netDelta[a.pid] || 0 };
     });
     setPlayerAnswers(withPlayers);
+    for (const p of players) { await sSet(pointsDeltaKey(code, room.currentIndex, p.id), netDelta[p.id] || 0); }
+    await sSet(revealedKey(code, room.currentIndex), true);
     const withScores = await Promise.all(players.map(async (p) => ({ ...p, score: (await sGet(scoreKey(code, p.id))) || 0 })));
     withScores.sort((a, b) => b.score - a.score);
     setProvisional(withScores);
-    setAutoLeft(5);
+    setAutoLeft(7);
     setRevealed(true);
   }, [code, q, room]);
 
@@ -1732,10 +1825,31 @@ function PlayerGame({ code, pid, room, assignedJokers, usedJokersEver, setUsedJo
   const [pickingTargetFor, setPickingTargetFor] = useState(null);
   const [otherPlayers, setOtherPlayers] = useState([]);
   const [targeters, setTargeters] = useState([]);
+  const [revealed, setRevealed] = useState(false);
+  const [myPoints, setMyPoints] = useState(0);
+  const [provisional, setProvisional] = useState([]);
 
   const left = speedDeadline != null ? Math.max(0, Math.ceil((speedDeadline - Date.now()) / 1000)) : globalLeft;
 
-  useEffect(() => { setSubmitted(false); setHiddenOptions([]); setJokerUsed(null); setScaleVal(0); setPickingTargetFor(null); setSpeedDeadline(null); setTargeters([]); }, [room.currentIndex]);
+  useEffect(() => { setSubmitted(false); setHiddenOptions([]); setJokerUsed(null); setScaleVal(0); setPickingTargetFor(null); setSpeedDeadline(null); setTargeters([]); setRevealed(false); setMyPoints(0); setProvisional([]); }, [room.currentIndex]);
+
+  useEffect(() => {
+    if (!(submitted || left === 0)) return;
+    let stop = false;
+    const t = setInterval(async () => {
+      const isRevealed = await sGet(revealedKey(code, room.currentIndex));
+      if (stop || !isRevealed) return;
+      clearInterval(t);
+      const [myDelta, playerKeys] = await Promise.all([sGet(pointsDeltaKey(code, room.currentIndex, pid)), sList(`qz:${code}:player:`)]);
+      setMyPoints(myDelta || 0);
+      const players = (await Promise.all(playerKeys.map((k) => sGet(k)))).filter(Boolean);
+      const withScores = await Promise.all(players.map(async (p) => ({ ...p, score: (await sGet(scoreKey(code, p.id))) || 0 })));
+      withScores.sort((a, b) => b.score - a.score);
+      setProvisional(withScores);
+      setRevealed(true);
+    }, 800);
+    return () => { stop = true; clearInterval(t); };
+  }, [submitted, left, code, room.currentIndex, pid]);
 
   useEffect(() => {
     let stop = false;
@@ -1760,7 +1874,7 @@ function PlayerGame({ code, pid, room, assignedJokers, usedJokersEver, setUsedJo
     return () => { stop = true; };
   }, [submitted, left, code, room.currentIndex, pid]);
 
-  async function submit(value) { if (submitted || left === 0) return; setSubmitted(true); await sSet(answerKey(code, room.currentIndex, pid), { pid, value, jokerUsed, submittedAt: Date.now() }); }
+  async function submit(value) { if (submitted || left === 0) return; setSubmitted(true); setPickingTargetFor(null); await sSet(answerKey(code, room.currentIndex, pid), { pid, value, jokerUsed, submittedAt: Date.now() }); }
 
   async function pickTarget(jokerId) {
     const keys = await sList(`qz:${code}:player:`);
@@ -1803,13 +1917,13 @@ function PlayerGame({ code, pid, room, assignedJokers, usedJokersEver, setUsedJo
       {speedDeadline != null && <p className="text-xs text-center mb-2" style={{ color: C.pink }}>⏱️ Ton temps a été réduit par un adversaire !</p>}
       <div>
         <div className="rounded-2xl p-5 mb-5" style={{ background: "rgba(255,255,255,0.06)" }}><p className="uppercase tracking-widest mb-2" style={{ fontSize: 16, fontWeight: 800, color: C.gold }}>{findCategory(q.category)?.emoji} {findCategory(q.category)?.label}</p><p style={{ fontFamily: F.display, fontSize: 26 }}>{q.text}</p></div>
-        {!submitted && left > 0 && !pickingTargetFor && (
+        {!submitted && left > 0 && (
           <>
             {q.type === "qcm" && (<div className="grid grid-cols-1 gap-3 mb-5">{q.options.map((o, i) => hiddenOptions.includes(i) ? null : (<button key={i} onClick={() => submit(i)} className="rounded-xl py-3 px-4 text-left" style={{ background: "rgba(255,255,255,0.08)", fontFamily: F.body, fontWeight: 700, fontSize: 17 }}>{o}</button>))}</div>)}
             {q.type === "vf" && (<div className="flex gap-3 mb-5"><button onClick={() => submit(true)} className="flex-1 rounded-xl py-4" style={{ background: C.teal, color: "#1B1030", fontFamily: F.display, fontSize: 18 }}>Vrai</button><button onClick={() => submit(false)} className="flex-1 rounded-xl py-4" style={{ background: C.pink, color: "#1B1030", fontFamily: F.display, fontSize: 18 }}>Faux</button></div>)}
             {q.type === "carte" && (<div className="relative rounded-xl mb-5" style={{ width: "100%", height: 200, background: "rgba(255,255,255,0.06)" }}>{MAP_ZONES.map((z) => (<button key={z.id} onClick={() => submit(z.id)} className="absolute rounded-full px-2 py-1 text-xs" style={{ left: `${z.x}%`, top: `${z.y}%`, transform: "translate(-50%,-50%)", background: "rgba(255,255,255,0.15)" }}><MapPin size={12} className="inline mr-1" />{z.label}</button>))}</div>)}
             {q.type === "echelle" && (<div className="mb-5"><div className="flex items-center justify-center gap-3 mb-4"><button onClick={() => setScaleVal((v) => Number(v) - 1)} className="rounded-full p-2" style={{ background: "rgba(255,255,255,0.1)" }}><Minus size={16} /></button><input type="number" inputMode="decimal" value={scaleVal} onFocus={() => { if (scaleVal === 0) setScaleVal(""); }} onChange={(e) => setScaleVal(e.target.value === "" ? "" : Number(e.target.value))} className="text-center rounded-xl px-4 py-2" style={{ fontFamily: F.mono, fontSize: 28, color: C.cream, background: "rgba(255,255,255,0.08)", border: "2px solid rgba(255,255,255,0.2)", width: 140 }} /><button onClick={() => setScaleVal((v) => Number(v) + 1)} className="rounded-full p-2" style={{ background: "rgba(255,255,255,0.1)" }}><Plus size={16} /></button></div><BigButton onClick={() => submit(scaleVal === "" ? 0 : scaleVal)} color={C.gold}>Valider</BigButton></div>)}
-            {enabledJokers.length > 0 ? (
+            {!pickingTargetFor && (enabledJokers.length > 0 ? (
               <div className="mt-4">
                 <p className="text-xs opacity-60 mb-2 text-center">Jokers disponibles</p>
                 <div className="grid grid-cols-2 gap-3">
@@ -1825,18 +1939,18 @@ function PlayerGame({ code, pid, room, assignedJokers, usedJokersEver, setUsedJo
               <p className="text-xs opacity-40 mt-4 text-center">
                 {assignedJokers.length === 0 ? "Aucun joker activé pour cette partie." : "Tu as déjà utilisé tous tes jokers."}
               </p>
+            ))}
+            {pickingTargetFor && (
+              <div className="mt-4 rounded-2xl p-3" style={{ background: "rgba(123,78,255,0.12)", border: `2px solid ${C.violet}` }}>
+                <p className="text-sm opacity-80 mb-2 text-center">Choisis ta cible (tu peux aussi répondre directement, ça annulera ce joker)</p>
+                <div className="flex flex-wrap gap-3 justify-center">{otherPlayers.map((p) => (<button key={p.id} onClick={() => confirmTarget(p.id)} className="flex flex-col items-center gap-1"><div className="rounded-full flex items-center justify-center" style={{ width: 52, height: 52, background: "rgba(255,255,255,0.08)", fontSize: 26 }}>{p.animal}</div><span className="text-xs">{p.pseudo}</span></button>))}</div>
+                <div className="mt-3 text-center"><GhostButton onClick={() => setPickingTargetFor(null)} small>Annuler</GhostButton></div>
+              </div>
             )}
           </>
         )}
       </div>
-      {pickingTargetFor && (
-        <div className="mt-2">
-          <p className="text-sm opacity-70 mb-2 text-center">Choisis ta cible</p>
-          <div className="flex flex-wrap gap-3 justify-center">{otherPlayers.map((p) => (<button key={p.id} onClick={() => confirmTarget(p.id)} className="flex flex-col items-center gap-1"><div className="rounded-full flex items-center justify-center" style={{ width: 52, height: 52, background: "rgba(255,255,255,0.08)", fontSize: 26 }}>{p.animal}</div><span className="text-xs">{p.pseudo}</span></button>))}</div>
-          <div className="mt-3"><GhostButton onClick={() => setPickingTargetFor(null)} small>Annuler</GhostButton></div>
-        </div>
-      )}
-      {(submitted || left === 0) && !pickingTargetFor && (
+      {(submitted || left === 0) && !revealed && (
         <div className="text-center mt-6 opacity-90">
           <p style={{ fontFamily: F.display, fontSize: 20 }}>{submitted ? "Réponse envoyée ✅" : "Temps écoulé ⏱️"}</p>
           <p className="text-sm mt-1 opacity-70">En attente des autres joueurs...</p>
@@ -1844,6 +1958,34 @@ function PlayerGame({ code, pid, room, assignedJokers, usedJokersEver, setUsedJo
             <p className="text-sm mt-3 rounded-xl py-2 px-3 inline-block" style={{ background: "rgba(255,61,127,0.15)", color: C.pink }}>
               🎯 {targeters.join(", ")} {targeters.length > 1 ? "t'ont" : "t'a"} ciblé sur cette question !
             </p>
+          )}
+        </div>
+      )}
+      {revealed && (
+        <div className="mt-6">
+          <div className="text-center mb-4">
+            <p style={{ fontFamily: F.display, fontSize: 26, color: myPoints > 0 ? C.teal : myPoints < 0 ? C.pink : C.cream }}>{myPoints > 0 ? `+${myPoints}` : myPoints} pts</p>
+            {q.type === "echelle" && <p className="text-sm opacity-70 mt-1">Réponse : {q.answer} {q.unit || ""}</p>}
+            {targeters.length > 0 && (
+              <p className="text-sm mt-3 rounded-xl py-2 px-3 inline-block" style={{ background: "rgba(255,61,127,0.15)", color: C.pink }}>
+                🎯 {targeters.join(", ")} {targeters.length > 1 ? "t'ont" : "t'a"} ciblé sur cette question !
+              </p>
+            )}
+          </div>
+          {provisional.length > 0 && (
+            <div className="rounded-2xl p-4" style={{ background: "rgba(255,201,60,0.08)" }}>
+              <p className="text-sm font-bold mb-2" style={{ color: C.gold }}>🏆 Classement provisoire</p>
+              <div className="flex flex-col gap-1">
+                {provisional.map((p, i) => (
+                  <div key={p.id} className="flex items-center gap-2 text-sm" style={{ fontWeight: p.id === pid ? 800 : 400 }}>
+                    <span className="opacity-60" style={{ width: 20 }}>{i + 1}.</span>
+                    <span>{p.animal}</span>
+                    <span className="flex-1">{p.pseudo}{p.id === pid ? " (toi)" : ""}</span>
+                    <span style={{ fontFamily: F.mono, color: C.teal }}>{p.score}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
           )}
         </div>
       )}
@@ -2199,7 +2341,7 @@ function BlindTestAdminGame({ code, room, onRoomChange, onFinished }) {
   const [revealed, setRevealed] = useState(false);
   const [playerAnswers, setPlayerAnswers] = useState([]);
   const [provisional, setProvisional] = useState([]);
-  const [autoLeft, setAutoLeft] = useState(5);
+  const [autoLeft, setAutoLeft] = useState(7);
   const [options, setOptions] = useState([]);
   const audioRef = useRef(null);
   const advancingRef = useRef(false);
@@ -2240,7 +2382,7 @@ function BlindTestAdminGame({ code, room, onRoomChange, onFinished }) {
   }, [room.currentIndex]);
 
   useEffect(() => {
-    setRevealed(false); advancingRef.current = false; setPlayerAnswers([]); setAutoLeft(5); setProvisional([]);
+    setRevealed(false); advancingRef.current = false; setPlayerAnswers([]); setAutoLeft(7); setProvisional([]);
     const t = setInterval(async () => {
       const [keys, playerKeys] = await Promise.all([sList(`qz:${code}:answer:${room.currentIndex}:`), sList(`qz:${code}:player:`)]);
       setAnswersCount(keys.length);
@@ -2279,6 +2421,8 @@ function BlindTestAdminGame({ code, room, onRoomChange, onFinished }) {
     }
     const withPlayers = answers.map((a) => { const p = players.find((pp) => pp.id === a.pid); return { ...a, pseudo: p?.pseudo || "?", animal: p?.animal || "❓", correct: a.value === correctValue, points: pointsByPid[a.pid] || 0 }; });
     setPlayerAnswers(withPlayers);
+    for (const p of players) { await sSet(pointsDeltaKey(code, room.currentIndex, p.id), pointsByPid[p.id] || 0); }
+    await sSet(revealedKey(code, room.currentIndex), true);
     const withScores = await Promise.all(players.map(async (p) => ({ ...p, score: (await sGet(scoreKey(code, p.id))) || 0 })));
     withScores.sort((a, b) => b.score - a.score);
     setProvisional(withScores);
@@ -2362,9 +2506,12 @@ function BlindTestPlayerGame({ code, pid, room }) {
   const left = useCountdown(room.questionStartedAt, room.settings.seconds);
   const [submitted, setSubmitted] = useState(false);
   const [options, setOptions] = useState([]);
+  const [revealed, setRevealed] = useState(false);
+  const [myPoints, setMyPoints] = useState(0);
+  const [provisional, setProvisional] = useState([]);
 
   useEffect(() => {
-    setSubmitted(false); setOptions([]);
+    setSubmitted(false); setOptions([]); setRevealed(false); setMyPoints(0); setProvisional([]);
     let stop = false;
     const t = setInterval(async () => {
       const opts = await sGet(`qz:${code}:blindoptions:${room.currentIndex}`);
@@ -2372,6 +2519,24 @@ function BlindTestPlayerGame({ code, pid, room }) {
     }, 400);
     return () => { stop = true; clearInterval(t); };
   }, [room.currentIndex, code]);
+
+  useEffect(() => {
+    if (!(submitted || left === 0)) return;
+    let stop = false;
+    const t = setInterval(async () => {
+      const isRevealed = await sGet(revealedKey(code, room.currentIndex));
+      if (stop || !isRevealed) return;
+      clearInterval(t);
+      const [myDelta, playerKeys] = await Promise.all([sGet(pointsDeltaKey(code, room.currentIndex, pid)), sList(`qz:${code}:player:`)]);
+      setMyPoints(myDelta || 0);
+      const players = (await Promise.all(playerKeys.map((k) => sGet(k)))).filter(Boolean);
+      const withScores = await Promise.all(players.map(async (p) => ({ ...p, score: (await sGet(scoreKey(code, p.id))) || 0 })));
+      withScores.sort((a, b) => b.score - a.score);
+      setProvisional(withScores);
+      setRevealed(true);
+    }, 800);
+    return () => { stop = true; clearInterval(t); };
+  }, [submitted, left, code, room.currentIndex, pid]);
 
   async function submit(value) { if (submitted || left === 0) return; setSubmitted(true); await sSet(answerKey(code, room.currentIndex, pid), { pid, value, submittedAt: Date.now() }); }
 
@@ -2390,10 +2555,362 @@ function BlindTestPlayerGame({ code, pid, room }) {
         ) : (
           <p className="text-center opacity-60 mt-6">Chargement des options...</p>
         )
-      ) : (
+      ) : !revealed ? (
         <div className="text-center mt-6 opacity-90">
           <p style={{ fontFamily: F.display, fontSize: 20 }}>{submitted ? "Réponse envoyée ✅" : "Temps écoulé ⏱️"}</p>
           <p className="text-sm mt-1 opacity-70">En attente des autres joueurs...</p>
+        </div>
+      ) : (
+        <div className="mt-6">
+          <p className="text-center mb-4" style={{ fontFamily: F.display, fontSize: 26, color: myPoints > 0 ? C.teal : C.cream }}>{myPoints > 0 ? `+${myPoints}` : myPoints} pts</p>
+          {provisional.length > 0 && (
+            <div className="rounded-2xl p-4" style={{ background: "rgba(255,201,60,0.08)" }}>
+              <p className="text-sm font-bold mb-2" style={{ color: C.gold }}>🏆 Classement provisoire</p>
+              <div className="flex flex-col gap-1">
+                {provisional.map((p, i) => (
+                  <div key={p.id} className="flex items-center gap-2 text-sm" style={{ fontWeight: p.id === pid ? 800 : 400 }}>
+                    <span className="opacity-60" style={{ width: 20 }}>{i + 1}.</span>
+                    <span>{p.animal}</span>
+                    <span className="flex-1">{p.pseudo}{p.id === pid ? " (toi)" : ""}</span>
+                    <span style={{ fontFamily: F.mono, color: C.teal }}>{p.score}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </Stage>
+  );
+}
+
+/* ---------------------------------------------------------
+   QUITTE OU DOUBLE — enchères
+--------------------------------------------------------- */
+function CreateEnchere({ onCreated, onBack }) {
+  const [nbQuestions, setNbQuestions] = useState(10);
+  const [bettingSeconds, setBettingSeconds] = useState(15);
+  const [answerSeconds, setAnswerSeconds] = useState(20);
+  const [startingPoints, setStartingPoints] = useState(10000);
+  const [kidsMode, setKidsMode] = useState(false);
+
+  async function create() {
+    const bank = kidsMode ? KIDS_QB : QB;
+    const catOptions = kidsMode ? KIDS_CATEGORIES : CATEGORIES;
+    const questions = pickQuestions(catOptions.map((c) => c.id), nbQuestions, bank);
+    const code = genCode();
+    const state = {
+      mode: "enchere", phase: "lobby", code,
+      settings: { bettingSeconds, answerSeconds, nbQuestions, startingPoints, kidsMode },
+      questions, currentIndex: -1, stage: "betting", stageStartedAt: null, createdAt: Date.now(),
+    };
+    await sSet(roomKey(code), state);
+    onCreated(code, state);
+  }
+
+  return (
+    <Stage wide>
+      <ScreenHeader title="💰 Quitte ou Double — réglages" onBack={onBack} color={C.gold} />
+      <p className="text-sm opacity-70 mb-4 text-center">Toutes les catégories sont mélangées automatiquement — pas de sélection à faire.</p>
+      <div className="mb-4">
+        <Chip active={kidsMode} onClick={() => setKidsMode((v) => !v)}>🎈 Mode Kids (fin primaire / collège)</Chip>
+      </div>
+      <div className="grid grid-cols-2 gap-6 mb-6">
+        <div>
+          <p className="text-sm opacity-70 mb-2 font-bold">Nombre de questions</p>
+          <div className="flex items-center gap-3">
+            <button onClick={() => setNbQuestions((n) => Math.max(5, n - 1))} className="rounded-full p-2" style={{ background: "rgba(255,255,255,0.1)" }}><Minus size={16} /></button>
+            <span style={{ fontFamily: F.mono, fontSize: 22 }}>{nbQuestions}</span>
+            <button onClick={() => setNbQuestions((n) => Math.min(25, n + 1))} className="rounded-full p-2" style={{ background: "rgba(255,255,255,0.1)" }}><Plus size={16} /></button>
+          </div>
+        </div>
+        <div>
+          <p className="text-sm opacity-70 mb-2 font-bold">Capital de départ</p>
+          <div className="flex items-center gap-3">
+            <button onClick={() => setStartingPoints((n) => Math.max(1000, n - 1000))} className="rounded-full p-2" style={{ background: "rgba(255,255,255,0.1)" }}><Minus size={16} /></button>
+            <span style={{ fontFamily: F.mono, fontSize: 22 }}>{startingPoints}</span>
+            <button onClick={() => setStartingPoints((n) => Math.min(50000, n + 1000))} className="rounded-full p-2" style={{ background: "rgba(255,255,255,0.1)" }}><Plus size={16} /></button>
+          </div>
+        </div>
+        <div>
+          <p className="text-sm opacity-70 mb-2 font-bold">Secondes pour miser</p>
+          <div className="flex items-center gap-3">
+            <button onClick={() => setBettingSeconds((n) => Math.max(5, n - 5))} className="rounded-full p-2" style={{ background: "rgba(255,255,255,0.1)" }}><Minus size={16} /></button>
+            <span style={{ fontFamily: F.mono, fontSize: 22 }}>{bettingSeconds}s</span>
+            <button onClick={() => setBettingSeconds((n) => Math.min(60, n + 5))} className="rounded-full p-2" style={{ background: "rgba(255,255,255,0.1)" }}><Plus size={16} /></button>
+          </div>
+        </div>
+        <div>
+          <p className="text-sm opacity-70 mb-2 font-bold">Secondes pour répondre</p>
+          <div className="flex items-center gap-3">
+            <button onClick={() => setAnswerSeconds((n) => Math.max(5, n - 5))} className="rounded-full p-2" style={{ background: "rgba(255,255,255,0.1)" }}><Minus size={16} /></button>
+            <span style={{ fontFamily: F.mono, fontSize: 22 }}>{answerSeconds}s</span>
+            <button onClick={() => setAnswerSeconds((n) => Math.min(60, n + 5))} className="rounded-full p-2" style={{ background: "rgba(255,255,255,0.1)" }}><Plus size={16} /></button>
+          </div>
+        </div>
+      </div>
+      <BigButton onClick={create} color={C.gold} icon={Play}>Créer la salle</BigButton>
+    </Stage>
+  );
+}
+
+function EnchereAdminGame({ code, room, onRoomChange, onFinished }) {
+  const q = room.questions[room.currentIndex];
+  const stage = room.stage;
+  const left = useCountdown(room.stageStartedAt, stage === "betting" ? room.settings.bettingSeconds : room.settings.answerSeconds);
+  const [activeCount, setActiveCount] = useState(0);
+  const [readyCount, setReadyCount] = useState(0);
+  const [revealed, setRevealed] = useState(false);
+  const [roundResults, setRoundResults] = useState([]);
+  const advancingRef = useRef(false);
+  const hint = DIFFICULTY_HINT[q.type] || DIFFICULTY_HINT.qcm;
+
+  const getActivePlayers = useCallback(async () => {
+    const keys = await sList(`qz:${code}:player:`);
+    const players = (await Promise.all(keys.map((k) => sGet(k)))).filter(Boolean);
+    const withScores = await Promise.all(players.map(async (p) => ({ ...p, score: (await sGet(scoreKey(code, p.id))) || 0 })));
+    return withScores.filter((p) => p.score > 0);
+  }, [code]);
+
+  const advanceToAnswering = useCallback(async () => {
+    if (advancingRef.current) return;
+    advancingRef.current = true;
+    const nextRoom = { ...room, stage: "answering", stageStartedAt: Date.now() };
+    await sSet(roomKey(code), nextRoom);
+    onRoomChange(nextRoom);
+  }, [code, room, onRoomChange]);
+
+  const collectResults = useCallback(async () => {
+    if (advancingRef.current) return;
+    advancingRef.current = true;
+    const active = await getActivePlayers();
+    const answerKeys = await sList(`qz:${code}:answer:${room.currentIndex}:`);
+    const answers = (await Promise.all(answerKeys.map((k) => sGet(k)))).filter(Boolean);
+    let minDiff = null;
+    if (q.type === "echelle") answers.forEach((a) => { const d = Math.abs(Number(a.value) - Number(q.answer)); if (minDiff === null || d < minDiff) minDiff = d; });
+    const results = [];
+    for (const p of active) {
+      const bet = (await sGet(betKey(code, room.currentIndex, p.id))) || 0;
+      const ans = answers.find((a) => a.pid === p.id);
+      let correct = false;
+      if (ans) {
+        if (q.type === "qcm" || q.type === "vf" || q.type === "carte") correct = ans.value === q.answer;
+        else if (q.type === "echelle") correct = Math.abs(Number(ans.value) - Number(q.answer)) <= echelleMargin(q);
+      }
+      const delta = correct ? bet : -bet;
+      const prevScore = (await sGet(scoreKey(code, p.id))) || 0;
+      const newScore = Math.max(0, prevScore + delta);
+      await sSet(scoreKey(code, p.id), newScore);
+      await sSet(pointsDeltaKey(code, room.currentIndex, p.id), delta);
+      results.push({ ...p, bet, correct, delta, newScore });
+    }
+    await sSet(revealedKey(code, room.currentIndex), true);
+    setRoundResults(results);
+    setRevealed(true);
+  }, [code, room, q, getActivePlayers]);
+
+  useEffect(() => {
+    setRevealed(false); setRoundResults([]); advancingRef.current = false;
+    const t = setInterval(async () => {
+      const active = await getActivePlayers();
+      setActiveCount(active.length);
+      if (stage === "betting") {
+        const bets = await Promise.all(active.map((p) => sGet(betKey(code, room.currentIndex, p.id))));
+        const ready = bets.filter((b) => b !== null && b !== undefined).length;
+        setReadyCount(ready);
+        if (active.length > 0 && ready >= active.length) advanceToAnswering();
+      } else {
+        const answerKeys = await sList(`qz:${code}:answer:${room.currentIndex}:`);
+        setReadyCount(answerKeys.length);
+        if (active.length > 0 && answerKeys.length >= active.length && !revealed) collectResults();
+      }
+    }, 1000);
+    return () => clearInterval(t);
+  }, [room.currentIndex, stage, code, getActivePlayers, advanceToAnswering, collectResults, revealed]);
+
+  useEffect(() => {
+    if (left === 0) {
+      if (stage === "betting") advanceToAnswering();
+      else if (!revealed) collectResults();
+    }
+  }, [left, stage, revealed, advanceToAnswering, collectResults]);
+
+  async function next() {
+    const isLast = room.currentIndex >= room.questions.length - 1;
+    if (isLast) { const nextRoom = { ...room, phase: "results" }; await sSet(roomKey(code), nextRoom); onFinished(nextRoom); }
+    else { const nextRoom = { ...room, currentIndex: room.currentIndex + 1, stage: "betting", stageStartedAt: Date.now() }; await sSet(roomKey(code), nextRoom); onRoomChange(nextRoom); }
+  }
+
+  const cat = findCategory(q.category);
+
+  if (stage === "betting" && !revealed) {
+    return (
+      <Stage wide>
+        <div className="flex items-center justify-between mb-4">
+          <span className="text-sm opacity-60">Question {room.currentIndex + 1} / {room.questions.length}</span>
+          <span className="flex items-center gap-1 text-sm opacity-60"><Users size={14} /> {readyCount}/{activeCount} ont misé</span>
+          <span className="flex items-center gap-1" style={{ fontFamily: F.mono, fontSize: 20, color: left <= 5 ? C.pink : C.gold }}><Clock size={18} /> {left}s</span>
+        </div>
+        <div className="rounded-3xl p-10 mb-6 text-center" style={{ background: "rgba(255,255,255,0.06)" }}>
+          <p className="text-xs opacity-60 mb-3">💰 Placez vos mises !</p>
+          <p className="uppercase tracking-widest mb-4" style={{ fontSize: 22, fontWeight: 800, color: C.gold }}>{cat?.emoji} {cat?.label}</p>
+          <p className="rounded-full inline-block px-4 py-2" style={{ background: "rgba(255,255,255,0.1)", fontFamily: F.display, fontSize: 18 }}>{hint.emoji} {hint.label}</p>
+          <p className="text-xs opacity-50 mt-4">La question sera révélée une fois toutes les mises reçues.</p>
+        </div>
+        <BigButton onClick={advanceToAnswering} color={C.violet}>Révéler la question maintenant</BigButton>
+      </Stage>
+    );
+  }
+
+  return (
+    <Stage wide>
+      <div className="flex items-center justify-between mb-4">
+        <span className="text-sm opacity-60">Question {room.currentIndex + 1} / {room.questions.length}</span>
+        <span className="flex items-center gap-1 text-sm opacity-60"><Users size={14} /> {readyCount}/{activeCount} réponses</span>
+        <span className="flex items-center gap-1" style={{ fontFamily: F.mono, fontSize: 20, color: left <= 5 ? C.pink : C.gold }}><Clock size={18} /> {left}s</span>
+      </div>
+      <div className="rounded-3xl p-8 mb-6 text-center" style={{ background: "rgba(255,255,255,0.06)" }}>
+        <p className="uppercase tracking-widest mb-3" style={{ fontSize: 20, fontWeight: 800, color: C.gold }}>{cat?.emoji} {cat?.label}</p>
+        <p style={{ fontFamily: F.display, fontSize: 32 }}>{q.text}</p>
+        {q.type === "qcm" && (<div className="grid grid-cols-2 gap-3 mt-6">{q.options.map((o, i) => (<div key={i} className="rounded-xl p-3" style={{ background: revealed && i === q.answer ? C.teal : "rgba(255,255,255,0.08)", color: revealed && i === q.answer ? "#1B1030" : C.cream, fontFamily: F.body, fontWeight: 700, fontSize: 18 }}>{o}</div>))}</div>)}
+        {q.type === "vf" && (<div className="flex gap-4 justify-center mt-6"><div className="rounded-xl px-6 py-3" style={{ background: revealed && q.answer === true ? C.teal : "rgba(255,255,255,0.08)" }}>Vrai</div><div className="rounded-xl px-6 py-3" style={{ background: revealed && q.answer === false ? C.teal : "rgba(255,255,255,0.08)" }}>Faux</div></div>)}
+        {q.type === "carte" && (<div className="relative rounded-xl mt-6 mx-auto" style={{ width: "100%", maxWidth: 420, height: 220, background: "rgba(255,255,255,0.06)" }}>{MAP_ZONES.map((z) => (<div key={z.id} className="absolute rounded-full px-2 py-1 text-xs" style={{ left: `${z.x}%`, top: `${z.y}%`, transform: "translate(-50%,-50%)", background: revealed && z.id === q.answer ? C.teal : "rgba(255,255,255,0.12)", color: revealed && z.id === q.answer ? "#1B1030" : C.cream }}>{z.label}</div>))}</div>)}
+        {q.type === "echelle" && revealed && <p className="mt-6" style={{ fontFamily: F.mono, fontSize: 26, color: C.teal }}>Réponse : {q.answer} {q.unit || ""}</p>}
+      </div>
+      {revealed && roundResults.length > 0 && (
+        <div className="rounded-2xl p-4 mb-6" style={{ background: "rgba(255,255,255,0.05)" }}>
+          <p className="text-sm font-bold mb-2 opacity-70">Résultats de la mise</p>
+          <div className="flex flex-col gap-2">
+            {roundResults.sort((a, b) => b.newScore - a.newScore).map((p) => (
+              <div key={p.id} className="flex items-center gap-2 text-sm">
+                <span>{p.animal}</span>
+                <span className="flex-1">{p.pseudo}</span>
+                <span className="opacity-60">mise {p.bet}</span>
+                <span style={{ fontFamily: F.mono, color: p.delta > 0 ? C.teal : p.delta < 0 ? C.pink : "rgba(255,255,255,0.4)", minWidth: 60, textAlign: "right" }}>{p.delta > 0 ? `+${p.delta}` : p.delta}</span>
+                <span style={{ fontFamily: F.mono, fontWeight: 700 }}>{p.newScore}</span>
+                {p.newScore === 0 && <span style={{ color: C.pink, fontSize: 12 }}>💀</span>}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+      {revealed ? (<BigButton onClick={next} color={C.pink} icon={ArrowRight}>{room.currentIndex >= room.questions.length - 1 ? "Voir le classement final" : "Question suivante"}</BigButton>) : (<BigButton onClick={collectResults} color={C.violet}>Révéler les résultats maintenant</BigButton>)}
+    </Stage>
+  );
+}
+
+function EnchèrePlayerGame({ code, pid, room }) {
+  const q = room.questions[room.currentIndex];
+  const stage = room.stage;
+  const left = useCountdown(room.stageStartedAt, stage === "betting" ? room.settings.bettingSeconds : room.settings.answerSeconds);
+  const [myScore, setMyScore] = useState(null);
+  const [betVal, setBetVal] = useState(0);
+  const [betSubmitted, setBetSubmitted] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [revealed, setRevealed] = useState(false);
+  const [myDelta, setMyDelta] = useState(0);
+  const hint = DIFFICULTY_HINT[q.type] || DIFFICULTY_HINT.qcm;
+
+  useEffect(() => { setBetVal(0); setBetSubmitted(false); setSubmitted(false); setRevealed(false); setMyDelta(0); }, [room.currentIndex]);
+
+  useEffect(() => {
+    let stop = false;
+    (async () => { const s = (await sGet(scoreKey(code, pid))) ?? 0; if (!stop) setMyScore(s); })();
+    return () => { stop = true; };
+  }, [code, pid, room.currentIndex]);
+
+  useEffect(() => {
+    if (stage !== "betting" || myScore === null) return;
+    if (myScore <= 0) { sSet(betKey(code, room.currentIndex, pid), 0); setBetSubmitted(true); }
+  }, [stage, myScore, code, room.currentIndex, pid]);
+
+  useEffect(() => {
+    if (!(submitted || stage === "answering" && left === 0)) return;
+    let stop = false;
+    const t = setInterval(async () => {
+      const isRevealed = await sGet(revealedKey(code, room.currentIndex));
+      if (stop || !isRevealed) return;
+      clearInterval(t);
+      const delta = await sGet(pointsDeltaKey(code, room.currentIndex, pid));
+      setMyDelta(delta || 0);
+      setRevealed(true);
+    }, 800);
+    return () => { stop = true; clearInterval(t); };
+  }, [submitted, stage, left, code, room.currentIndex, pid]);
+
+  async function submitBet() {
+    if (betSubmitted || myScore === null) return;
+    const amount = Math.max(0, Math.min(myScore, Number(betVal) || 0));
+    setBetSubmitted(true);
+    await sSet(betKey(code, room.currentIndex, pid), amount);
+  }
+  async function submitAnswer(value) {
+    if (submitted || left === 0) return;
+    setSubmitted(true);
+    await sSet(answerKey(code, room.currentIndex, pid), { pid, value, submittedAt: Date.now() });
+  }
+
+  if (myScore !== null && myScore <= 0) {
+    return (
+      <Stage>
+        <div className="text-center mt-10">
+          <Skull size={40} className="mx-auto mb-3" color={C.pink} />
+          <p style={{ fontFamily: F.display, fontSize: 22 }}>Éliminé 💀</p>
+          <p className="text-sm opacity-70 mt-2">Tu es tombé à 0 point, tu ne peux plus miser. Regarde la suite sur l'écran principal !</p>
+        </div>
+      </Stage>
+    );
+  }
+
+  if (stage === "betting") {
+    const cat = findCategory(q.category);
+    return (
+      <Stage>
+        <div className="flex items-center justify-between mb-4">
+          <span className="text-xs opacity-60">Q{room.currentIndex + 1}/{room.questions.length}</span>
+          <span className="text-xs" style={{ fontFamily: F.mono, color: C.gold }}>💰 {myScore ?? "..."}</span>
+          <span style={{ fontFamily: F.mono, fontSize: 20, color: left <= 5 ? C.pink : C.gold }}>{left}s</span>
+        </div>
+        <div className="rounded-2xl p-6 mb-5 text-center" style={{ background: "rgba(255,255,255,0.06)" }}>
+          <p className="uppercase tracking-widest mb-3" style={{ fontSize: 16, fontWeight: 800, color: C.gold }}>{cat?.emoji} {cat?.label}</p>
+          <p className="rounded-full inline-block px-4 py-2" style={{ background: "rgba(255,255,255,0.1)", fontFamily: F.display, fontSize: 16 }}>{hint.emoji} {hint.label}</p>
+        </div>
+        {betSubmitted ? (
+          <div className="text-center mt-6 opacity-90"><p style={{ fontFamily: F.display, fontSize: 20 }}>Mise envoyée ✅</p><p className="text-sm mt-1 opacity-70">En attente de la question...</p></div>
+        ) : (
+          <div>
+            <p className="text-sm opacity-70 mb-2 text-center">Combien mises-tu ? (max {myScore ?? 0})</p>
+            <div className="flex items-center justify-center gap-3 mb-4">
+              <button onClick={() => setBetVal((v) => Math.max(0, Number(v) - 50))} className="rounded-full p-2" style={{ background: "rgba(255,255,255,0.1)" }}><Minus size={16} /></button>
+              <input type="number" inputMode="numeric" value={betVal} onFocus={() => { if (betVal === 0) setBetVal(""); }} onChange={(e) => setBetVal(e.target.value === "" ? "" : Math.max(0, Math.min(myScore ?? 0, Number(e.target.value))))} className="text-center rounded-xl px-4 py-2" style={{ fontFamily: F.mono, fontSize: 28, color: C.cream, background: "rgba(255,255,255,0.08)", border: "2px solid rgba(255,255,255,0.2)", width: 160 }} />
+              <button onClick={() => setBetVal((v) => Math.min(myScore ?? 0, Number(v) + 50))} className="rounded-full p-2" style={{ background: "rgba(255,255,255,0.1)" }}><Plus size={16} /></button>
+            </div>
+            <div className="flex gap-2 justify-center mb-4">
+              <GhostButton small onClick={() => setBetVal(Math.round((myScore ?? 0) / 2))}>Moitié</GhostButton>
+              <GhostButton small onClick={() => setBetVal(myScore ?? 0)}>Tout miser</GhostButton>
+            </div>
+            <BigButton onClick={submitBet} color={C.gold}>Valider ma mise</BigButton>
+          </div>
+        )}
+      </Stage>
+    );
+  }
+
+  return (
+    <Stage>
+      <div className="flex items-center justify-between mb-4">
+        <span className="text-xs opacity-60">Q{room.currentIndex + 1}/{room.questions.length}</span>
+        <span style={{ fontFamily: F.mono, fontSize: 20, color: left <= 5 ? C.pink : C.gold }}>{left}s</span>
+      </div>
+      <div className="rounded-2xl p-5 mb-5" style={{ background: "rgba(255,255,255,0.06)" }}><p className="uppercase tracking-widest mb-2" style={{ fontSize: 16, fontWeight: 800, color: C.gold }}>{findCategory(q.category)?.emoji} {findCategory(q.category)?.label}</p><p style={{ fontFamily: F.display, fontSize: 26 }}>{q.text}</p></div>
+      {!submitted && left > 0 ? (
+        <QuestionInput q={q} onSubmit={submitAnswer} scaleVal={betVal} setScaleVal={setBetVal} />
+      ) : !revealed ? (
+        <div className="text-center mt-6 opacity-90"><p style={{ fontFamily: F.display, fontSize: 20 }}>{submitted ? "Réponse envoyée ✅" : "Temps écoulé ⏱️"}</p><p className="text-sm mt-1 opacity-70">En attente des autres joueurs...</p></div>
+      ) : (
+        <div className="text-center mt-6">
+          <p style={{ fontFamily: F.display, fontSize: 28, color: myDelta > 0 ? C.teal : myDelta < 0 ? C.pink : C.cream }}>{myDelta > 0 ? `+${myDelta}` : myDelta} pts</p>
+          <p className="text-sm opacity-70 mt-2">En attente de la question suivante...</p>
         </div>
       )}
     </Stage>
@@ -2436,10 +2953,11 @@ export default function QuizApp() {
         setRoom(r);
         const isMatchAmor = r.mode === "matchamor";
         const isBlindTest = r.mode === "blindtest";
-        if (r.phase === "question") setView(isAdmin ? (isMatchAmor ? "admin-matchamor" : isBlindTest ? "admin-blindgame" : "admin-game") : (isMatchAmor ? "player-matchamor" : isBlindTest ? "player-blindgame" : "player-game"));
+        const isEnchere = r.mode === "enchere";
+        if (r.phase === "question") setView(isAdmin ? (isMatchAmor ? "admin-matchamor" : isBlindTest ? "admin-blindgame" : isEnchere ? "admin-enchere" : "admin-game") : (isMatchAmor ? "player-matchamor" : isBlindTest ? "player-blindgame" : isEnchere ? "player-enchere" : "player-game"));
         else if (r.phase === "results") setView(isMatchAmor ? "results-matchamor" : "results");
         else if (r.phase === "lobby") {
-          const stillOnboarding = !isAdmin && (viewRef.current === "player-tuto" || viewRef.current === "player-jokerdraw");
+          const stillOnboarding = !isAdmin && (viewRef.current === "player-tuto" || viewRef.current === "player-jokerdraw" || viewRef.current === "player-jokerpick");
           if (!stillOnboarding) setView(isAdmin ? "admin-lobby" : "player-lobby");
         }
       }
@@ -2453,23 +2971,91 @@ export default function QuizApp() {
 
   async function playAgain() {
     const playerKeysList = await sList(`qz:${code}:player:`);
+    const resetScore = room.mode === "enchere" ? (room.settings.startingPoints || 10000) : 0;
     for (const k of playerKeysList) {
       const p = await sGet(k);
       if (p) {
-        await sSet(scoreKey(code, p.id), 0);
+        await sSet(scoreKey(code, p.id), resetScore);
         await sSet(timeKey(code, p.id), 0);
         await sSet(killerKey(code, p.id), 0);
         await sSet(victimKey(code, p.id), 0);
       }
     }
-    const resetRoom = { ...room, phase: "lobby", currentIndex: -1, questionStartedAt: null };
+    const resetRoom = { ...room, phase: "lobby", currentIndex: -1, questionStartedAt: null, stage: room.mode === "enchere" ? "betting" : room.stage, stageStartedAt: null };
     await sSet(roomKey(code), resetRoom);
     setRoom(resetRoom);
     setUsedJokersEver([]);
     setView(isAdmin ? "admin-lobby" : "player-lobby");
   }
 
-  if (view === "home") return <Home onCreate={() => setView("admin-create")} onJoin={() => setView("player-join")} onSolo={() => setView("solo-home")} onMatchAmor={() => setView("matchamor-create")} onBlindTest={() => setView("blindtest-create")} />;
+  if (view === "home") return <Home onCreate={() => setView("explain-classic")} onJoin={() => setView("player-join")} onSolo={() => setView("explain-solo")} onMatchAmor={() => setView("explain-matchamor")} onBlindTest={() => setView("explain-blindtest")} onEnchere={() => setView("explain-enchere")} />;
+
+  if (view === "explain-classic") return (
+    <ModeExplainer
+      emoji="🎯" title="Quiz Classique" color={C.gold}
+      onBack={() => setView("home")}
+      onContinue={() => setView("admin-create")}
+      bullets={[
+        { emoji: "📱", text: "Chaque joueur répond depuis son téléphone, l'hôte affiche les questions sur un grand écran (TV, PC, tablette...)." },
+        { emoji: "⚡", text: "Plus tu réponds vite ET juste, plus tu marques de points — de 50 à 100 points par bonne réponse selon ta rapidité." },
+        { emoji: "🃏", text: "Jokers en option : vole des points à un adversaire, bloque-le, réduis son temps de réponse..." },
+        { emoji: "🏆", text: "Le classement se met à jour après chaque question, jusqu'au classement final et aux prix spéciaux." },
+      ]}
+      example="Sur une question à 20 secondes : réponds juste en 2 secondes → 95 points. Réponds juste à la 19ᵉ seconde → seulement 51 points. Une mauvaise réponse ne rapporte rien (ou un malus si l'hôte l'a activé)."
+    />
+  );
+  if (view === "explain-solo") return (
+    <ModeExplainer
+      emoji="🧑‍🎓" title="Jouer seul" color={C.violet}
+      onBack={() => setView("home")}
+      onContinue={() => setView("solo-home")}
+      bullets={[
+        { emoji: "🎯", text: "Entraîne-toi à ton rythme, sans autres joueurs — parfait pour découvrir les catégories avant une vraie partie." },
+        { emoji: "💀", text: "Mode Crash Test : le temps est illimité par question, mais 3 erreurs et c'est terminé !" },
+        { emoji: "🚫", text: "Pas de jokers en solo : ils demandent un adversaire à cibler." },
+      ]}
+    />
+  );
+  if (view === "explain-matchamor") return (
+    <ModeExplainer
+      emoji="💔" title="Match Amor" color={C.pink}
+      onBack={() => setView("home")}
+      onContinue={() => setView("matchamor-create")}
+      bullets={[
+        { emoji: "⚔️", text: "Chaque question élimine les joueurs qui se trompent — réponds juste pour rester en course." },
+        { emoji: "🔥", text: "Si tout le monde se trompe (ou si tout le monde répond juste), personne n'est éliminé ce tour-ci." },
+        { emoji: "🏆", text: "Le dernier joueur encore en vie remporte la partie." },
+      ]}
+    />
+  );
+  if (view === "explain-blindtest") return (
+    <ModeExplainer
+      emoji="🎧" title="Blind Test musical" color={C.violet}
+      onBack={() => setView("home")}
+      onContinue={() => setView("blindtest-create")}
+      bullets={[
+        { emoji: "🔊", text: "Le son se joue depuis l'écran de l'hôte — les joueurs répondent simplement depuis leur téléphone." },
+        { emoji: "🎚️", text: "Choisis l'effet : normal, ralenti, accéléré, ou juste les 2 premières secondes de l'intro." },
+        { emoji: "❓", text: "Types de questions : titre du morceau, artiste, année de sortie, origine de l'artiste." },
+      ]}
+    />
+  );
+  if (view === "explain-enchere") return (
+    <ModeExplainer
+      emoji="💰" title="Quitte ou Double" color={C.gold}
+      onBack={() => setView("home")}
+      onContinue={() => setView("enchere-create")}
+      bullets={[
+        { emoji: "💵", text: "Chaque joueur démarre avec le même capital de points (10 000 par défaut)." },
+        { emoji: "🎯", text: "Avant chaque question, tu vois seulement le thème et un indice de difficulté — à toi de miser le montant de ton choix." },
+        { emoji: "✅", text: "Bonne réponse : ta mise est doublée et ajoutée à ton total. Mauvaise réponse : tu perds ta mise." },
+        { emoji: "💀", text: "Si tu tombes à 0 point, tu es éliminé : impossible de miser à nouveau." },
+        { emoji: "🏆", text: "À la fin des questions, le joueur avec le plus de points remporte la partie." },
+      ]}
+      example="Tu as 1000 points et tu mises 300 sur une question annoncée 🔴 Difficile. Bonne réponse → tu gagnes 300 pts (total 1300). Mauvaise réponse → tu perds ta mise (total 700)."
+    />
+  );
+
   if (view === "solo-home") return <SoloHome onBack={() => setView("home")} onNormal={() => { setSoloMode("normal"); setView("solo-profile"); }} onCrash={() => { setSoloMode("crash"); setView("solo-profile"); }} />;
   if (view === "solo-profile") return <SoloProfile onBack={() => setView("solo-home")} onNext={(p) => { setSoloProfile(p); setView(soloMode === "crash" ? "crash-setup" : "solo-setup"); }} />;
   if (view === "solo-setup") return <SoloSetup onBack={() => setView("solo-profile")} onStart={(cfg) => { setSoloConfig(cfg); setView("solo-quiz"); }} />;
@@ -2481,7 +3067,10 @@ export default function QuizApp() {
 
   if (view === "blindtest-create") return <CreateBlindTest onBack={() => setView("home")} onCreated={(c, r) => { setCode(c); setRoom(r); setView("admin-lobby"); }} />;
 
+  if (view === "enchere-create") return <CreateEnchere onBack={() => setView("home")} onCreated={(c, r) => { setCode(c); setRoom(r); setView("admin-lobby"); }} />;
+
   if (view === "admin-create") return <CreateRoom onBack={() => setView("home")} onCreated={(c, r, hostPid) => { setCode(c); setRoom(r); setPid(hostPid || null); setView("admin-lobby"); }} />;
+
 
   if (view === "player-join") return (
     <JoinRoom
@@ -2489,7 +3078,7 @@ export default function QuizApp() {
       initialCode={urlCode}
       onJoined={(c, p, prof, r, reconnectInfo) => {
         setCode(c); setPid(p); setProfile(prof); setRoom(r);
-        if (r.mode === "matchamor" || r.mode === "blindtest") { setView("player-lobby"); return; }
+        if (r.mode === "matchamor" || r.mode === "blindtest" || r.mode === "enchere") { setView("player-lobby"); return; }
         if (reconnectInfo?.isReconnect) {
           setAssignedJokers(reconnectInfo.assignedJokers || []);
           setUsedJokersEver(reconnectInfo.usedJokersEver || []);
@@ -2505,24 +3094,20 @@ export default function QuizApp() {
     <JokerTuto
       room={room}
       onDone={() => {
-        if (room.settings.jokerRandom) { setView("player-jokerdraw"); }
-        else {
-          const ids = Object.entries(room.settings.jokers || {}).filter(([, v]) => v).map(([k]) => k);
-          setAssignedJokers(ids);
-          setView("player-lobby");
-        }
+        setView(room.settings.jokerRandom ? "player-jokerdraw" : "player-jokerpick");
       }}
     />
   );
 
   if (view === "player-jokerdraw" && room) return <JokerDraw room={room} code={code} pid={pid} onDone={(picked) => { setAssignedJokers(picked); setView("player-lobby"); }} />;
+  if (view === "player-jokerpick" && room) return <JokerPick room={room} code={code} pid={pid} onDone={(picked) => { setAssignedJokers(picked); setView("player-lobby"); }} />;
 
   if (view === "admin-lobby" && room) return (
     <AdminLobby
       code={code}
       room={room}
-      onStart={(r) => { setRoom(r); setView(r.mode === "matchamor" ? "admin-matchamor" : r.mode === "blindtest" ? "admin-blindgame" : "admin-game"); }}
-      buildExtraOnStart={room.mode === "matchamor" ? (players) => ({ alive: players.map((p) => p.id) }) : undefined}
+      onStart={(r) => { setRoom(r); setView(r.mode === "matchamor" ? "admin-matchamor" : r.mode === "blindtest" ? "admin-blindgame" : r.mode === "enchere" ? "admin-enchere" : "admin-game"); }}
+      buildExtraOnStart={room.mode === "matchamor" ? (players) => ({ alive: players.map((p) => p.id) }) : room.mode === "enchere" ? () => ({ stage: "betting", stageStartedAt: Date.now() }) : undefined}
       onBack={resetAll}
     />
   );
@@ -2536,6 +3121,8 @@ export default function QuizApp() {
   if (view === "admin-matchamor" && room) return <MatchAmorAdminGame code={code} room={room} onRoomChange={(r) => setRoom(r)} onFinished={(r) => { setRoom(r); setView("results-matchamor"); }} />;
   if (view === "admin-blindgame" && room) return <BlindTestAdminGame code={code} room={room} onRoomChange={(r) => setRoom(r)} onFinished={(r) => { setRoom(r); setView("results"); }} />;
   if (view === "player-blindgame" && room) return <BlindTestPlayerGame code={code} pid={pid} room={room} />;
+  if (view === "admin-enchere" && room) return <EnchereAdminGame code={code} room={room} onRoomChange={(r) => setRoom(r)} onFinished={(r) => { setRoom(r); setView("results"); }} />;
+  if (view === "player-enchere" && room) return <EnchèrePlayerGame code={code} pid={pid} room={room} />;
   if (view === "player-matchamor" && room) return <PlayerMatchAmor code={code} pid={pid} room={room} />;
   if (view === "results-matchamor") return <MatchAmorResults code={code} room={room} isAdmin={isAdmin} onRestart={resetAll} />;
 
