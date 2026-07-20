@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo, createContext, useContext } from "react";
-import { Users, Crown, Zap, Shield, Swords, Percent, EyeOff, Sparkles, Play, Copy, Check, ArrowRight, Trophy, Clock, Plus, Minus, MapPin, RefreshCw, Skull, Heart, Cast, Info, BarChart3, Hourglass } from "lucide-react";
+import { Users, Crown, Zap, Shield, Swords, Percent, EyeOff, Sparkles, Play, Copy, Check, ArrowRight, Trophy, Clock, Plus, Minus, MapPin, RefreshCw, Skull, Heart, Info, BarChart3, Hourglass, Headphones, Coins, User, Pause, QrCode, Camera, X } from "lucide-react";
 import { initializeApp } from "firebase/app";
 import { getDatabase, ref, get, set as fbSet, query, orderByKey, startAt, endAt } from "firebase/database";
 
@@ -70,11 +70,10 @@ const STRINGS = {
     explainEnchereB5: "À la fin des questions, le joueur avec le plus de points remporte la partie.",
     explainEnchereExample: "Tu as 1000 points et tu mises 300 sur une question annoncée 🔴 Difficile. Bonne réponse → tu gagnes 300 pts (total 1300). Mauvaise réponse → tu perds ta mise (total 700).",
     roomSettingsTitle: "Réglages de la partie",
-    castHint: "Sur téléphone : utilise l'affichage sans fil (AirPlay / Chromecast) pour caster cet écran sur la TV.",
     categoriesLabel: "Catégories",
     checkAll: "Tout cocher",
     uncheckAll: "Tout décocher",
-    kidsMode: "🎈 Mode Kids (fin primaire / collège)",
+    kidsMode: "🎈 Mode Kids (10-14 ans)",
     questionTypesLabel: "Types de questions",
     qcmLabel: "QCM",
     vfLabel: "Vrai / Faux",
@@ -131,16 +130,20 @@ const STRINGS = {
     noJokerForGame: "Aucun joker pour cette partie.",
     launchGame: "Lancer la partie",
     joinWithCode: "Rejoignez avec le code",
-    castRoomHint: "Sur téléphone : caste cet écran via AirPlay / Chromecast pour l'afficher sur la TV",
     linkCopiedMsg: "Lien copié ✓",
     copyLinkBtn: "📋 Copier le lien de la partie",
-    pasteLinkHint: "À coller dans un SMS/WhatsApp — ouvre l'appli avec le code déjà rempli",
-    scanHint: "📷 Ou scanne pour rejoindre directement",
+    scanHint: "📷 Scanner pour rejoindre la partie",
     clickToChangeTeam: " — clique un joueur pour changer son équipe",
     waitingPlayersLobby: "En attente de joueurs...",
     teamWord: "Équipe",
     roomWord: "Salle",
     loadingSimple: "Chargement...",
+    scanQrBtn: "📷 Scanner un QR code",
+    scanCameraHint: "Vise le QR code affiché sur l'écran de l'hôte",
+    cameraError: "Impossible d'accéder à la caméra.",
+    cameraErrorTitle: "Caméra indisponible",
+    cameraErrorHint: "Vérifie que tu as autorisé l'accès à la caméra, ou tape le code à la main ci-dessous.",
+    orDivider: "— ou —",
     questionsWord: "questions",
     tracksWord: "morceaux",
     questionWord: "Question",
@@ -267,6 +270,9 @@ const STRINGS = {
     mixedCategoriesHint: "Toutes les catégories sont mélangées automatiquement — pas de sélection à faire.",
     loadingOptions: "Chargement des options...",
     haveBetSuffix: "ont misé",
+    pauseBtn: "⏸ Mettre en pause",
+    resumeBtn: "▶️ Reprendre",
+    pausedMsg: "En pause — reprends quand tu veux",
     j_5050_label: "50/50", j_5050_desc: "Retire 2 mauvaises réponses (QCM uniquement).",
     j_x2_label: "x2", j_x2_desc: "Double tes points si tu réponds juste à cette question.",
     j_steal_label: "Vol de points", j_steal_desc: "Si tu réponds juste, vole 30 points à l'adversaire de ton choix.",
@@ -320,11 +326,10 @@ const STRINGS = {
     explainEnchereB5: "At the end of the questions, the player with the most points wins the game.",
     explainEnchereExample: "You have 1000 points and bet 300 on a question marked 🔴 Hard. Correct answer → you gain 300 pts (total 1300). Wrong answer → you lose your bet (total 700).",
     roomSettingsTitle: "Game settings",
-    castHint: "On phone: use wireless display (AirPlay / Chromecast) to cast this screen to the TV.",
     categoriesLabel: "Categories",
     checkAll: "Check all",
     uncheckAll: "Uncheck all",
-    kidsMode: "🎈 Kids mode (upper elementary / middle school)",
+    kidsMode: "🎈 Kids Mode (ages 10-14)",
     questionTypesLabel: "Question types",
     qcmLabel: "Multiple choice",
     vfLabel: "True / False",
@@ -381,16 +386,20 @@ const STRINGS = {
     noJokerForGame: "No jokers for this game.",
     launchGame: "Start the game",
     joinWithCode: "Join with the code",
-    castRoomHint: "On phone: cast this screen via AirPlay / Chromecast to display it on the TV",
     linkCopiedMsg: "Link copied ✓",
     copyLinkBtn: "📋 Copy game link",
-    pasteLinkHint: "Paste into a text/WhatsApp message — opens the app with the code already filled in",
-    scanHint: "📷 Or scan to join directly",
+    scanHint: "📷 Scan to join the game",
     clickToChangeTeam: " — tap a player to change their team",
     waitingPlayersLobby: "Waiting for players...",
     teamWord: "Team",
     roomWord: "Room",
     loadingSimple: "Loading...",
+    scanQrBtn: "📷 Scan a QR code",
+    scanCameraHint: "Point at the QR code shown on the host's screen",
+    cameraError: "Couldn't access the camera.",
+    cameraErrorTitle: "Camera unavailable",
+    cameraErrorHint: "Check that you've allowed camera access, or type the code manually below.",
+    orDivider: "— or —",
     questionsWord: "questions",
     tracksWord: "tracks",
     questionWord: "Question",
@@ -517,6 +526,9 @@ const STRINGS = {
     mixedCategoriesHint: "All categories are mixed automatically — nothing to select.",
     loadingOptions: "Loading options...",
     haveBetSuffix: "have bet",
+    pauseBtn: "⏸ Pause",
+    resumeBtn: "▶️ Resume",
+    pausedMsg: "Paused — resume whenever you're ready",
     j_5050_label: "50/50", j_5050_desc: "Removes 2 wrong answers (multiple choice only).",
     j_x2_label: "x2", j_x2_desc: "Doubles your points if you answer this question correctly.",
     j_steal_label: "Point Steal", j_steal_desc: "If you answer correctly, steal 30 points from the opponent of your choice.",
@@ -561,6 +573,111 @@ function useGoogleFonts() {
     link.href = "https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@400;600;700;800&family=Space+Mono:wght@400;700&family=Lilita+One&display=swap";
     document.head.appendChild(link);
   }, []);
+}
+
+function loadJsQR() {
+  return new Promise((resolve, reject) => {
+    if (window.jsQR) return resolve(window.jsQR);
+    const id = "quiz-app-jsqr";
+    const existing = document.getElementById(id);
+    if (existing) {
+      existing.addEventListener("load", () => resolve(window.jsQR));
+      existing.addEventListener("error", reject);
+      return;
+    }
+    const script = document.createElement("script");
+    script.id = id;
+    script.src = "https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js";
+    script.onload = () => resolve(window.jsQR);
+    script.onerror = reject;
+    document.head.appendChild(script);
+  });
+}
+
+function extractCodeFromScan(text) {
+  if (!text) return null;
+  try {
+    const url = new URL(text);
+    const c = url.searchParams.get("code");
+    if (c && c.length === 4) return c.toUpperCase();
+  } catch {
+    // Pas une URL — peut-être le code brut a été encodé directement
+  }
+  const trimmed = text.trim().toUpperCase();
+  if (/^[A-Z]{4}$/.test(trimmed)) return trimmed;
+  return null;
+}
+
+function QRScannerModal({ onScanned, onClose }) {
+  const { t: tr } = useLang();
+  const videoRef = useRef(null);
+  const canvasRef = useRef(document.createElement("canvas"));
+  const [error, setError] = useState("");
+  const streamRef = useRef(null);
+  const rafRef = useRef(null);
+
+  useEffect(() => {
+    let stopped = false;
+    (async () => {
+      try {
+        await loadJsQR();
+        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+        if (stopped) { stream.getTracks().forEach((t) => t.stop()); return; }
+        streamRef.current = stream;
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+          await videoRef.current.play();
+        }
+        const tick = () => {
+          if (stopped) return;
+          const video = videoRef.current;
+          if (video && video.readyState === video.HAVE_ENOUGH_DATA && window.jsQR) {
+            const canvas = canvasRef.current;
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const result = window.jsQR(imageData.data, imageData.width, imageData.height);
+            if (result && result.data) {
+              const code = extractCodeFromScan(result.data);
+              if (code) { onScanned(code); return; }
+            }
+          }
+          rafRef.current = requestAnimationFrame(tick);
+        };
+        rafRef.current = requestAnimationFrame(tick);
+      } catch (e) {
+        if (!stopped) setError(e?.message || tr("cameraError"));
+      }
+    })();
+    return () => {
+      stopped = true;
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      if (streamRef.current) streamRef.current.getTracks().forEach((t) => t.stop());
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return (
+    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.9)", zIndex: 100, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 20 }}>
+      <button onClick={onClose} className="rounded-full p-2 mb-4" style={{ background: "rgba(255,255,255,0.15)", position: "absolute", top: 20, right: 20 }}><X size={22} color="#fff" /></button>
+      {error ? (
+        <div className="text-center" style={{ color: C.cream, maxWidth: 320 }}>
+          <p className="mb-2" style={{ fontFamily: F.display, fontSize: 18, color: C.pink }}>{tr("cameraErrorTitle")}</p>
+          <p className="text-sm opacity-80">{tr("cameraErrorHint")}</p>
+        </div>
+      ) : (
+        <>
+          <div className="rounded-2xl overflow-hidden relative" style={{ width: "100%", maxWidth: 360, aspectRatio: "1/1", background: "#000" }}>
+            <video ref={videoRef} muted playsInline style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+            <div style={{ position: "absolute", inset: 24, border: `3px solid ${C.gold}`, borderRadius: 16, pointerEvents: "none" }} />
+          </div>
+          <p className="text-sm mt-4 text-center" style={{ color: C.cream, opacity: 0.8 }}>{tr("scanCameraHint")}</p>
+        </>
+      )}
+    </div>
+  );
 }
 const F = { display: "'Baloo 2', system-ui, sans-serif", body: "'Nunito', system-ui, sans-serif", mono: "'Space Mono', monospace" };
 const C = { bg: "#180F2E", bg2: "#241645", pink: "#FF3D7F", gold: "#FFC93C", teal: "#2EE6D6", violet: "#7B4EFF", cream: "#FFF6E9", mint: "#4ADE80", orange: "#C2410C" };
@@ -683,6 +800,7 @@ const victimKey = (code, pid) => `qz:${code}:victim:${pid}`;
 const targetedKey = (code, qIdx, targetId, attackerId) => `qz:${code}:targeted:${qIdx}:${targetId}:${attackerId}`;
 const speedChronoKey = (code, qIdx, targetId) => `qz:${code}:speedchrono:${qIdx}:${targetId}`;
 const revealedKey = (code, qIdx) => `qz:${code}:revealed:${qIdx}`;
+const revealDetailKey = (code, qIdx) => `qz:${code}:revealdetail:${qIdx}`;
 const pointsDeltaKey = (code, qIdx, pid) => `qz:${code}:pointsdelta:${qIdx}:${pid}`;
 const betKey = (code, qIdx, pid) => `qz:${code}:bet:${qIdx}:${pid}`;
 const debuffKeyPrefix = (code, qIdx, targetId) => `qz:${code}:debuff:${qIdx}:${targetId}:`;
@@ -1165,63 +1283,64 @@ const BLIND_CATEGORIES = [
 
 // type: "solo_h" (homme seul), "solo_f" (femme seule), "groupe" (duo/groupe)
 const ARTIST_META = {
-  "Michael Jackson": { type: "solo_h", origin: "États-Unis" },
-  "Madonna": { type: "solo_f", origin: "États-Unis" },
-  "Queen": { type: "groupe", origin: "Royaume-Uni" },
+  "Michael Jackson": { type: "solo_h", origin: "États-Unis", trivia: [{ text: "Michael Jackson a commencé sa carrière au sein de quel groupe familial ?", options: ["Les Jackson 5", "Les Osmonds", "Les Isley Brothers", "The Commodores"], answer: 0 }] },
+  "Madonna": { type: "solo_f", origin: "États-Unis", trivia: [{ text: "Avant de percer dans la musique, Madonna a d'abord été danseuse à :", options: ["Los Angeles", "New York", "Chicago", "Miami"], answer: 1 }] },
+  "Queen": { type: "groupe", origin: "Royaume-Uni", trivia: [{ text: "Avant de former Queen, le chanteur Freddie Mercury étudiait :", options: ["Le design graphique", "La médecine", "Le droit", "La musicologie"], answer: 0 }] },
   "Daniel Balavoine": { type: "solo_h", origin: "France" },
-  "Indochine": { type: "groupe", origin: "France" },
+  "Indochine": { type: "groupe", origin: "France", trivia: [{ text: "Le groupe Indochine a été fondé au début de quelle décennie ?", options: ["Les années 70", "Les années 80", "Les années 90", "Les années 2000"], answer: 1 }] },
   "Jean-Jacques Goldman": { type: "solo_h", origin: "France" },
   "Cyndi Lauper": { type: "solo_f", origin: "États-Unis" },
   "Eurythmics": { type: "groupe", origin: "Royaume-Uni" },
-  "Britney Spears": { type: "solo_f", origin: "États-Unis" },
+  "Britney Spears": { type: "solo_f", origin: "États-Unis", trivia: [{ text: "Avant sa carrière musicale, Britney Spears est passée par :", options: ["Le Mickey Mouse Club", "Une école de danse classique", "Un télé-crochet", "Broadway"], answer: 0 }] },
   "Black Eyed Peas": { type: "groupe", origin: "États-Unis" },
   "Lorie": { type: "solo_f", origin: "France" },
   "Star Academy": { type: "groupe", origin: "France" },
-  "Shakira": { type: "solo_f", origin: "Colombie" },
-  "Beyoncé": { type: "solo_f", origin: "États-Unis" },
+  "Shakira": { type: "solo_f", origin: "Colombie", trivia: [{ text: "Shakira est originaire de quelle ville colombienne ?", options: ["Bogotá", "Medellín", "Barranquilla", "Cali"], answer: 2 }] },
+  "Beyoncé": { type: "solo_f", origin: "États-Unis", trivia: [{ text: "Beyoncé a commencé sa carrière au sein de quel girls band ?", options: ["Destiny's Child", "TLC", "Spice Girls", "En Vogue"], answer: 0 }] },
   "Linkin Park": { type: "groupe", origin: "États-Unis" },
   "Christina Aguilera": { type: "solo_f", origin: "États-Unis" },
-  "Celine Dion": { type: "solo_f", origin: "Canada" },
+  "Celine Dion": { type: "solo_f", origin: "Canada", trivia: [{ text: "Céline Dion est originaire de quelle province canadienne ?", options: ["L'Ontario", "Le Québec", "L'Alberta", "La Colombie-Britannique"], answer: 1 }] },
   "France Gall": { type: "solo_f", origin: "France" },
   "Whitney Houston": { type: "solo_f", origin: "États-Unis" },
   "Michel Sardou": { type: "solo_h", origin: "France" },
-  "Johnny Hallyday": { type: "solo_h", origin: "France" },
-  "ABBA": { type: "groupe", origin: "Suède" },
-  "Rihanna": { type: "solo_f", origin: "Barbade" },
+  "Johnny Hallyday": { type: "solo_h", origin: "France", trivia: [{ text: "Johnny Hallyday est considéré comme la star du :", options: ["Rock français", "Jazz manouche", "Rap français", "Reggae français"], answer: 0 }] },
+  "ABBA": { type: "groupe", origin: "Suède", trivia: [{ text: "Le nom du groupe ABBA vient de :", options: ["Un lieu suédois", "Les initiales des 4 membres", "Un mot religieux", "Une marque de disques"], answer: 1 }] },
+  "Rihanna": { type: "solo_f", origin: "Barbade", trivia: [{ text: "Rihanna est originaire de quelle île des Caraïbes ?", options: ["Jamaïque", "Barbade", "Trinité-et-Tobago", "Cuba"], answer: 1 }] },
   "Spice Girls": { type: "groupe", origin: "Royaume-Uni" },
-  "Dua Lipa": { type: "solo_f", origin: "Royaume-Uni" },
+  "Dua Lipa": { type: "solo_f", origin: "Royaume-Uni", trivia: [{ text: "La famille de Dua Lipa est originaire de quel pays ?", options: ["Albanie / Kosovo", "Italie", "Grèce", "Turquie"], answer: 0 }] },
   "Angèle": { type: "solo_f", origin: "Belgique" },
-  "Adele": { type: "solo_f", origin: "Royaume-Uni" },
-  "Lady Gaga": { type: "solo_f", origin: "États-Unis" },
-  "Ariana Grande": { type: "solo_f", origin: "États-Unis" },
-  "Daft Punk": { type: "groupe", origin: "France" },
+  "Adele": { type: "solo_f", origin: "Royaume-Uni", trivia: [{ text: "Adele a grandi dans quel quartier de Londres ?", options: ["Tottenham", "Chelsea", "Camden", "Brixton"], answer: 0 }] },
+  "Lady Gaga": { type: "solo_f", origin: "États-Unis", trivia: [{ text: "Avant de choisir 'Lady Gaga', quel était le vrai prénom de la chanteuse ?", options: ["Stefani", "Nicole", "Ashley", "Katherine"], answer: 0 }] },
+  "Ariana Grande": { type: "solo_f", origin: "États-Unis", trivia: [{ text: "Avant la musique, Ariana Grande était surtout connue comme :", options: ["Actrice dans une série Nickelodeon", "Danseuse professionnelle", "Actrice de cinéma", "Mannequin"], answer: 0 }] },
+  "Daft Punk": { type: "groupe", origin: "France", trivia: [{ text: "Les deux membres de Daft Punk se sont rencontrés :", options: ["Au lycée à Paris", "En studio à Los Angeles", "Sur Internet", "Dans un club de jazz"], answer: 0 }] },
   "Fréro Delavega": { type: "groupe", origin: "France" },
   "Simon & Garfunkel": { type: "groupe", origin: "États-Unis" },
-  "Bigflo et Oli": { type: "groupe", origin: "France" },
+  "Bigflo et Oli": { type: "groupe", origin: "France", trivia: [{ text: "Bigflo et Oli sont originaires de quelle ville française ?", options: ["Toulouse", "Marseille", "Lyon", "Bordeaux"], answer: 0 }] },
   "Wejdene": { type: "solo_f", origin: "France" },
   "Kids United": { type: "groupe", origin: "France" },
   "Fugees": { type: "groupe", origin: "États-Unis" },
   "Nekfeu": { type: "solo_h", origin: "France" },
-  "PNL": { type: "groupe", origin: "France" },
-  "Jul": { type: "solo_h", origin: "France" },
+  "PNL": { type: "groupe", origin: "France", trivia: [{ text: "PNL est un groupe composé de :", options: ["Deux frères", "Deux cousins", "Deux amis d'enfance sans lien familial", "Un trio"], answer: 0 }] },
+  "Jul": { type: "solo_h", origin: "France", trivia: [{ text: "Jul est originaire de quelle ville ?", options: ["Marseille", "Paris", "Lyon", "Nice"], answer: 0 }] },
   "Booba": { type: "solo_h", origin: "France" },
-  "Orelsan": { type: "solo_h", origin: "France" },
+  "Orelsan": { type: "solo_h", origin: "France", trivia: [{ text: "Orelsan est originaire de quelle ville normande ?", options: ["Caen", "Rouen", "Le Havre", "Cherbourg"], answer: 0 }] },
   "Ninho": { type: "solo_h", origin: "France" },
-  "Damso": { type: "solo_h", origin: "Belgique" },
+  "Damso": { type: "solo_h", origin: "Belgique", trivia: [{ text: "Damso est né dans quel pays avant de s'installer en Belgique ?", options: ["République démocratique du Congo", "Rwanda", "Sénégal", "Côte d'Ivoire"], answer: 0 }] },
   "Usher": { type: "solo_h", origin: "États-Unis" },
-  "Alicia Keys": { type: "solo_f", origin: "États-Unis" },
+  "Alicia Keys": { type: "solo_f", origin: "États-Unis", trivia: [{ text: "Alicia Keys a étudié quel instrument dès son plus jeune âge ?", options: ["Le piano classique", "La guitare", "Le violon", "La batterie"], answer: 0 }] },
   "Ne-Yo": { type: "solo_h", origin: "États-Unis" },
-  "Aya Nakamura": { type: "solo_f", origin: "France" },
+  "Aya Nakamura": { type: "solo_f", origin: "France", trivia: [{ text: "Aya Nakamura est née dans quel pays avant de grandir en France ?", options: ["Mali", "Sénégal", "Côte d'Ivoire", "Guinée"], answer: 0 }] },
   "Chris Brown": { type: "solo_h", origin: "États-Unis" },
-  "The Weeknd": { type: "solo_h", origin: "Canada" },
-  "Charles Aznavour": { type: "solo_h", origin: "France" },
+  "The Weeknd": { type: "solo_h", origin: "Canada", trivia: [{ text: "The Weeknd est d'origine :", options: ["Éthiopienne", "Somalienne", "Érythréenne", "Kenyane"], answer: 0 }] },
+  "Charles Aznavour": { type: "solo_h", origin: "France", trivia: [{ text: "Charles Aznavour est d'origine :", options: ["Arménienne", "Grecque", "Turque", "Libanaise"], answer: 0 }] },
   "Francis Cabrel": { type: "solo_h", origin: "France" },
-  "Patrick Bruel": { type: "solo_h", origin: "France" },
+  "Patrick Bruel": { type: "solo_h", origin: "France", trivia: [{ text: "Patrick Bruel est né dans quel pays ?", options: ["Algérie", "Maroc", "Tunisie", "France"], answer: 0 }] },
   "Vanessa Paradis": { type: "solo_f", origin: "France" },
   "Zaz": { type: "solo_f", origin: "France" },
   "Julien Doré": { type: "solo_h", origin: "France" },
-  "Louane": { type: "solo_f", origin: "France" },
+  "Louane": { type: "solo_f", origin: "France", trivia: [{ text: "Louane s'est d'abord fait connaître grâce à :", options: ["The Voice", "Nouvelle Star", "Un télé-crochet anglais", "Un film uniquement"], answer: 0 }] },
   "Christophe Maé": { type: "solo_h", origin: "France" },
+
 };
 
 async function itunesSearchTracks(term) {
@@ -1259,6 +1378,7 @@ async function pickBlindTracks(categoryIds, count) {
       artistType: meta?.type || null,
       artistOrigin: meta?.origin || null,
       releaseYear,
+      trivia: meta?.trivia || null,
     };
   });
 }
@@ -1280,6 +1400,25 @@ function pickQuestions(catIds, count, bank = QB) {
   return pool.slice(0, Math.min(count, pool.length));
 }
 function genCode() { const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ"; let s = ""; for (let i = 0; i < 4; i++) s += chars[Math.floor(Math.random() * chars.length)]; return s; }
+function withRankChange(sortedPlayers, prevRankRef) {
+  const prevMap = prevRankRef.current || {};
+  const result = sortedPlayers.map((p, i) => {
+    const newRank = i + 1;
+    const prevRank = prevMap[p.id];
+    const change = prevRank === undefined ? null : prevRank - newRank;
+    return { ...p, rankChange: change };
+  });
+  const newMap = {};
+  sortedPlayers.forEach((p, i) => { newMap[p.id] = i + 1; });
+  prevRankRef.current = newMap;
+  return result;
+}
+function RankBadge({ change }) {
+  if (change === null || change === undefined) return null;
+  if (change > 0) return <span style={{ color: C.teal, fontSize: 12, fontWeight: 700 }}>▲{change}</span>;
+  if (change < 0) return <span style={{ color: C.pink, fontSize: 12, fontWeight: 700 }}>▼{Math.abs(change)}</span>;
+  return <span style={{ color: "rgba(255,255,255,0.4)", fontSize: 12, fontWeight: 700 }}>=</span>;
+}
 function uid() { return Math.random().toString(36).slice(2, 10); }
 function buildJoinUrl(code) {
   if (typeof window === "undefined") return "";
@@ -1409,7 +1548,20 @@ function Home({ onCreate, onJoin, onSolo, onMatchAmor, onBlindTest, onEnchere })
   const { lang, t: tr, setLang } = useLang();
   return (
     <Stage>
-      <Logo />
+      <div className="text-center mb-2 select-none" style={{ paddingTop: 4 }}>
+        <h1
+          style={{
+            fontFamily: "'Lilita One', system-ui, sans-serif",
+            fontSize: 76,
+            letterSpacing: 1,
+            color: C.gold,
+            lineHeight: 1,
+            textShadow: `4px 4px 0 ${C.pink}, -1px -1px 0 ${C.violet}, 0 0 26px rgba(255,201,60,0.35)`,
+          }}
+        >
+          Quizi
+        </h1>
+      </div>
       <LangSwitch lang={lang} setLang={setLang} />
       <p className="text-center opacity-80 mb-8" style={{ fontSize: 15 }}>
         {tr("appTagline")}
@@ -1417,10 +1569,10 @@ function Home({ onCreate, onJoin, onSolo, onMatchAmor, onBlindTest, onEnchere })
       <div className="flex flex-col gap-4">
         <BigButton onClick={onCreate} color={C.gold} icon={Crown}>{tr("createGame")}</BigButton>
         <BigButton onClick={onJoin} color={C.teal} icon={Users}>{tr("joinGame")}</BigButton>
-        <BigButton onClick={onBlindTest} color={C.violet}><EmojiIcon>🎧</EmojiIcon> {tr("blindTestBtn")}</BigButton>
-        <BigButton onClick={onEnchere} color={C.orange}><EmojiIcon>💰</EmojiIcon> {tr("enchereBtn")}</BigButton>
-        <BigButton onClick={onMatchAmor} color={C.pink} icon={Skull}>{tr("matchAmorBtn")} <EmojiIcon>💔</EmojiIcon></BigButton>
-        <BigButton onClick={onSolo} color={C.mint} icon={Skull}>{tr("soloBtn")}</BigButton>
+        <BigButton onClick={onBlindTest} color={C.violet} icon={Headphones}>{tr("blindTestBtn")}</BigButton>
+        <BigButton onClick={onEnchere} color={C.orange} icon={Coins}>{tr("enchereBtn")}</BigButton>
+        <BigButton onClick={onMatchAmor} color={C.pink} icon={Skull}>{tr("matchAmorBtn")}</BigButton>
+        <BigButton onClick={onSolo} color={C.mint} icon={User}>{tr("soloBtn")}</BigButton>
       </div>
     </Stage>
   );
@@ -1672,7 +1824,6 @@ function CreateRoom({ onCreated, onBack }) {
   const { lang, t: tr } = useLang();
   const [cats, setCats] = useState(["animaux", "geo", "films"]);
   const [nbQuestions, setNbQuestions] = useState(10);
-  const [types, setTypes] = useState({ qcm: true, vf: true, echelle: true });
   const [jokers, setJokers] = useState({ "5050": true, x2: true, steal: true, block: true, speedchrono: true });
   const [seconds, setSeconds] = useState(20);
   const [teamsMode, setTeamsMode] = useState(1);
@@ -1683,15 +1834,21 @@ function CreateRoom({ onCreated, onBack }) {
   const [hostPlays, setHostPlays] = useState(false);
   const [hostAnimal, setHostAnimal] = useState(null);
   const [hostPseudo, setHostPseudo] = useState("");
-  function toggleType(t) { setTypes((s) => ({ ...s, [t]: !s[t] })); }
   function toggleJoker(j) { setJokers((s) => ({ ...s, [j]: !s[j] })); }
 
   async function create() {
-    const activeTypes = Object.entries(types).filter(([, v]) => v).map(([k]) => k);
     const bank = kidsMode ? KIDS_QB : QB;
     const catOptions = kidsMode ? KIDS_CATEGORIES : CATEGORIES;
-    let pool = pickQuestions(cats.length ? cats : catOptions.map((c) => c.id), 500, bank).filter((q) => activeTypes.includes(q.type));
-    const questions = pool.slice(0, nbQuestions);
+    // Mix automatique des types de questions, légèrement pondéré en faveur des QCM
+    const fullPool = pickQuestions(cats.length ? cats : catOptions.map((c) => c.id), 800, bank);
+    const byType = { qcm: fullPool.filter((q) => q.type === "qcm"), vf: fullPool.filter((q) => q.type === "vf"), echelle: fullPool.filter((q) => q.type === "echelle") };
+    const targetQcm = Math.ceil(nbQuestions * 0.45);
+    const targetVf = Math.ceil(nbQuestions * 0.3);
+    const targetEchelle = nbQuestions - targetQcm - targetVf;
+    let mixed = [...byType.qcm.slice(0, targetQcm), ...byType.vf.slice(0, targetVf), ...byType.echelle.slice(0, targetEchelle)];
+    if (mixed.length < nbQuestions) mixed = [...mixed, ...fullPool.filter((q) => !mixed.includes(q))];
+    for (let i = mixed.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [mixed[i], mixed[j]] = [mixed[j], mixed[i]]; }
+    const questions = mixed.slice(0, nbQuestions);
     const code = genCode();
     const state = { phase: "lobby", code, settings: { seconds, jokers, teamsMode, malus, jokerRandom, jokerRandomCount, kidsMode, hostPlays }, questions, currentIndex: -1, questionStartedAt: null, createdAt: Date.now() };
     await sSet(roomKey(code), state);
@@ -1708,14 +1865,7 @@ function CreateRoom({ onCreated, onBack }) {
   return (
     <Stage wide>
       <ScreenHeader title={tr("roomSettingsTitle")} onBack={onBack} />
-      <p className="text-xs opacity-50 mb-4 text-center flex items-center justify-center gap-1"><Cast size={14} /> {tr("castHint")}</p>
       <CategoryPicker cats={cats} setCats={setCats} kidsMode={kidsMode} setKidsMode={setKidsMode} />
-      <p className="text-sm opacity-70 mb-2 font-bold">{tr("questionTypesLabel")}</p>
-      <div className="flex flex-wrap gap-2 mb-6">
-        <Chip active={types.qcm} onClick={() => toggleType("qcm")}>{tr("qcmLabel")}</Chip>
-        <Chip active={types.vf} onClick={() => toggleType("vf")}>{tr("vfLabel")}</Chip>
-        <Chip active={types.echelle} onClick={() => toggleType("echelle")}>{tr("echelleLabel")}</Chip>
-      </div>
       <div className="grid grid-cols-2 gap-6 mb-6">
         <div>
           <p className="text-sm opacity-70 mb-2 font-bold">{tr("nbQuestionsLabel")}</p>
@@ -1788,6 +1938,7 @@ function JoinRoom({ onJoined, onBack, initialCode }) {
   const [pseudo, setPseudo] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [scanning, setScanning] = useState(false);
   const autoTried = useRef(false);
 
   async function validateCode(codeOverride) {
@@ -1846,10 +1997,18 @@ function JoinRoom({ onJoined, onBack, initialCode }) {
   if (step === "code") return (
     <Stage>
       <ScreenHeader title={tr("joinTitle")} onBack={onBack} color={C.teal} />
+      <BigButton onClick={() => setScanning(true)} color={C.gold} icon={Camera}>{tr("scanQrBtn")}</BigButton>
+      <p className="text-xs opacity-50 text-center my-3">{tr("orDivider")}</p>
       <p className="text-sm opacity-70 mb-2 font-bold">{tr("roomCodeLabel")}</p>
       <input value={code} onChange={(e) => setCode(e.target.value.toUpperCase().slice(0, 4))} placeholder={tr("roomCodePlaceholder")} className="w-full mb-4 rounded-xl px-4 py-3 text-center tracking-[0.3em]" style={{ fontFamily: F.mono, fontSize: 22, background: "rgba(255,255,255,0.08)", color: C.cream, border: `2px solid ${C.violet}` }} />
       {error && <p className="text-sm mb-3" style={{ color: C.pink }}>{error}</p>}
       <BigButton onClick={() => validateCode()} color={C.teal} disabled={loading}>{loading ? tr("loadingDots") : tr("continueSimple")}</BigButton>
+      {scanning && (
+        <QRScannerModal
+          onClose={() => setScanning(false)}
+          onScanned={(scannedCode) => { setScanning(false); setCode(scannedCode); validateCode(scannedCode); }}
+        />
+      )}
     </Stage>
   );
 
@@ -2074,12 +2233,10 @@ function AdminLobby({ code, room, onStart, buildExtraOnStart, onBack }) {
           <span style={{ fontFamily: F.mono, fontSize: 48, letterSpacing: 10, color: C.gold }}>{code}</span>
           <button onClick={() => { navigator.clipboard?.writeText(code); setCopied(true); setTimeout(() => setCopied(false), 1500); }} className="rounded-lg p-2" style={{ background: "rgba(255,255,255,0.1)" }}>{copied ? <Check size={18} /> : <Copy size={18} />}</button>
         </div>
-        <p className="text-xs opacity-50 mt-2 flex items-center justify-center gap-1"><Cast size={12} /> {tr("castRoomHint")}</p>
         <div className="flex flex-col items-center mt-4">
           <GhostButton onClick={() => { navigator.clipboard?.writeText(buildJoinUrl(code)); setLinkCopied(true); setTimeout(() => setLinkCopied(false), 1500); }}>
             {linkCopied ? tr("linkCopiedMsg") : tr("copyLinkBtn")}
           </GhostButton>
-          <p className="text-[11px] opacity-50 mt-2 max-w-xs text-center">{tr("pasteLinkHint")}</p>
         </div>
         <div className="flex flex-col items-center mt-4">
           <div className="rounded-2xl p-2" style={{ background: C.cream }}>
@@ -2200,7 +2357,9 @@ function AdminGame({ code, room, onRoomChange, onFinished, hostPid, hostAssigned
   const [hostOtherPlayers, setHostOtherPlayers] = useState([]);
   const [hostCopyPeek, setHostCopyPeek] = useState(null);
   const [hostPollData, setHostPollData] = useState(null);
+  const [paused, setPaused] = useState(false);
   const advancingRef = useRef(false);
+  const prevRankRef = useRef({});
 
   const collectAndScore = useCallback(async () => {
     if (advancingRef.current) return;
@@ -2271,17 +2430,18 @@ function AdminGame({ code, room, onRoomChange, onFinished, hostPid, hostAssigned
       return { ...a, pseudo: p?.pseudo || "?", animal: p?.animal || "❓", correct: correctness[a.pid], points: netDelta[a.pid] || 0 };
     });
     setPlayerAnswers(withPlayers);
+    await sSet(revealDetailKey(code, room.currentIndex), withPlayers.map((a) => ({ pid: a.pid, pseudo: a.pseudo, animal: a.animal, correct: a.correct, points: a.points, value: a.value })));
     for (const p of players) { await sSet(pointsDeltaKey(code, room.currentIndex, p.id), netDelta[p.id] || 0); }
     await sSet(revealedKey(code, room.currentIndex), true);
     const withScores = await Promise.all(players.map(async (p) => ({ ...p, score: (await sGet(scoreKey(code, p.id))) || 0 })));
     withScores.sort((a, b) => b.score - a.score);
-    setProvisional(withScores);
+    setProvisional(withRankChange(withScores, prevRankRef));
     setAutoLeft(7);
     setRevealed(true);
   }, [code, q, room]);
 
   useEffect(() => {
-    setRevealed(false); advancingRef.current = false; setPlayerAnswers([]); setProvisional([]); setHostSubmitted(false); setHostScaleVal(0); setHostJokerUsed(null); setHostHiddenOptions([]); setHostPickingTargetFor(null); setHostCopyPeek(null); setHostPollData(null);
+    setRevealed(false); advancingRef.current = false; setPlayerAnswers([]); setProvisional([]); setHostSubmitted(false); setHostScaleVal(0); setHostJokerUsed(null); setHostHiddenOptions([]); setHostPickingTargetFor(null); setHostCopyPeek(null); setHostPollData(null); setPaused(false);
     const t = setInterval(async () => {
       const [keys, playerKeys] = await Promise.all([sList(`qz:${code}:answer:${room.currentIndex}:`), sList(`qz:${code}:player:`)]);
       setAnswersCount(keys.length);
@@ -2298,12 +2458,12 @@ function AdminGame({ code, room, onRoomChange, onFinished, hostPid, hostAssigned
   }
 
   useEffect(() => {
-    if (!revealed) return;
+    if (!revealed || paused) return;
     if (autoLeft <= 0) { next(); return; }
     const t = setTimeout(() => setAutoLeft((n) => n - 1), 1000);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [revealed, autoLeft]);
+  }, [revealed, autoLeft, paused]);
 
   function answerLabel(a) {
     if (q.type === "qcm") return q.options[a.value] ?? "?";
@@ -2472,13 +2632,22 @@ function AdminGame({ code, room, onRoomChange, onFinished, hostPid, hostAssigned
                 <span className="opacity-60" style={{ width: 20 }}>{i + 1}.</span>
                 <span>{p.animal}</span>
                 <span className="flex-1">{p.pseudo}</span>
+                <span style={{ width: 28, textAlign: "center" }}><RankBadge change={p.rankChange} /></span>
                 <span style={{ fontFamily: F.mono, color: C.teal }}>{p.score}</span>
               </div>
             ))}
           </div>
         </div>
       )}
-      {revealed ? (<BigButton onClick={next} color={C.pink} icon={ArrowRight}>{room.currentIndex >= room.questions.length - 1 ? tr("finalRankingBtn") : `${tr("nextQuestion")} (${autoLeft}s)`}</BigButton>) : (<BigButton onClick={collectAndScore} color={C.violet}>{tr("revealNow")}</BigButton>)}
+      {revealed ? (
+        <div className="flex flex-col gap-3">
+          {paused && <p className="text-xs opacity-60 text-center">{tr("pausedMsg")}</p>}
+          <BigButton onClick={next} color={C.pink} icon={ArrowRight}>{room.currentIndex >= room.questions.length - 1 ? tr("finalRankingBtn") : paused ? tr("nextQuestion") : `${tr("nextQuestion")} (${autoLeft}s)`}</BigButton>
+          {room.currentIndex < room.questions.length - 1 && (
+            <GhostButton onClick={() => setPaused((v) => !v)}>{paused ? tr("resumeBtn") : tr("pauseBtn")}</GhostButton>
+          )}
+        </div>
+      ) : (<BigButton onClick={collectAndScore} color={C.violet}>{tr("revealNow")}</BigButton>)}
     </Stage>
   );
 }
@@ -2503,10 +2672,12 @@ function PlayerGameCore({ code, pid, room, assignedJokers, usedJokersEver, setUs
   const [provisional, setProvisional] = useState([]);
   const [copyPeek, setCopyPeek] = useState(null);
   const [pollData, setPollData] = useState(null);
+  const [allAnswers, setAllAnswers] = useState([]);
+  const prevRankRef = useRef({});
 
   const left = speedDeadline != null ? Math.max(0, Math.ceil((speedDeadline - Date.now()) / 1000)) : globalLeft;
 
-  useEffect(() => { setSubmitted(false); setHiddenOptions([]); setJokerUsed(null); setScaleVal(0); setPickingTargetFor(null); setSpeedDeadline(null); setTargeters([]); setRevealed(false); setMyPoints(0); setProvisional([]); setCopyPeek(null); setPollData(null); }, [room.currentIndex]);
+  useEffect(() => { setSubmitted(false); setHiddenOptions([]); setJokerUsed(null); setScaleVal(0); setPickingTargetFor(null); setSpeedDeadline(null); setTargeters([]); setRevealed(false); setMyPoints(0); setProvisional([]); setCopyPeek(null); setPollData(null); setAllAnswers([]); }, [room.currentIndex]);
 
   useEffect(() => {
     if (!(submitted || left === 0)) return;
@@ -2515,12 +2686,17 @@ function PlayerGameCore({ code, pid, room, assignedJokers, usedJokersEver, setUs
       const isRevealed = await sGet(revealedKey(code, room.currentIndex));
       if (stop || !isRevealed) return;
       clearInterval(t);
-      const [myDelta, playerKeys] = await Promise.all([sGet(pointsDeltaKey(code, room.currentIndex, pid)), sList(`qz:${code}:player:`)]);
+      const [myDelta, playerKeys, detail] = await Promise.all([
+        sGet(pointsDeltaKey(code, room.currentIndex, pid)),
+        sList(`qz:${code}:player:`),
+        sGet(revealDetailKey(code, room.currentIndex)),
+      ]);
       setMyPoints(myDelta || 0);
       const players = (await Promise.all(playerKeys.map((k) => sGet(k)))).filter(Boolean);
       const withScores = await Promise.all(players.map(async (p) => ({ ...p, score: (await sGet(scoreKey(code, p.id))) || 0 })));
       withScores.sort((a, b) => b.score - a.score);
-      setProvisional(withScores);
+      setProvisional(withRankChange(withScores, prevRankRef));
+      setAllAnswers(detail || []);
       setRevealed(true);
     }, 800);
     return () => { stop = true; clearInterval(t); };
@@ -2691,6 +2867,25 @@ function PlayerGameCore({ code, pid, room, assignedJokers, usedJokersEver, setUs
               </p>
             )}
           </div>
+          {allAnswers.length > 0 && (
+            <div className="rounded-2xl p-4 mb-4" style={{ background: "rgba(255,255,255,0.05)" }}>
+              <p className="text-sm font-bold mb-2 opacity-70">{tr("playerAnswersTitle")}</p>
+              <div className="flex flex-col gap-2">
+                {allAnswers.map((a) => {
+                  const label = q.type === "qcm" ? (q.options[a.value] ?? "?") : q.type === "vf" ? (a.value ? tr("trueLabel") : tr("falseLabel")) : q.type === "carte" ? (MAP_ZONES.find((z) => z.id === a.value)?.label || "?") : String(a.value);
+                  return (
+                    <div key={a.pid} className="flex items-center gap-2 text-sm" style={{ fontWeight: a.pid === pid ? 800 : 400 }}>
+                      <span>{a.animal}</span>
+                      <span className="flex-1">{a.pseudo}{a.pid === pid ? tr("you") : ""}</span>
+                      <span style={{ color: a.correct ? C.teal : C.pink, fontWeight: 700 }}>{label}</span>
+                      <span style={{ fontFamily: F.mono, fontSize: 13, color: a.points > 0 ? C.teal : a.points < 0 ? C.pink : "rgba(255,255,255,0.4)", minWidth: 54, textAlign: "right" }}>{a.points > 0 ? `+${a.points}` : a.points} pts</span>
+                      {a.correct ? <Check size={16} color={C.teal} /> : <span style={{ color: C.pink }}>✕</span>}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
           {provisional.length > 0 && (
             <div className="rounded-2xl p-4" style={{ background: "rgba(255,201,60,0.08)" }}>
               <p className="text-sm font-bold mb-2" style={{ color: C.gold }}>{tr("provisionalRanking")}</p>
@@ -2700,6 +2895,7 @@ function PlayerGameCore({ code, pid, room, assignedJokers, usedJokersEver, setUs
                     <span className="opacity-60" style={{ width: 20 }}>{i + 1}.</span>
                     <span>{p.animal}</span>
                     <span className="flex-1">{p.pseudo}{p.id === pid ? tr("you") : ""}</span>
+                    <RankBadge change={p.rankChange} />
                     <span style={{ fontFamily: F.mono, color: C.teal }}>{p.score}</span>
                   </div>
                 ))}
@@ -3026,28 +3222,25 @@ function CreateBlindTest({ onCreated, onBack }) {
   const [cats, setCats] = useState(["annees2000blind", "rapfr"]);
   const [nbTracks, setNbTracks] = useState(10);
   const [seconds, setSeconds] = useState(15);
-  const [effect, setEffect] = useState("normal");
-  const [questionTypes, setQuestionTypes] = useState({ titre: true, artiste: true, annee: false, origine: false });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [hostPlays, setHostPlays] = useState(false);
   const [hostAnimal, setHostAnimal] = useState(null);
   const [hostPseudo, setHostPseudo] = useState("");
+  const allCatsSelected = BLIND_CATEGORIES.every((c) => cats.includes(c.id));
 
   function toggleCat(id) { setCats((c) => (c.includes(id) ? c.filter((x) => x !== id) : [...c, id])); }
-  function toggleType(t) { setQuestionTypes((s) => ({ ...s, [t]: !s[t] })); }
+  function toggleAllCats() { setCats(allCatsSelected ? [] : BLIND_CATEGORIES.map((c) => c.id)); }
 
   async function create() {
     if (cats.length === 0) return setError(tr("chooseCategoryError"));
-    const types = Object.entries(questionTypes).filter(([, v]) => v).map(([k]) => k);
-    if (types.length === 0) return setError(tr("chooseTypeError"));
     setLoading(true);
     setError("");
     const tracks = await pickBlindTracks(cats, nbTracks);
     setLoading(false);
     if (tracks.length < 3) return setError(tr("notEnoughTracks"));
     const code = genCode();
-    const state = { mode: "blindtest", phase: "lobby", code, settings: { seconds, effect, questionTypes: types, hostPlays }, tracks, currentIndex: -1, questionStartedAt: null, createdAt: Date.now() };
+    const state = { mode: "blindtest", phase: "lobby", code, settings: { seconds, effect: "normal", questionTypes: ["titre", "artiste", "annee", "origine", "trivia"], hostPlays }, tracks, currentIndex: -1, questionStartedAt: null, createdAt: Date.now() };
     await sSet(roomKey(code), state);
     let hostPid = null;
     if (hostPlays && hostAnimal) {
@@ -3063,23 +3256,12 @@ function CreateBlindTest({ onCreated, onBack }) {
     <Stage wide>
       <ScreenHeader title="🎧 Blind Test — réglages" onBack={onBack} color={C.violet} />
       <p className="text-xs opacity-50 mb-4 text-center">{tr("apiHint")}</p>
-      <p className="text-sm opacity-70 mb-2 font-bold">{tr("musicCategoriesLabel")}</p>
+      <div className="flex items-center justify-between mb-2">
+        <p className="text-sm opacity-70 font-bold">{tr("musicCategoriesLabel")}</p>
+        <GhostButton onClick={toggleAllCats} small>{allCatsSelected ? tr("uncheckAll") : tr("checkAll")}</GhostButton>
+      </div>
       <div className="grid grid-cols-2 gap-2 mb-6">{BLIND_CATEGORIES.map((c) => (<Chip key={c.id} active={cats.includes(c.id)} onClick={() => toggleCat(c.id)}>{c.emoji} {c.label}</Chip>))}</div>
-      <p className="text-sm opacity-70 mb-2 font-bold">{tr("questionTypesBlindLabel")}</p>
-      <div className="flex flex-wrap gap-2 mb-6">
-        <Chip active={questionTypes.titre} onClick={() => toggleType("titre")}>{tr("titleQuestionLabel")}</Chip>
-        <Chip active={questionTypes.artiste} onClick={() => toggleType("artiste")}>{tr("artistQuestionLabel")}</Chip>
-        <Chip active={questionTypes.annee} onClick={() => toggleType("annee")}>{tr("yearQuestionLabel")}</Chip>
-        <Chip active={questionTypes.origine} onClick={() => toggleType("origine")}>{tr("originQuestionLabel")}</Chip>
-      </div>
       <p className="text-xs opacity-50 mb-4 text-center">{tr("consistencyHint")}</p>
-      <p className="text-sm opacity-70 mb-2 font-bold">{tr("audioEffectLabel")}</p>
-      <div className="flex flex-wrap gap-2 mb-6">
-        <Chip active={effect === "normal"} onClick={() => setEffect("normal")}>{tr("normalLabel")}</Chip>
-        <Chip active={effect === "ralenti"} onClick={() => setEffect("ralenti")}>{tr("slowLabel")}</Chip>
-        <Chip active={effect === "accelere"} onClick={() => setEffect("accelere")}>{tr("fastLabel")}</Chip>
-        <Chip active={effect === "intro"} onClick={() => setEffect("intro")}>{tr("introEffectLabel")}</Chip>
-      </div>
       <div className="grid grid-cols-2 gap-6 mb-6">
         <div>
           <p className="text-sm opacity-70 mb-2 font-bold">{tr("nbTracksLabel")}</p>
@@ -3125,35 +3307,48 @@ function BlindTestAdminGame({ code, room, onRoomChange, onFinished, hostPid }) {
     const valid = types.filter((t) => {
       if (t === "annee") return !!track.releaseYear;
       if (t === "origine") return !!track.artistOrigin;
+      if (t === "trivia") return !!(track.trivia && track.trivia.length > 0);
       return true;
     });
     const pool = valid.length > 0 ? valid : ["titre"];
     return pool[Math.floor(Math.random() * pool.length)];
   }, [room.currentIndex, track]);
+  const triviaQuestion = useMemo(() => {
+    if (questionKind !== "trivia" || !track.trivia || track.trivia.length === 0) return null;
+    return track.trivia[Math.floor(Math.random() * track.trivia.length)];
+  }, [room.currentIndex, questionKind, track]);
   const left = useCountdown(room.questionStartedAt, room.settings.seconds);
   const [answersCount, setAnswersCount] = useState(0);
   const [revealed, setRevealed] = useState(false);
   const [playerAnswers, setPlayerAnswers] = useState([]);
   const [provisional, setProvisional] = useState([]);
   const [autoLeft, setAutoLeft] = useState(7);
+  const [paused, setPaused] = useState(false);
   const [options, setOptions] = useState([]);
   const [hostSubmitted, setHostSubmitted] = useState(false);
+  const prevRankRef = useRef({});
   const audioRef = useRef(null);
   const advancingRef = useRef(false);
 
   const correctValue =
+    questionKind === "trivia" ? triviaQuestion?.options[triviaQuestion.answer] :
     questionKind === "titre" ? track.trackName :
     questionKind === "artiste" ? track.artistName :
     questionKind === "annee" ? String(track.releaseYear) :
     track.artistOrigin;
 
   const questionLabel =
+    questionKind === "trivia" ? triviaQuestion?.text :
     questionKind === "titre" ? tr("titleQuestionLabel") :
     questionKind === "artiste" ? tr("whoSingsQuestion") :
     questionKind === "annee" ? tr("whatYearQuestion") :
     tr("whereFromQuestion");
 
   useEffect(() => {
+    if (questionKind === "trivia") {
+      if (triviaQuestion) { setOptions(triviaQuestion.options); sSet(`qz:${code}:blindoptions:${room.currentIndex}`, triviaQuestion.options); }
+      return;
+    }
     let pool = [];
     if (questionKind === "artiste") {
       const sameType = room.tracks.filter((t, i) => i !== room.currentIndex && t.artistName !== track.artistName && (!track.artistType || t.artistType === track.artistType));
@@ -3187,7 +3382,7 @@ function BlindTestAdminGame({ code, room, onRoomChange, onFinished, hostPid }) {
   }, [room.currentIndex]);
 
   useEffect(() => {
-    setRevealed(false); advancingRef.current = false; setPlayerAnswers([]); setAutoLeft(7); setProvisional([]); setHostSubmitted(false);
+    setRevealed(false); advancingRef.current = false; setPlayerAnswers([]); setAutoLeft(7); setProvisional([]); setHostSubmitted(false); setPaused(false);
     const t = setInterval(async () => {
       const [keys, playerKeys] = await Promise.all([sList(`qz:${code}:answer:${room.currentIndex}:`), sList(`qz:${code}:player:`)]);
       setAnswersCount(keys.length);
@@ -3226,11 +3421,12 @@ function BlindTestAdminGame({ code, room, onRoomChange, onFinished, hostPid }) {
     }
     const withPlayers = answers.map((a) => { const p = players.find((pp) => pp.id === a.pid); return { ...a, pseudo: p?.pseudo || "?", animal: p?.animal || "❓", correct: a.value === correctValue, points: pointsByPid[a.pid] || 0 }; });
     setPlayerAnswers(withPlayers);
+    await sSet(revealDetailKey(code, room.currentIndex), withPlayers.map((a) => ({ pid: a.pid, pseudo: a.pseudo, animal: a.animal, correct: a.correct, points: a.points, value: a.value })));
     for (const p of players) { await sSet(pointsDeltaKey(code, room.currentIndex, p.id), pointsByPid[p.id] || 0); }
     await sSet(revealedKey(code, room.currentIndex), true);
     const withScores = await Promise.all(players.map(async (p) => ({ ...p, score: (await sGet(scoreKey(code, p.id))) || 0 })));
     withScores.sort((a, b) => b.score - a.score);
-    setProvisional(withScores);
+    setProvisional(withRankChange(withScores, prevRankRef));
     setRevealed(true);
   }, [code, room, correctValue]);
 
@@ -3243,12 +3439,12 @@ function BlindTestAdminGame({ code, room, onRoomChange, onFinished, hostPid }) {
   }
 
   useEffect(() => {
-    if (!revealed) return;
+    if (!revealed || paused) return;
     if (autoLeft <= 0) { next(); return; }
     const t = setTimeout(() => setAutoLeft((n) => n - 1), 1000);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [revealed, autoLeft]);
+  }, [revealed, autoLeft, paused]);
 
   return (
     <Stage wide>
@@ -3305,13 +3501,19 @@ function BlindTestAdminGame({ code, room, onRoomChange, onFinished, hostPid }) {
                 <span className="opacity-60" style={{ width: 20 }}>{i + 1}.</span>
                 <span>{p.animal}</span>
                 <span className="flex-1">{p.pseudo}</span>
+                <RankBadge change={p.rankChange} />
                 <span style={{ fontFamily: F.mono, color: C.teal }}>{p.score}</span>
               </div>
             ))}
           </div>
         </div>
       )}
-      {revealed ? (<BigButton onClick={next} color={C.pink} icon={ArrowRight}>{room.currentIndex >= room.tracks.length - 1 ? tr("finalRankingBtn") : `${tr("nextTrack")} (${autoLeft}s)`}</BigButton>) : (<BigButton onClick={collectAndScore} color={C.violet}>{tr("revealNow")}</BigButton>)}
+      {revealed ? (
+        <div className="flex flex-col gap-2">
+          <BigButton onClick={next} color={C.pink} icon={ArrowRight}>{room.currentIndex >= room.tracks.length - 1 ? tr("finalRankingBtn") : paused ? tr("nextTrack") : `${tr("nextTrack")} (${autoLeft}s)`}</BigButton>
+          {room.currentIndex < room.tracks.length - 1 && <GhostButton onClick={() => setPaused((v) => !v)}>{paused ? tr("resumeBtn") : tr("pauseBtn")}</GhostButton>}
+        </div>
+      ) : (<BigButton onClick={collectAndScore} color={C.violet}>{tr("revealNow")}</BigButton>)}
     </Stage>
   );
 }
@@ -3324,9 +3526,11 @@ function BlindTestPlayerGame({ code, pid, room }) {
   const [revealed, setRevealed] = useState(false);
   const [myPoints, setMyPoints] = useState(0);
   const [provisional, setProvisional] = useState([]);
+  const [allAnswers, setAllAnswers] = useState([]);
+  const prevRankRef = useRef({});
 
   useEffect(() => {
-    setSubmitted(false); setOptions([]); setRevealed(false); setMyPoints(0); setProvisional([]);
+    setSubmitted(false); setOptions([]); setRevealed(false); setMyPoints(0); setProvisional([]); setAllAnswers([]);
     let stop = false;
     const t = setInterval(async () => {
       const opts = await sGet(`qz:${code}:blindoptions:${room.currentIndex}`);
@@ -3342,12 +3546,17 @@ function BlindTestPlayerGame({ code, pid, room }) {
       const isRevealed = await sGet(revealedKey(code, room.currentIndex));
       if (stop || !isRevealed) return;
       clearInterval(t);
-      const [myDelta, playerKeys] = await Promise.all([sGet(pointsDeltaKey(code, room.currentIndex, pid)), sList(`qz:${code}:player:`)]);
+      const [myDelta, playerKeys, detail] = await Promise.all([
+        sGet(pointsDeltaKey(code, room.currentIndex, pid)),
+        sList(`qz:${code}:player:`),
+        sGet(revealDetailKey(code, room.currentIndex)),
+      ]);
       setMyPoints(myDelta || 0);
       const players = (await Promise.all(playerKeys.map((k) => sGet(k)))).filter(Boolean);
       const withScores = await Promise.all(players.map(async (p) => ({ ...p, score: (await sGet(scoreKey(code, p.id))) || 0 })));
       withScores.sort((a, b) => b.score - a.score);
-      setProvisional(withScores);
+      setProvisional(withRankChange(withScores, prevRankRef));
+      setAllAnswers(detail || []);
       setRevealed(true);
     }, 800);
     return () => { stop = true; clearInterval(t); };
@@ -3378,6 +3587,22 @@ function BlindTestPlayerGame({ code, pid, room }) {
       ) : (
         <div className="mt-6">
           <p className="text-center mb-4" style={{ fontFamily: F.display, fontSize: 26, color: myPoints > 0 ? C.teal : C.cream }}>{myPoints > 0 ? `+${myPoints}` : myPoints} pts</p>
+          {allAnswers.length > 0 && (
+            <div className="rounded-2xl p-4 mb-4" style={{ background: "rgba(255,255,255,0.05)" }}>
+              <p className="text-sm font-bold mb-2 opacity-70">{tr("playerAnswersTitle")}</p>
+              <div className="flex flex-col gap-2">
+                {allAnswers.map((a) => (
+                  <div key={a.pid} className="flex items-center gap-2 text-sm" style={{ fontWeight: a.pid === pid ? 800 : 400 }}>
+                    <span>{a.animal}</span>
+                    <span className="flex-1">{a.pseudo}{a.pid === pid ? tr("you") : ""}</span>
+                    <span style={{ color: a.correct ? C.teal : C.pink, fontWeight: 700 }}>{a.value}</span>
+                    <span style={{ fontFamily: F.mono, fontSize: 13, color: a.points > 0 ? C.teal : "rgba(255,255,255,0.4)", minWidth: 54, textAlign: "right" }}>{a.points > 0 ? `+${a.points}` : a.points} pts</span>
+                    {a.correct ? <Check size={16} color={C.teal} /> : <span style={{ color: C.pink }}>✕</span>}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
           {provisional.length > 0 && (
             <div className="rounded-2xl p-4" style={{ background: "rgba(255,201,60,0.08)" }}>
               <p className="text-sm font-bold mb-2" style={{ color: C.gold }}>{tr("provisionalRanking")}</p>
@@ -3387,6 +3612,7 @@ function BlindTestPlayerGame({ code, pid, room }) {
                     <span className="opacity-60" style={{ width: 20 }}>{i + 1}.</span>
                     <span>{p.animal}</span>
                     <span className="flex-1">{p.pseudo}{p.id === pid ? tr("you") : ""}</span>
+                    <RankBadge change={p.rankChange} />
                     <span style={{ fontFamily: F.mono, color: C.teal }}>{p.score}</span>
                   </div>
                 ))}
@@ -3504,6 +3730,7 @@ function EnchereAdminGame({ code, room, onRoomChange, onFinished, hostPid }) {
   const [hostBetVal, setHostBetVal] = useState(0);
   const [hostBetSubmitted, setHostBetSubmitted] = useState(false);
   const [hostAnswerSubmitted, setHostAnswerSubmitted] = useState(false);
+  const prevRankRef = useRef({});
   const advancingRef = useRef(false);
   const hint = DIFFICULTY_HINT[q.type] || DIFFICULTY_HINT.qcm;
 
@@ -3547,7 +3774,8 @@ function EnchereAdminGame({ code, room, onRoomChange, onFinished, hostPid }) {
       results.push({ ...p, bet, correct, delta, newScore });
     }
     await sSet(revealedKey(code, room.currentIndex), true);
-    setRoundResults(results);
+    await sSet(revealDetailKey(code, room.currentIndex), results.map((p) => ({ pid: p.id, pseudo: p.pseudo, animal: p.animal, correct: p.correct, points: p.delta, value: p.bet })));
+    setRoundResults(withRankChange([...results].sort((a, b) => b.newScore - a.newScore), prevRankRef));
     setRevealed(true);
   }, [code, room, q, getActivePlayers]);
 
@@ -3598,7 +3826,6 @@ function EnchereAdminGame({ code, room, onRoomChange, onFinished, hostPid }) {
         <div className="rounded-3xl p-10 mb-6 text-center" style={{ background: "rgba(255,255,255,0.06)" }}>
           <p className="text-xs opacity-60 mb-3">{tr("placeBets")}</p>
           <p className="uppercase tracking-widest mb-4" style={{ fontSize: 22, fontWeight: 800, color: C.gold }}>{cat?.emoji} {catLabelText}</p>
-          <p className="rounded-full inline-block px-4 py-2" style={{ background: "rgba(255,255,255,0.1)", fontFamily: F.display, fontSize: 18 }}>{hint.emoji} {hintLabel(hint, lang)}</p>
           <p className="text-xs opacity-50 mt-4">{tr("revealAfterBets")}</p>
         </div>
         {hostPid && hostScore > 0 && (
@@ -3661,12 +3888,13 @@ function EnchereAdminGame({ code, room, onRoomChange, onFinished, hostPid }) {
         <div className="rounded-2xl p-4 mb-6" style={{ background: "rgba(255,255,255,0.05)" }}>
           <p className="text-sm font-bold mb-2 opacity-70">{tr("betResultsTitle")}</p>
           <div className="flex flex-col gap-2">
-            {roundResults.sort((a, b) => b.newScore - a.newScore).map((p) => (
+            {roundResults.map((p) => (
               <div key={p.id} className="flex items-center gap-2 text-sm">
                 <span>{p.animal}</span>
                 <span className="flex-1">{p.pseudo}</span>
                 <span className="opacity-60">{tr("betWord")} {p.bet}</span>
                 <span style={{ fontFamily: F.mono, color: p.delta > 0 ? C.teal : p.delta < 0 ? C.pink : "rgba(255,255,255,0.4)", minWidth: 60, textAlign: "right" }}>{p.delta > 0 ? `+${p.delta}` : p.delta}</span>
+                <RankBadge change={p.rankChange} />
                 <span style={{ fontFamily: F.mono, fontWeight: 700 }}>{p.newScore}</span>
                 {p.newScore === 0 && <span style={{ color: C.pink, fontSize: 12 }}>💀</span>}
               </div>
@@ -3690,9 +3918,12 @@ function EnchèrePlayerGame({ code, pid, room }) {
   const [submitted, setSubmitted] = useState(false);
   const [revealed, setRevealed] = useState(false);
   const [myDelta, setMyDelta] = useState(0);
+  const [allBets, setAllBets] = useState([]);
+  const [provisional, setProvisional] = useState([]);
+  const prevRankRef = useRef({});
   const hint = DIFFICULTY_HINT[q.type] || DIFFICULTY_HINT.qcm;
 
-  useEffect(() => { setBetVal(0); setBetSubmitted(false); setSubmitted(false); setRevealed(false); setMyDelta(0); }, [room.currentIndex]);
+  useEffect(() => { setBetVal(0); setBetSubmitted(false); setSubmitted(false); setRevealed(false); setMyDelta(0); setAllBets([]); setProvisional([]); }, [room.currentIndex]);
 
   useEffect(() => {
     let stop = false;
@@ -3712,8 +3943,17 @@ function EnchèrePlayerGame({ code, pid, room }) {
       const isRevealed = await sGet(revealedKey(code, room.currentIndex));
       if (stop || !isRevealed) return;
       clearInterval(t);
-      const delta = await sGet(pointsDeltaKey(code, room.currentIndex, pid));
+      const [delta, detail, playerKeys] = await Promise.all([
+        sGet(pointsDeltaKey(code, room.currentIndex, pid)),
+        sGet(revealDetailKey(code, room.currentIndex)),
+        sList(`qz:${code}:player:`),
+      ]);
       setMyDelta(delta || 0);
+      setAllBets(detail || []);
+      const players = (await Promise.all(playerKeys.map((k) => sGet(k)))).filter(Boolean);
+      const withScores = await Promise.all(players.map(async (p) => ({ ...p, score: (await sGet(scoreKey(code, p.id))) || 0 })));
+      withScores.sort((a, b) => b.score - a.score);
+      setProvisional(withRankChange(withScores, prevRankRef));
       setRevealed(true);
     }, 800);
     return () => { stop = true; clearInterval(t); };
@@ -3755,7 +3995,6 @@ function EnchèrePlayerGame({ code, pid, room }) {
         </div>
         <div className="rounded-2xl p-6 mb-5 text-center" style={{ background: "rgba(255,255,255,0.06)" }}>
           <p className="uppercase tracking-widest mb-3" style={{ fontSize: 16, fontWeight: 800, color: C.gold }}>{cat?.emoji} {catLabelText}</p>
-          <p className="rounded-full inline-block px-4 py-2" style={{ background: "rgba(255,255,255,0.1)", fontFamily: F.display, fontSize: 16 }}>{hint.emoji} {hintLabel(hint, lang)}</p>
         </div>
         {betSubmitted ? (
           <div className="text-center mt-6 opacity-90"><p style={{ fontFamily: F.display, fontSize: 20 }}>{tr("betSentLabel")}</p><p className="text-sm mt-1 opacity-70">{tr("waitingForQuestion")}</p></div>
@@ -3792,7 +4031,39 @@ function EnchèrePlayerGame({ code, pid, room }) {
       ) : (
         <div className="text-center mt-6">
           <p style={{ fontFamily: F.display, fontSize: 28, color: myDelta > 0 ? C.teal : myDelta < 0 ? C.pink : C.cream }}>{myDelta > 0 ? `+${myDelta}` : myDelta} pts</p>
-          <p className="text-sm opacity-70 mt-2">{tr("waitingNextQuestion")}</p>
+          {allBets.length > 0 && (
+            <div className="rounded-2xl p-4 mb-4 mt-4 text-left" style={{ background: "rgba(255,255,255,0.05)" }}>
+              <p className="text-sm font-bold mb-2 opacity-70">{tr("betResultsTitle")}</p>
+              <div className="flex flex-col gap-2">
+                {allBets.map((a) => (
+                  <div key={a.pid} className="flex items-center gap-2 text-sm" style={{ fontWeight: a.pid === pid ? 800 : 400 }}>
+                    <span>{a.animal}</span>
+                    <span className="flex-1">{a.pseudo}{a.pid === pid ? tr("you") : ""}</span>
+                    <span className="opacity-60">{tr("betWord")} {a.value}</span>
+                    <span style={{ fontFamily: F.mono, fontSize: 13, color: a.points > 0 ? C.teal : a.points < 0 ? C.pink : "rgba(255,255,255,0.4)", minWidth: 54, textAlign: "right" }}>{a.points > 0 ? `+${a.points}` : a.points}</span>
+                    {a.correct ? <Check size={16} color={C.teal} /> : <span style={{ color: C.pink }}>✕</span>}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          {provisional.length > 0 && (
+            <div className="rounded-2xl p-4 text-left" style={{ background: "rgba(255,201,60,0.08)" }}>
+              <p className="text-sm font-bold mb-2" style={{ color: C.gold }}>{tr("provisionalRanking")}</p>
+              <div className="flex flex-col gap-1">
+                {provisional.map((p, i) => (
+                  <div key={p.id} className="flex items-center gap-2 text-sm" style={{ fontWeight: p.id === pid ? 800 : 400 }}>
+                    <span className="opacity-60" style={{ width: 20 }}>{i + 1}.</span>
+                    <span>{p.animal}</span>
+                    <span className="flex-1">{p.pseudo}{p.id === pid ? tr("you") : ""}</span>
+                    <RankBadge change={p.rankChange} />
+                    <span style={{ fontFamily: F.mono, color: C.teal }}>{p.score}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          <p className="text-sm opacity-70 mt-4">{tr("waitingNextQuestion")}</p>
         </div>
       )}
     </Stage>
