@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback, createContext, useContext } from "react";
-import { Users, Crown, Zap, Shield, ShieldCheck, Swords, Percent, EyeOff, Sparkles, Play, Copy, Check, ArrowRight, Trophy, Clock, Plus, Minus, MapPin, RefreshCw, Skull, Heart, Cast, Info, BarChart3, Hourglass } from "lucide-react";
+import { Users, Crown, Zap, Shield, Swords, Percent, EyeOff, Sparkles, Play, Copy, Check, ArrowRight, Trophy, Clock, Plus, Minus, MapPin, RefreshCw, Skull, Heart, Cast, Info, BarChart3, Hourglass } from "lucide-react";
 import { initializeApp } from "firebase/app";
 import { getDatabase, ref, get, set as fbSet, query, orderByKey, startAt, endAt } from "firebase/database";
 
@@ -35,9 +35,9 @@ const STRINGS = {
     appTagline: "Culture générale, questions insolites, jokers vicieux. Un écran (TV ou téléphone casté) pour l'hôte, un téléphone par joueur.",
     createGame: "Créer une partie (hôte)",
     joinGame: "Rejoindre une partie",
-    blindTestBtn: "🎧 Blind Test musical",
-    enchereBtn: "💰 Quitte ou Double",
-    matchAmorBtn: "Match Amor 💔",
+    blindTestBtn: "Blind Test musical",
+    enchereBtn: "Quitte ou Double",
+    matchAmorBtn: "Match Amor",
     soloBtn: "Jouer seul",
     back: "← Retour",
     continueBtn: "C'est parti !",
@@ -186,6 +186,87 @@ const STRINGS = {
     trueLabel: "Vrai",
     falseLabel: "Faux",
     listening: "🔊 Écoutez sur cet écran...",
+    soloIntro: "Pratique quand tu veux tester tes questions avant une vraie partie. Pas de jokers en solo — ils demandent des adversaires.",
+    classicTestMode: "Mode test classique",
+    crashTestMode: "Mode Crash Test 💀",
+    crashHint: "Crash Test : temps illimité par question, mais 3 erreurs et c'est fini.",
+    pseudoGenHint: "✨ le bouton génère un pseudo fun si tu manques d'inspiration",
+    soloSettingsTitle: "Mode test — réglages",
+    crashSettingsTitle: "Crash Test — réglages",
+    startBtn: "Commencer",
+    launchCrashBtn: "Lancer le Crash Test",
+    scoreLabel: "Score",
+    finishedTitle: "Terminé !",
+    scoreOnTotal: "Score : {score} pts sur {total}",
+    backToHome: "Retour à l'accueil",
+    correctAnswerMsg: "Bonne réponse ! 🎉",
+    wrongAnswerMsg: "Raté !",
+    wrongAnswerCrashMsg: "Raté ! 💔",
+    answerColonLabel: "Réponse :",
+    nextBtn: "Suivant",
+    crashFinishedTitle: "Crash Test terminé",
+    finalScoreSeen: "Score final : {score} pts — {n} questions vues",
+    matchAmorSettingsTitle: "Match Amor — réglages",
+    matchAmorIntro: "Question après question, les mauvaises réponses éliminent. Le dernier debout gagne. 💔",
+    createMatchAmorRoom: "Créer la salle Match Amor",
+    inRace: "en course",
+    placeBets: "💰 Placez vos mises !",
+    correctAnswerIs: "Bonne réponse :",
+    eliminatedLabel: "💔 Éliminé(s) :",
+    noOneEliminated: "Personne d'éliminé ce round, tout le monde continue !",
+    eliminatedScreenTitle: "Tu es éliminé 💀",
+    eliminatedScreenHint: "Il reste {n} joueur(s) en course. Regarde la suite sur l'écran !",
+    winnerTitle: "Vainqueur de Match Amor",
+    calculatingSimple: "Calcul...",
+    suspenseMsg: "Suspense...",
+    apiHint: "Extraits fournis par l'API iTunes (30s max, gratuit). Le son se joue depuis l'écran de l'hôte — les joueurs n'ont besoin que de leur téléphone pour répondre.",
+    musicCategoriesLabel: "Catégories musicales",
+    questionTypesBlindLabel: "Types de questions",
+    titleQuestionLabel: "Quel est le titre ?",
+    artistQuestionLabel: "Qui chante ?",
+    yearQuestionLabel: "Quelle année ?",
+    originQuestionLabel: "Origine de l'artiste ?",
+    consistencyHint: "Pour \"Qui chante ?\", les propositions restent cohérentes (groupe vs groupe, homme vs homme, femme vs femme) quand l'info est connue.",
+    audioEffectLabel: "Effet audio",
+    normalLabel: "Normal",
+    slowLabel: "Ralenti 🐌",
+    fastLabel: "Accéléré 🐇",
+    introEffectLabel: "Intro très courte (2s) ⚡",
+    nbTracksLabel: "Nombre de morceaux",
+    searchingTracks: "Recherche des morceaux...",
+    notEnoughTracks: "Pas assez de morceaux trouvés pour ces catégories, réessaie ou change de catégories.",
+    chooseCategoryError: "Choisis au moins une catégorie musicale.",
+    chooseTypeError: "Choisis au moins un type de question.",
+    mysteryTrack: "🔊 Écoute sur l'écran principal !",
+    whoSingsQuestion: "Qui chante cette chanson ?",
+    whatYearQuestion: "En quelle année est sortie cette chanson ?",
+    whereFromQuestion: "D'où vient cet artiste ?",
+    trackWordSingular: "Morceau",
+    answersPluralWord: "réponses",
+    listeningOnScreen: "🔊 Écoutez sur cet écran...",
+    bettingPlaced: "💰 Placez vos mises !",
+    revealAfterBets: "La question sera révélée une fois toutes les mises reçues.",
+    revealQuestionNow: "Révéler la question maintenant",
+    yourBetHost: "🎤 Ta mise (hôte) — capital :",
+    betSentLabel: "Mise envoyée ✅",
+    howMuchBet: "Combien mises-tu ? (max {max})",
+    halfBtn: "Moitié",
+    allInBtn: "Tout miser",
+    validateMyBet: "Valider ma mise",
+    betResultsTitle: "Résultats de la mise",
+    betWord: "mise",
+    seeGrandFinal: "Voir le classement final",
+    revealResultsBtn: "Révéler les résultats maintenant",
+    eliminatedEnchereTitle: "Éliminé 💀",
+    eliminatedEnchereHint: "Tu es tombé à 0 point, tu ne peux plus miser. Regarde la suite sur l'écran principal !",
+    waitingForQuestion: "En attente de la question...",
+    waitingNextQuestion: "En attente de la question suivante...",
+    startingCapitalLabel: "Capital de départ",
+    bettingSecondsLabel: "Secondes pour miser",
+    answerSecondsLabel: "Secondes pour répondre",
+    mixedCategoriesHint: "Toutes les catégories sont mélangées automatiquement — pas de sélection à faire.",
+    loadingOptions: "Chargement des options...",
+    haveBetSuffix: "ont misé",
     j_5050_label: "50/50", j_5050_desc: "Retire 2 mauvaises réponses (QCM uniquement).",
     j_x2_label: "x2", j_x2_desc: "Double tes points si tu réponds juste à cette question.",
     j_steal_label: "Vol de points", j_steal_desc: "Si tu réponds juste, vole 30 points à l'adversaire de ton choix.",
@@ -204,9 +285,9 @@ const STRINGS = {
     appTagline: "General knowledge, quirky questions, nasty jokers. One screen (TV or casted phone) for the host, one phone per player.",
     createGame: "Create a game (host)",
     joinGame: "Join a game",
-    blindTestBtn: "🎧 Music Blind Test",
-    enchereBtn: "💰 Double or Nothing",
-    matchAmorBtn: "Love Match 💔",
+    blindTestBtn: "Music Blind Test",
+    enchereBtn: "Double or Nothing",
+    matchAmorBtn: "Love Match",
     soloBtn: "Play solo",
     back: "← Back",
     continueBtn: "Let's go!",
@@ -355,6 +436,87 @@ const STRINGS = {
     trueLabel: "True",
     falseLabel: "False",
     listening: "🔊 Listen on this screen...",
+    soloIntro: "Practice whenever you want to try out questions before a real game. No jokers in solo — they need opponents.",
+    classicTestMode: "Classic test mode",
+    crashTestMode: "Crash Test mode 💀",
+    crashHint: "Crash Test: unlimited time per question, but 3 mistakes and it's over.",
+    pseudoGenHint: "✨ tap the button to generate a fun nickname if you're out of ideas",
+    soloSettingsTitle: "Test mode — settings",
+    crashSettingsTitle: "Crash Test — settings",
+    startBtn: "Start",
+    launchCrashBtn: "Start Crash Test",
+    scoreLabel: "Score",
+    finishedTitle: "Done!",
+    scoreOnTotal: "Score: {score} pts out of {total}",
+    backToHome: "Back to home",
+    correctAnswerMsg: "Correct answer! 🎉",
+    wrongAnswerMsg: "Wrong!",
+    wrongAnswerCrashMsg: "Wrong! 💔",
+    answerColonLabel: "Answer:",
+    nextBtn: "Next",
+    crashFinishedTitle: "Crash Test over",
+    finalScoreSeen: "Final score: {score} pts — {n} questions seen",
+    matchAmorSettingsTitle: "Love Match — settings",
+    matchAmorIntro: "Question after question, wrong answers eliminate you. The last one standing wins. 💔",
+    createMatchAmorRoom: "Create the Love Match room",
+    inRace: "still in",
+    placeBets: "💰 Place your bets!",
+    correctAnswerIs: "Correct answer:",
+    eliminatedLabel: "💔 Eliminated:",
+    noOneEliminated: "No one eliminated this round, everyone continues!",
+    eliminatedScreenTitle: "You're eliminated 💀",
+    eliminatedScreenHint: "{n} player(s) still in the race. Watch the rest on the screen!",
+    winnerTitle: "Love Match winner",
+    calculatingSimple: "Calculating...",
+    suspenseMsg: "Suspense...",
+    apiHint: "Clips provided by the iTunes API (30s max, free). The sound plays from the host's screen — players only need their phone to answer.",
+    musicCategoriesLabel: "Music categories",
+    questionTypesBlindLabel: "Question types",
+    titleQuestionLabel: "What's the title?",
+    artistQuestionLabel: "Who sings it?",
+    yearQuestionLabel: "What year?",
+    originQuestionLabel: "Artist's origin?",
+    consistencyHint: "For \"Who sings it?\", the options stay consistent (group vs group, man vs man, woman vs woman) when known.",
+    audioEffectLabel: "Audio effect",
+    normalLabel: "Normal",
+    slowLabel: "Slowed down 🐌",
+    fastLabel: "Sped up 🐇",
+    introEffectLabel: "Very short intro (2s) ⚡",
+    nbTracksLabel: "Number of tracks",
+    searchingTracks: "Searching for tracks...",
+    notEnoughTracks: "Not enough tracks found for these categories, try again or change categories.",
+    chooseCategoryError: "Choose at least one music category.",
+    chooseTypeError: "Choose at least one question type.",
+    mysteryTrack: "🔊 Listen on the main screen!",
+    whoSingsQuestion: "Who sings this song?",
+    whatYearQuestion: "What year was this song released?",
+    whereFromQuestion: "Where is this artist from?",
+    trackWordSingular: "Track",
+    answersPluralWord: "answers",
+    listeningOnScreen: "🔊 Listen on this screen...",
+    bettingPlaced: "💰 Place your bets!",
+    revealAfterBets: "The question will be revealed once all bets are in.",
+    revealQuestionNow: "Reveal the question now",
+    yourBetHost: "🎤 Your bet (host) — capital:",
+    betSentLabel: "Bet sent ✅",
+    howMuchBet: "How much do you bet? (max {max})",
+    halfBtn: "Half",
+    allInBtn: "All in",
+    validateMyBet: "Confirm my bet",
+    betResultsTitle: "Bet results",
+    betWord: "bet",
+    seeGrandFinal: "See final ranking",
+    revealResultsBtn: "Reveal results now",
+    eliminatedEnchereTitle: "Eliminated 💀",
+    eliminatedEnchereHint: "You dropped to 0 points, you can no longer bet. Watch the rest on the main screen!",
+    waitingForQuestion: "Waiting for the question...",
+    waitingNextQuestion: "Waiting for the next question...",
+    startingCapitalLabel: "Starting capital",
+    bettingSecondsLabel: "Seconds to bet",
+    answerSecondsLabel: "Seconds to answer",
+    mixedCategoriesHint: "All categories are mixed automatically — nothing to select.",
+    loadingOptions: "Loading options...",
+    haveBetSuffix: "have bet",
     j_5050_label: "50/50", j_5050_desc: "Removes 2 wrong answers (multiple choice only).",
     j_x2_label: "x2", j_x2_desc: "Doubles your points if you answer this question correctly.",
     j_steal_label: "Point Steal", j_steal_desc: "If you answer correctly, steal 30 points from the opponent of your choice.",
@@ -401,7 +563,7 @@ function useGoogleFonts() {
   }, []);
 }
 const F = { display: "'Baloo 2', system-ui, sans-serif", body: "'Nunito', system-ui, sans-serif", mono: "'Space Mono', monospace" };
-const C = { bg: "#180F2E", bg2: "#241645", pink: "#FF3D7F", gold: "#FFC93C", teal: "#2EE6D6", violet: "#7B4EFF", cream: "#FFF6E9", mint: "#4ADE80" };
+const C = { bg: "#180F2E", bg2: "#241645", pink: "#FF3D7F", gold: "#FFC93C", teal: "#2EE6D6", violet: "#7B4EFF", cream: "#FFF6E9", mint: "#4ADE80", orange: "#C2410C" };
 
 /* ---------------------------------------------------------
    ANIMATIONS DE FIN DE PARTIE (confettis / pluie d'emojis)
@@ -472,6 +634,11 @@ const DIFFICULTY_HINT = {
   carte: { label: "Moyen", emoji: "🟡" },
   echelle: { label: "Difficile", emoji: "🔴" },
 };
+function hintLabel(hint, lang) {
+  if (lang !== "en") return hint.label;
+  const map = { Facile: "Easy", Moyen: "Medium", Difficile: "Hard" };
+  return map[hint.label] || hint.label;
+}
 
 /* ---------------------------------------------------------
    STORAGE (Firebase Realtime Database, même schéma de clés qu'avant)
@@ -518,7 +685,6 @@ const speedChronoKey = (code, qIdx, targetId) => `qz:${code}:speedchrono:${qIdx}
 const revealedKey = (code, qIdx) => `qz:${code}:revealed:${qIdx}`;
 const pointsDeltaKey = (code, qIdx, pid) => `qz:${code}:pointsdelta:${qIdx}:${pid}`;
 const betKey = (code, qIdx, pid) => `qz:${code}:bet:${qIdx}:${pid}`;
-const shieldKey = (code, qIdx, pid) => `qz:${code}:shield:${qIdx}:${pid}`;
 const debuffKeyPrefix = (code, qIdx, targetId) => `qz:${code}:debuff:${qIdx}:${targetId}:`;
 
 /* ---------------------------------------------------------
@@ -1133,7 +1299,6 @@ const JOKERS = [
   { id: "block", label: "Blocage", icon: Shield, emoji: "🛡️", desc: "Si tu réponds juste, l'adversaire ciblé ne marque aucun point sur cette question.", targeted: true },
   { id: "speedchrono", label: "Speed Chrono", icon: Clock, emoji: "⏱️", desc: "Divise par deux le temps restant d'un adversaire pour répondre à cette question.", targeted: true },
   { id: "copieur", label: "Copieur", icon: Copy, emoji: "📋", desc: "Espionne la réponse déjà validée d'un adversaire avant de donner la tienne (s'il n'a pas encore répondu, tu ne verras rien).", targeted: true },
-  { id: "bouclier", label: "Bouclier", icon: ShieldCheck, emoji: "🔰", desc: "Te protège d'un Vol de points ou d'un Blocage pendant cette question.", targeted: false },
   { id: "sondage", label: "Sondage", icon: BarChart3, emoji: "📊", desc: "Affiche en direct le pourcentage de joueurs ayant choisi chaque réponse (QCM uniquement).", targeted: false },
   { id: "voleurtemps", label: "Voleur du Temps", icon: Hourglass, emoji: "⌛", desc: "Vole 3 secondes à TOUS les autres joueurs sur cette question — le temps volé t'est intégralement reversé.", targeted: false },
 ];
@@ -1180,12 +1345,19 @@ function ScreenHeader({ title, onBack, color = C.gold }) {
   );
 }
 function BigButton({ children, onClick, color = C.pink, disabled, icon: Icon }) {
-  const textColor = color === C.violet ? C.cream : "#1B1030";
+  const textColor = (color === C.violet || color === C.orange) ? C.cream : "#1B1030";
   return (
     <button onClick={onClick} disabled={disabled} className="w-full rounded-2xl py-4 px-6 flex items-center justify-center gap-2 transition-transform active:scale-95 disabled:opacity-40" style={{ background: color, fontFamily: F.display, fontSize: 20, color: textColor, boxShadow: `0 6px 0 rgba(0,0,0,0.25)` }}>
       {Icon && <Icon size={20} />}
       {children}
     </button>
+  );
+}
+function EmojiIcon({ children, size = 20 }) {
+  return (
+    <span style={{ fontSize: size, textShadow: "-1.5px -1.5px 0 #fff, 1.5px -1.5px 0 #fff, -1.5px 1.5px 0 #fff, 1.5px 1.5px 0 #fff, 0 -1.5px 0 #fff, 0 1.5px 0 #fff, -1.5px 0 0 #fff, 1.5px 0 0 #fff" }}>
+      {children}
+    </span>
   );
 }
 function GhostButton({ children, onClick, small }) {
@@ -1245,9 +1417,9 @@ function Home({ onCreate, onJoin, onSolo, onMatchAmor, onBlindTest, onEnchere })
       <div className="flex flex-col gap-4">
         <BigButton onClick={onCreate} color={C.gold} icon={Crown}>{tr("createGame")}</BigButton>
         <BigButton onClick={onJoin} color={C.teal} icon={Users}>{tr("joinGame")}</BigButton>
-        <BigButton onClick={onBlindTest} color={C.violet}>{tr("blindTestBtn")}</BigButton>
-        <BigButton onClick={onEnchere} color={C.gold}>{tr("enchereBtn")}</BigButton>
-        <BigButton onClick={onMatchAmor} color={C.pink} icon={Skull}>{tr("matchAmorBtn")}</BigButton>
+        <BigButton onClick={onBlindTest} color={C.violet}><EmojiIcon>🎧</EmojiIcon> {tr("blindTestBtn")}</BigButton>
+        <BigButton onClick={onEnchere} color={C.orange}><EmojiIcon>💰</EmojiIcon> {tr("enchereBtn")}</BigButton>
+        <BigButton onClick={onMatchAmor} color={C.pink} icon={Skull}>{tr("matchAmorBtn")} <EmojiIcon>💔</EmojiIcon></BigButton>
         <BigButton onClick={onSolo} color={C.mint} icon={Skull}>{tr("soloBtn")}</BigButton>
       </div>
     </Stage>
@@ -1258,51 +1430,54 @@ function Home({ onCreate, onJoin, onSolo, onMatchAmor, onBlindTest, onEnchere })
    SOLO
 --------------------------------------------------------- */
 function SoloHome({ onBack, onNormal, onCrash }) {
+  const { t: tr } = useLang();
   return (
     <Stage>
-      <ScreenHeader title="Jouer seul" onBack={onBack} color={C.violet} />
-      <p className="text-sm opacity-70 mb-6 text-center">Pratique quand tu veux tester tes questions avant une vraie partie. Pas de jokers en solo — ils demandent des adversaires.</p>
+      <ScreenHeader title={tr("soloBtn")} onBack={onBack} color={C.violet} />
+      <p className="text-sm opacity-70 mb-6 text-center">{tr("soloIntro")}</p>
       <div className="flex flex-col gap-4">
-        <BigButton onClick={onNormal} color={C.teal}>Mode test classique</BigButton>
-        <BigButton onClick={onCrash} color={C.pink} icon={Skull}>Mode Crash Test 💀</BigButton>
+        <BigButton onClick={onNormal} color={C.teal}>{tr("classicTestMode")}</BigButton>
+        <BigButton onClick={onCrash} color={C.pink} icon={Skull}>{tr("crashTestMode")}</BigButton>
       </div>
-      <p className="text-xs opacity-50 mt-4 text-center">Crash Test : temps illimité par question, mais 3 erreurs et c'est fini.</p>
+      <p className="text-xs opacity-50 mt-4 text-center">{tr("crashHint")}</p>
     </Stage>
   );
 }
 
 function SoloProfile({ onBack, onNext }) {
+  const { t: tr } = useLang();
   const [animal, setAnimal] = useState(null);
   const [pseudo, setPseudo] = useState("");
   const [error, setError] = useState("");
   return (
     <Stage>
-      <ScreenHeader title="Ton avatar" onBack={onBack} color={C.violet} />
+      <ScreenHeader title={tr("yourAvatarTitle")} onBack={onBack} color={C.violet} />
       <AvatarPicker animal={animal} onPick={setAnimal} taken={[]} />
       <div className="flex gap-2 mb-2 mt-4">
-        <input value={pseudo} onChange={(e) => setPseudo(e.target.value)} placeholder="Écris ton pseudo..." className="flex-1 rounded-xl px-4 py-2" style={{ background: "rgba(255,255,255,0.08)", color: C.cream, border: `2px solid rgba(255,255,255,0.15)` }} />
+        <input value={pseudo} onChange={(e) => setPseudo(e.target.value)} placeholder={tr("pseudoPlaceholder")} className="flex-1 rounded-xl px-4 py-2" style={{ background: "rgba(255,255,255,0.08)", color: C.cream, border: `2px solid rgba(255,255,255,0.15)` }} />
         <button onClick={() => setPseudo(funPseudo())} className="rounded-xl px-3" style={{ background: C.gold }}><Sparkles size={18} color="#1B1030" /></button>
       </div>
-      <p className="text-xs opacity-60 mb-4">✨ le bouton génère un pseudo fun si tu manques d'inspiration</p>
+      <p className="text-xs opacity-60 mb-4">{tr("pseudoGenHint")}</p>
       {error && <p className="text-sm mb-3 text-center" style={{ color: C.pink }}>{error}</p>}
-      <BigButton onClick={() => { if (!animal) return setError("Choisis un animal."); if (!pseudo.trim()) return setError("Choisis un pseudo."); onNext({ animal, pseudo: pseudo.trim() }); }} color={C.violet}>Continuer</BigButton>
+      <BigButton onClick={() => { if (!animal) return setError(tr("errChooseAnimal")); if (!pseudo.trim()) return setError(tr("errChoosePseudo")); onNext({ animal, pseudo: pseudo.trim() }); }} color={C.violet}>{tr("continueBtn")}</BigButton>
     </Stage>
   );
 }
 
 function SoloSetup({ onBack, onStart, crash }) {
+  const { t: tr } = useLang();
   const [cats, setCats] = useState(["animaux", "geo", "films"]);
   const [nb, setNb] = useState(10);
   const [seconds, setSeconds] = useState(20);
   const [kidsMode, setKidsMode] = useState(false);
   return (
     <Stage wide>
-      <ScreenHeader title={crash ? "Crash Test — réglages" : "Mode test — réglages"} onBack={onBack} color={crash ? C.pink : C.teal} />
+      <ScreenHeader title={crash ? tr("crashSettingsTitle") : tr("soloSettingsTitle")} onBack={onBack} color={crash ? C.pink : C.teal} />
       <CategoryPicker cats={cats} setCats={setCats} kidsMode={kidsMode} setKidsMode={setKidsMode} />
       {!crash && (
         <div className="grid grid-cols-2 gap-6 mb-6">
           <div>
-            <p className="text-sm opacity-70 mb-2 font-bold">Nombre de questions</p>
+            <p className="text-sm opacity-70 mb-2 font-bold">{tr("nbQuestionsLabel")}</p>
             <div className="flex items-center gap-3">
               <button onClick={() => setNb((n) => Math.max(5, n - 1))} className="rounded-full p-2" style={{ background: "rgba(255,255,255,0.1)" }}><Minus size={16} /></button>
               <span style={{ fontFamily: F.mono, fontSize: 22 }}>{nb}</span>
@@ -1310,21 +1485,22 @@ function SoloSetup({ onBack, onStart, crash }) {
             </div>
           </div>
           <div>
-            <p className="text-sm opacity-70 mb-2 font-bold">Secondes / question</p>
+            <p className="text-sm opacity-70 mb-2 font-bold">{tr("secondsPerQuestionLabel")}</p>
             <div className="flex items-center gap-3">
-              <button onClick={() => setSeconds((n) => Math.max(5, n - 5))} className="rounded-full p-2" style={{ background: "rgba(255,255,255,0.1)" }}><Minus size={16} /></button>
+              <button onClick={() => setSeconds((n) => Math.max(10, n - 5))} className="rounded-full p-2" style={{ background: "rgba(255,255,255,0.1)" }}><Minus size={16} /></button>
               <span style={{ fontFamily: F.mono, fontSize: 22 }}>{seconds}s</span>
               <button onClick={() => setSeconds((n) => Math.min(60, n + 5))} className="rounded-full p-2" style={{ background: "rgba(255,255,255,0.1)" }}><Plus size={16} /></button>
             </div>
           </div>
         </div>
       )}
-      <BigButton onClick={() => onStart({ cats: cats.length ? cats : (kidsMode ? KIDS_CATEGORIES : CATEGORIES).map((c) => c.id), nb, seconds, kidsMode })} color={crash ? C.pink : C.teal} icon={Play}>{crash ? "Lancer le Crash Test" : "Commencer"}</BigButton>
+      <BigButton onClick={() => onStart({ cats: cats.length ? cats : (kidsMode ? KIDS_CATEGORIES : CATEGORIES).map((c) => c.id), nb, seconds, kidsMode })} color={crash ? C.pink : C.teal} icon={Play}>{crash ? tr("launchCrashBtn") : tr("startBtn")}</BigButton>
     </Stage>
   );
 }
 
 function QuestionInput({ q, onSubmit, scaleVal, setScaleVal }) {
+  const { t: tr } = useLang();
   if (q.type === "qcm") return (
     <div className="grid grid-cols-1 gap-3">
       {q.options.map((o, i) => (<button key={i} onClick={() => onSubmit(i)} className="rounded-xl py-3 px-4 text-left" style={{ background: "rgba(255,255,255,0.08)", fontFamily: F.body, fontWeight: 700, color: C.cream, fontSize: 17 }}>{o}</button>))}
@@ -1332,8 +1508,8 @@ function QuestionInput({ q, onSubmit, scaleVal, setScaleVal }) {
   );
   if (q.type === "vf") return (
     <div className="flex gap-3">
-      <button onClick={() => onSubmit(true)} className="flex-1 rounded-xl py-4" style={{ background: C.teal, color: "#1B1030", fontFamily: F.display, fontSize: 18 }}>Vrai</button>
-      <button onClick={() => onSubmit(false)} className="flex-1 rounded-xl py-4" style={{ background: C.pink, color: "#1B1030", fontFamily: F.display, fontSize: 18 }}>Faux</button>
+      <button onClick={() => onSubmit(true)} className="flex-1 rounded-xl py-4" style={{ background: C.teal, color: "#1B1030", fontFamily: F.display, fontSize: 18 }}>{tr("trueLabel")}</button>
+      <button onClick={() => onSubmit(false)} className="flex-1 rounded-xl py-4" style={{ background: C.pink, color: "#1B1030", fontFamily: F.display, fontSize: 18 }}>{tr("falseLabel")}</button>
     </div>
   );
   if (q.type === "carte") return (
@@ -1363,6 +1539,7 @@ function QuestionInput({ q, onSubmit, scaleVal, setScaleVal }) {
 }
 
 function SoloQuiz({ config, profile, onExit }) {
+  const { lang, t: tr } = useLang();
   const [questions] = useState(() => pickQuestions(config.cats, config.nb, config.kidsMode ? KIDS_QB : QB));
   const [idx, setIdx] = useState(0);
   const [score, setScore] = useState(0);
@@ -1388,9 +1565,9 @@ function SoloQuiz({ config, profile, onExit }) {
     <Stage>
       <Logo />
       <div className="text-center mt-8">
-        <p style={{ fontFamily: F.display, fontSize: 24, color: C.gold }}>Terminé !</p>
-        <p className="mt-2 opacity-80">Score : {score} pts sur {questions.length * 100}</p>
-        <div className="mt-6"><BigButton onClick={onExit} color={C.violet}>Retour à l'accueil</BigButton></div>
+        <p style={{ fontFamily: F.display, fontSize: 24, color: C.gold }}>{tr("finishedTitle")}</p>
+        <p className="mt-2 opacity-80">{tr("scoreOnTotal").replace("{score}", score).replace("{total}", questions.length * 100)}</p>
+        <div className="mt-6"><BigButton onClick={onExit} color={C.violet}>{tr("backToHome")}</BigButton></div>
       </div>
     </Stage>
   );
@@ -1400,20 +1577,20 @@ function SoloQuiz({ config, profile, onExit }) {
       <div className="flex items-center justify-between mb-4">
         <span className="text-xs opacity-60 flex items-center gap-1">{profile?.animal} {profile?.pseudo}</span>
         <span className="text-xs opacity-60">Q{idx + 1}/{questions.length}</span>
-        <span style={{ fontFamily: F.mono, fontSize: 18, color: C.teal }}>Score : {score}</span>
+        <span style={{ fontFamily: F.mono, fontSize: 18, color: C.teal }}>{tr("scoreLabel")} : {score}</span>
         <span style={{ fontFamily: F.mono, fontSize: 18, color: left <= 5 ? C.pink : C.gold }}>{left}s</span>
       </div>
       <div className="rounded-2xl p-5 mb-5" style={{ background: "rgba(255,255,255,0.06)" }}>
-        <p className="uppercase tracking-widest mb-2" style={{ fontSize: 16, fontWeight: 800, color: C.gold }}>{findCategory(q.category)?.emoji} {findCategory(q.category)?.label}</p>
+        <p className="uppercase tracking-widest mb-2" style={{ fontSize: 16, fontWeight: 800, color: C.gold }}>{findCategory(q.category)?.emoji} {(() => { const c = findCategory(q.category); return c ? (c.id.startsWith("k_") ? kidsCategoryLabel(c, lang) : categoryLabel(c, lang)) : ""; })()}</p>
         <p style={{ fontFamily: F.display, fontSize: 26 }}>{q.text}</p>
       </div>
       {!answered ? (
         <QuestionInput q={q} onSubmit={checkAnswer} scaleVal={scaleVal} setScaleVal={setScaleVal} />
       ) : (
         <div className="text-center">
-          <p style={{ fontFamily: F.display, fontSize: 22, color: wasCorrect ? C.teal : C.pink }}>{wasCorrect ? "Bonne réponse ! 🎉" : "Raté !"}</p>
-          {q.type === "echelle" && <p className="text-sm opacity-70 mt-1">Réponse : {q.answer} {q.unit || ""}</p>}
-          <div className="mt-4"><BigButton onClick={() => { setAnswered(false); setScaleVal(0); setStartedAt(Date.now()); setIdx((i) => i + 1); }} color={C.gold} icon={ArrowRight}>Suivant</BigButton></div>
+          <p style={{ fontFamily: F.display, fontSize: 22, color: wasCorrect ? C.teal : C.pink }}>{wasCorrect ? tr("correctAnswerMsg") : tr("wrongAnswerMsg")}</p>
+          {q.type === "echelle" && <p className="text-sm opacity-70 mt-1">{tr("answerColonLabel")} {q.answer} {q.unit || ""}</p>}
+          <div className="mt-4"><BigButton onClick={() => { setAnswered(false); setScaleVal(0); setStartedAt(Date.now()); setIdx((i) => i + 1); }} color={C.gold} icon={ArrowRight}>{tr("nextBtn")}</BigButton></div>
         </div>
       )}
     </Stage>
@@ -1421,6 +1598,7 @@ function SoloQuiz({ config, profile, onExit }) {
 }
 
 function CrashTest({ config, profile, onExit }) {
+  const { lang, t: tr } = useLang();
   const [pool] = useState(() => pickQuestions(config.cats, 500, config.kidsMode ? KIDS_QB : QB));
   const [idx, setIdx] = useState(0);
   const [score, setScore] = useState(0);
@@ -1444,26 +1622,26 @@ function CrashTest({ config, profile, onExit }) {
     <Stage>
       <div className="flex items-center justify-between mb-4">
         <span className="text-xs opacity-60 flex items-center gap-1">{profile?.animal} {profile?.pseudo}</span>
-        <span style={{ fontFamily: F.mono, fontSize: 18, color: C.teal }}>Score : {score}</span>
+        <span style={{ fontFamily: F.mono, fontSize: 18, color: C.teal }}>{tr("scoreLabel")} : {score}</span>
         <span className="flex gap-1">{[0, 1, 2].map((i) => (<Heart key={i} size={18} fill={i < lives ? C.pink : "transparent"} color={C.pink} />))}</span>
       </div>
       {dead ? (
         <div className="text-center mt-8">
           <Skull size={48} className="mx-auto mb-3" color={C.pink} />
-          <p style={{ fontFamily: F.display, fontSize: 24, color: C.gold }}>Crash Test terminé</p>
-          <p className="mt-2 opacity-80">Score final : {score} pts — {idx} questions vues</p>
-          <div className="mt-6"><BigButton onClick={onExit} color={C.violet}>Retour à l'accueil</BigButton></div>
+          <p style={{ fontFamily: F.display, fontSize: 24, color: C.gold }}>{tr("crashFinishedTitle")}</p>
+          <p className="mt-2 opacity-80">{tr("finalScoreSeen").replace("{score}", score).replace("{n}", idx)}</p>
+          <div className="mt-6"><BigButton onClick={onExit} color={C.violet}>{tr("backToHome")}</BigButton></div>
         </div>
       ) : (
         <>
-          <div className="rounded-2xl p-5 mb-5" style={{ background: "rgba(255,255,255,0.06)" }}><p className="uppercase tracking-widest mb-2" style={{ fontSize: 16, fontWeight: 800, color: C.gold }}>{findCategory(q.category)?.emoji} {findCategory(q.category)?.label}</p><p style={{ fontFamily: F.display, fontSize: 26 }}>{q.text}</p></div>
+          <div className="rounded-2xl p-5 mb-5" style={{ background: "rgba(255,255,255,0.06)" }}><p className="uppercase tracking-widest mb-2" style={{ fontSize: 16, fontWeight: 800, color: C.gold }}>{findCategory(q.category)?.emoji} {(() => { const c = findCategory(q.category); return c ? (c.id.startsWith("k_") ? kidsCategoryLabel(c, lang) : categoryLabel(c, lang)) : ""; })()}</p><p style={{ fontFamily: F.display, fontSize: 26 }}>{q.text}</p></div>
           {!answered ? (
             <QuestionInput q={q} onSubmit={checkAnswer} scaleVal={scaleVal} setScaleVal={setScaleVal} />
           ) : (
             <div className="text-center">
-              <p style={{ fontFamily: F.display, fontSize: 22, color: wasCorrect ? C.teal : C.pink }}>{wasCorrect ? "Bonne réponse ! 🎉" : "Raté ! 💔"}</p>
-              {q.type === "echelle" && <p className="text-sm opacity-70 mt-1">Réponse : {q.answer} {q.unit || ""}</p>}
-              <div className="mt-4"><BigButton onClick={() => { setAnswered(false); setScaleVal(0); setIdx((i) => i + 1); }} color={C.gold} icon={ArrowRight}>Suivant</BigButton></div>
+              <p style={{ fontFamily: F.display, fontSize: 22, color: wasCorrect ? C.teal : C.pink }}>{wasCorrect ? tr("correctAnswerMsg") : tr("wrongAnswerCrashMsg")}</p>
+              {q.type === "echelle" && <p className="text-sm opacity-70 mt-1">{tr("answerColonLabel")} {q.answer} {q.unit || ""}</p>}
+              <div className="mt-4"><BigButton onClick={() => { setAnswered(false); setScaleVal(0); setIdx((i) => i + 1); }} color={C.gold} icon={ArrowRight}>{tr("nextBtn")}</BigButton></div>
             </div>
           )}
         </>
@@ -1550,7 +1728,7 @@ function CreateRoom({ onCreated, onBack }) {
         <div>
           <p className="text-sm opacity-70 mb-2 font-bold">{tr("secondsPerQuestionLabel")}</p>
           <div className="flex items-center gap-3">
-            <button onClick={() => setSeconds((n) => Math.max(5, n - 5))} className="rounded-full p-2" style={{ background: "rgba(255,255,255,0.1)" }}><Minus size={16} /></button>
+            <button onClick={() => setSeconds((n) => Math.max(10, n - 5))} className="rounded-full p-2" style={{ background: "rgba(255,255,255,0.1)" }}><Minus size={16} /></button>
             <span style={{ fontFamily: F.mono, fontSize: 22 }}>{seconds}s</span>
             <button onClick={() => setSeconds((n) => Math.min(60, n + 5))} className="rounded-full p-2" style={{ background: "rgba(255,255,255,0.1)" }}><Plus size={16} /></button>
           </div>
@@ -2057,11 +2235,8 @@ function AdminGame({ code, room, onRoomChange, onFinished, hostPid, hostAssigned
       }
     });
 
-    const shieldedIds = new Set();
-    for (const p of players) { if (await sGet(shieldKey(code, room.currentIndex, p.id))) shieldedIds.add(p.id); }
-
     const blockedDamage = {};
-    answers.forEach((a) => { if (a.jokerUsed?.id === "block" && correctness[a.pid] && a.jokerUsed.targetId && !shieldedIds.has(a.jokerUsed.targetId)) { blockedDamage[a.jokerUsed.targetId] = gained[a.jokerUsed.targetId] || 0; gained[a.jokerUsed.targetId] = 0; } });
+    answers.forEach((a) => { if (a.jokerUsed?.id === "block" && correctness[a.pid] && a.jokerUsed.targetId) { blockedDamage[a.jokerUsed.targetId] = gained[a.jokerUsed.targetId] || 0; gained[a.jokerUsed.targetId] = 0; } });
 
     const netDelta = { ...gained };
 
@@ -2073,7 +2248,7 @@ function AdminGame({ code, room, onRoomChange, onFinished, hostPid, hostAssigned
       await sSet(timeKey(code, a.pid), prevTime + elapsed);
     }
 
-    const stealOps = answers.filter((a) => a.jokerUsed?.id === "steal" && correctness[a.pid] && a.jokerUsed.targetId && !shieldedIds.has(a.jokerUsed.targetId));
+    const stealOps = answers.filter((a) => a.jokerUsed?.id === "steal" && correctness[a.pid] && a.jokerUsed.targetId);
     for (const op of stealOps) {
       const targetScore = (await sGet(scoreKey(code, op.jokerUsed.targetId))) || 0;
       const steal = Math.min(30, targetScore);
@@ -2167,7 +2342,6 @@ function AdminGame({ code, room, onRoomChange, onFinished, hostPid, hostAssigned
     setHostUsedJokersEver(nextUsed);
     sSet(`qz:${code}:jokerused:${hostPid}`, nextUsed);
     if (id === "5050" && q.type === "qcm") { const wrongIdx = q.options.map((_, i) => i).filter((i) => i !== q.answer); setHostHiddenOptions(wrongIdx.sort(() => Math.random() - 0.5).slice(0, 2)); }
-    if (id === "bouclier") sSet(shieldKey(code, room.currentIndex, hostPid), true);
     if (id === "voleurtemps") {
       (async () => {
         const keys = await sList(`qz:${code}:player:`);
@@ -2406,7 +2580,6 @@ function PlayerGameCore({ code, pid, room, assignedJokers, usedJokersEver, setUs
     setUsedJokersEver(nextUsed);
     sSet(`qz:${code}:jokerused:${pid}`, nextUsed);
     if (id === "5050" && q.type === "qcm") { const wrongIdx = q.options.map((_, i) => i).filter((i) => i !== q.answer); setHiddenOptions(wrongIdx.sort(() => Math.random() - 0.5).slice(0, 2)); }
-    if (id === "bouclier") sSet(shieldKey(code, room.currentIndex, pid), true);
     if (id === "voleurtemps") {
       (async () => {
         const keys = await sList(`qz:${code}:player:`);
@@ -2628,43 +2801,68 @@ function Results({ code, room, isAdmin, onRestart, onPlayAgain }) {
    MATCH AMOR — élimination progressive
 --------------------------------------------------------- */
 function CreateMatchAmor({ onCreated, onBack }) {
+  const { lang, t: tr } = useLang();
   const [cats, setCats] = useState(["animaux", "geo", "films"]);
   const [seconds, setSeconds] = useState(15);
   const [kidsMode, setKidsMode] = useState(false);
+  const [hostPlays, setHostPlays] = useState(false);
+  const [hostAnimal, setHostAnimal] = useState(null);
+  const [hostPseudo, setHostPseudo] = useState("");
 
   async function create() {
     const catOptions = kidsMode ? KIDS_CATEGORIES : CATEGORIES;
     const catIds = cats.length ? cats : catOptions.map((c) => c.id);
     const pool = pickQuestions(catIds, 300, kidsMode ? KIDS_QB : QB);
     const code = genCode();
-    const state = { mode: "matchamor", phase: "lobby", code, settings: { seconds, teamsMode: 1, kidsMode }, pool, currentIndex: 0, questionStartedAt: null, alive: [], createdAt: Date.now() };
+    const state = { mode: "matchamor", phase: "lobby", code, settings: { seconds, teamsMode: 1, kidsMode, hostPlays }, pool, currentIndex: 0, questionStartedAt: null, alive: [], createdAt: Date.now() };
     await sSet(roomKey(code), state);
-    onCreated(code, state);
+    let hostPid = null;
+    if (hostPlays && hostAnimal) {
+      hostPid = uid();
+      const pseudo = hostPseudo.trim() || (lang === "en" ? "The host" : "L'hôte");
+      await sSet(playerKey(code, hostPid), { id: hostPid, pseudo, animal: hostAnimal, team: 1, joinedAt: Date.now() });
+      await sSet(scoreKey(code, hostPid), 0);
+    }
+    onCreated(code, state, hostPid);
   }
 
   return (
     <Stage wide>
-      <ScreenHeader title="Match Amor — réglages" onBack={onBack} color={C.pink} />
-      <p className="text-sm opacity-70 mb-4 text-center">Question après question, les mauvaises réponses éliminent. Le dernier debout gagne. 💔</p>
+      <ScreenHeader title={tr("matchAmorSettingsTitle")} onBack={onBack} color={C.pink} />
+      <p className="text-sm opacity-70 mb-4 text-center">{tr("matchAmorIntro")}</p>
       <CategoryPicker cats={cats} setCats={setCats} kidsMode={kidsMode} setKidsMode={setKidsMode} />
-      <p className="text-sm opacity-70 mb-2 font-bold">Secondes par question</p>
-      <div className="flex items-center gap-3 mb-8">
-        <button onClick={() => setSeconds((n) => Math.max(5, n - 5))} className="rounded-full p-2" style={{ background: "rgba(255,255,255,0.1)" }}><Minus size={16} /></button>
+      <p className="text-sm opacity-70 mb-2 font-bold">{tr("secondsPerQuestionLabel")}</p>
+      <div className="flex items-center gap-3 mb-6">
+        <button onClick={() => setSeconds((n) => Math.max(10, n - 5))} className="rounded-full p-2" style={{ background: "rgba(255,255,255,0.1)" }}><Minus size={16} /></button>
         <span style={{ fontFamily: F.mono, fontSize: 22 }}>{seconds}s</span>
         <button onClick={() => setSeconds((n) => Math.min(60, n + 5))} className="rounded-full p-2" style={{ background: "rgba(255,255,255,0.1)" }}><Plus size={16} /></button>
       </div>
-      <BigButton onClick={create} color={C.pink} icon={Skull}>Créer la salle Match Amor</BigButton>
+      <p className="text-sm opacity-70 mb-2 font-bold">{tr("hostPlaysLabel")}</p>
+      <div className="flex flex-wrap gap-2 mb-3">
+        <Chip active={!hostPlays} onClick={() => setHostPlays(false)}>{tr("hostPlaysNo")}</Chip>
+        <Chip active={hostPlays} onClick={() => setHostPlays(true)}>{tr("hostPlaysYes")}</Chip>
+      </div>
+      {hostPlays && (
+        <div className="mb-6 rounded-2xl p-4" style={{ background: "rgba(255,255,255,0.04)" }}>
+          <input value={hostPseudo} onChange={(e) => setHostPseudo(e.target.value)} placeholder={tr("hostPseudoPlaceholder")} className="w-full mb-3 rounded-xl px-4 py-2" style={{ background: "rgba(255,255,255,0.08)", color: C.cream, border: "2px solid rgba(255,255,255,0.15)" }} />
+          <AvatarPicker animal={hostAnimal} onPick={setHostAnimal} taken={[]} />
+        </div>
+      )}
+      <BigButton onClick={create} color={C.pink} icon={Skull} disabled={hostPlays && !hostAnimal}>{tr("createMatchAmorRoom")}</BigButton>
     </Stage>
   );
 }
 
-function MatchAmorAdminGame({ code, room, onRoomChange, onFinished }) {
+function MatchAmorAdminGame({ code, room, onRoomChange, onFinished, hostPid }) {
+  const { lang, t: tr } = useLang();
   const q = room.pool[room.currentIndex % room.pool.length];
   const left = useCountdown(room.questionStartedAt, room.settings.seconds);
   const [revealed, setRevealed] = useState(false);
   const [eliminatedThisRound, setEliminatedThisRound] = useState([]);
   const [pendingAlive, setPendingAlive] = useState(null);
   const [allPlayers, setAllPlayers] = useState([]);
+  const [hostSubmitted, setHostSubmitted] = useState(false);
+  const [hostScaleVal, setHostScaleVal] = useState(0);
   const advancingRef = useRef(false);
 
   useEffect(() => { (async () => { const keys = await sList(`qz:${code}:player:`); setAllPlayers((await Promise.all(keys.map((k) => sGet(k)))).filter(Boolean)); })(); }, [code]);
@@ -2693,7 +2891,7 @@ function MatchAmorAdminGame({ code, room, onRoomChange, onFinished }) {
     setRevealed(true);
   }, [code, q, room]);
 
-  useEffect(() => { setRevealed(false); setPendingAlive(null); setEliminatedThisRound([]); advancingRef.current = false; }, [room.currentIndex]);
+  useEffect(() => { setRevealed(false); setPendingAlive(null); setEliminatedThisRound([]); advancingRef.current = false; setHostSubmitted(false); setHostScaleVal(0); }, [room.currentIndex]);
   useEffect(() => { if (left === 0 && !revealed) collect(); }, [left, revealed, collect]);
 
   async function next() {
@@ -2710,43 +2908,60 @@ function MatchAmorAdminGame({ code, room, onRoomChange, onFinished }) {
   }
 
   const cat = findCategory(q.category);
+  const catLabelText = cat ? (cat.id.startsWith("k_") ? kidsCategoryLabel(cat, lang) : categoryLabel(cat, lang)) : "";
   const eliminatedPlayers = allPlayers.filter((p) => eliminatedThisRound.includes(p.id));
 
   return (
     <Stage wide>
       <div className="flex items-center justify-between mb-4">
-        <span className="text-sm opacity-60"><Skull size={14} className="inline mr-1" /> {room.alive.length} en course</span>
+        <span className="text-sm opacity-60"><Skull size={14} className="inline mr-1" /> {room.alive.length} {tr("inRace")}</span>
         <span className="flex items-center gap-1" style={{ fontFamily: F.mono, fontSize: 20, color: left <= 5 ? C.pink : C.gold }}><Clock size={18} /> {left}s</span>
       </div>
       <div className="rounded-3xl p-8 mb-6 text-center" style={{ background: "rgba(255,255,255,0.06)" }}>
-        <p className="uppercase tracking-widest mb-3" style={{ fontSize: 20, fontWeight: 800, color: C.gold }}>{cat?.emoji} {cat?.label}</p>
+        <p className="uppercase tracking-widest mb-3" style={{ fontSize: 20, fontWeight: 800, color: C.gold }}>{cat?.emoji} {catLabelText}</p>
         <p style={{ fontFamily: F.display, fontSize: 32 }}>{q.text}</p>
         {revealed && (
           <div className="mt-6">
             {q.type === "echelle" ? (
-              <p style={{ fontFamily: F.mono, fontSize: 24, color: C.teal }}>Réponse : {q.answer} {q.unit || ""}</p>
+              <p style={{ fontFamily: F.mono, fontSize: 24, color: C.teal }}>{tr("answerColonLabel")} {q.answer} {q.unit || ""}</p>
             ) : (
               <p style={{ fontFamily: F.mono, fontSize: 22, color: C.teal }}>
-                Bonne réponse : {q.type === "qcm" ? q.options[q.answer] : q.type === "vf" ? (q.answer ? "Vrai" : "Faux") : MAP_ZONES.find((z) => z.id === q.answer)?.label}
+                {tr("correctAnswerIs")} {q.type === "qcm" ? q.options[q.answer] : q.type === "vf" ? (q.answer ? tr("trueLabel") : tr("falseLabel")) : MAP_ZONES.find((z) => z.id === q.answer)?.label}
               </p>
             )}
             {eliminatedPlayers.length > 0 ? (
               <div className="mt-4">
-                <p className="text-sm opacity-70 mb-2">💔 Éliminé(s) :</p>
+                <p className="text-sm opacity-70 mb-2">{tr("eliminatedLabel")}</p>
                 <div className="flex gap-2 justify-center flex-wrap">{eliminatedPlayers.map((p) => (<span key={p.id} className="text-sm rounded-full px-3 py-1" style={{ background: "rgba(255,61,127,0.2)" }}>{p.animal} {p.pseudo}</span>))}</div>
               </div>
             ) : (
-              <p className="text-sm opacity-70 mt-4">Personne d'éliminé ce round, tout le monde continue !</p>
+              <p className="text-sm opacity-70 mt-4">{tr("noOneEliminated")}</p>
             )}
           </div>
         )}
       </div>
-      {revealed ? (<BigButton onClick={next} color={C.pink} icon={ArrowRight}>{(pendingAlive || room.alive).length <= 1 ? "Voir le vainqueur" : "Question suivante"}</BigButton>) : (<BigButton onClick={collect} color={C.violet}>Révéler maintenant</BigButton>)}
+      {hostPid && room.alive.includes(hostPid) && !revealed && (
+        <div className="rounded-2xl p-4 mb-6" style={{ background: "rgba(255,255,255,0.05)", border: `2px solid ${C.violet}` }}>
+          <p className="text-sm font-bold mb-3" style={{ color: C.violet }}>{tr("hostAnswerTitle")}</p>
+          {hostSubmitted ? (
+            <p className="text-sm opacity-70">{tr("answerSubmitted")}</p>
+          ) : (
+            <QuestionInput
+              q={q}
+              scaleVal={hostScaleVal}
+              setScaleVal={setHostScaleVal}
+              onSubmit={async (value) => { setHostSubmitted(true); await sSet(answerKey(code, room.currentIndex, hostPid), { pid: hostPid, value, submittedAt: Date.now() }); }}
+            />
+          )}
+        </div>
+      )}
+      {revealed ? (<BigButton onClick={next} color={C.pink} icon={ArrowRight}>{(pendingAlive || room.alive).length <= 1 ? tr("seeWinner") : tr("nextQuestion")}</BigButton>) : (<BigButton onClick={collect} color={C.violet}>{tr("revealNow")}</BigButton>)}
     </Stage>
   );
 }
 
 function PlayerMatchAmor({ code, pid, room }) {
+  const { lang, t: tr } = useLang();
   const q = room.pool[room.currentIndex % room.pool.length];
   const alive = room.alive.includes(pid);
   const left = useCountdown(room.questionStartedAt, room.settings.seconds);
@@ -2759,8 +2974,8 @@ function PlayerMatchAmor({ code, pid, room }) {
     <Stage>
       <div className="text-center mt-10">
         <Skull size={40} className="mx-auto mb-3" color={C.pink} />
-        <p style={{ fontFamily: F.display, fontSize: 22 }}>Tu es éliminé 💀</p>
-        <p className="text-sm opacity-70 mt-2">Il reste {room.alive.length} joueur{room.alive.length > 1 ? "s" : ""} en course. Regarde la suite sur l'écran !</p>
+        <p style={{ fontFamily: F.display, fontSize: 22 }}>{tr("eliminatedScreenTitle")}</p>
+        <p className="text-sm opacity-70 mt-2">{tr("eliminatedScreenHint").replace("{n}", room.alive.length)}</p>
       </div>
     </Stage>
   );
@@ -2768,20 +2983,21 @@ function PlayerMatchAmor({ code, pid, room }) {
   return (
     <Stage>
       <div className="flex items-center justify-between mb-4">
-        <span className="text-xs opacity-60">{room.alive.length} en course</span>
+        <span className="text-xs opacity-60">{room.alive.length} {tr("inRace")}</span>
         <span style={{ fontFamily: F.mono, fontSize: 20, color: left <= 5 ? C.pink : C.gold }}>{left}s</span>
       </div>
-      <div className="rounded-2xl p-5 mb-5" style={{ background: "rgba(255,255,255,0.06)" }}><p className="uppercase tracking-widest mb-2" style={{ fontSize: 16, fontWeight: 800, color: C.gold }}>{findCategory(q.category)?.emoji} {findCategory(q.category)?.label}</p><p style={{ fontFamily: F.display, fontSize: 26 }}>{q.text}</p></div>
+      <div className="rounded-2xl p-5 mb-5" style={{ background: "rgba(255,255,255,0.06)" }}><p className="uppercase tracking-widest mb-2" style={{ fontSize: 16, fontWeight: 800, color: C.gold }}>{findCategory(q.category)?.emoji} {(() => { const c = findCategory(q.category); return c ? (c.id.startsWith("k_") ? kidsCategoryLabel(c, lang) : categoryLabel(c, lang)) : ""; })()}</p><p style={{ fontFamily: F.display, fontSize: 26 }}>{q.text}</p></div>
       {!submitted && left > 0 ? (
         <QuestionInput q={q} onSubmit={submit} scaleVal={scaleVal} setScaleVal={setScaleVal} />
       ) : (
-        <div className="text-center mt-6 opacity-70"><p style={{ fontFamily: F.display, fontSize: 20 }}>{submitted ? "Réponse envoyée ✅" : "Temps écoulé ⏱️"}</p><p className="text-sm mt-1">Suspense...</p></div>
+        <div className="text-center mt-6 opacity-70"><p style={{ fontFamily: F.display, fontSize: 20 }}>{submitted ? tr("answerSubmitted") : tr("timeUp")}</p><p className="text-sm mt-1">{tr("suspenseMsg")}</p></div>
       )}
     </Stage>
   );
 }
 
 function MatchAmorResults({ code, room, isAdmin, onRestart }) {
+  const { t: tr } = useLang();
   const [winner, setWinner] = useState(null);
   useEffect(() => { (async () => { if (room.winnerId) { const p = await sGet(playerKey(code, room.winnerId)); setWinner(p); } })(); }, [code, room.winnerId]);
   return (
@@ -2789,15 +3005,15 @@ function MatchAmorResults({ code, room, isAdmin, onRestart }) {
       <Logo />
       <div className="text-center mt-6">
         <Trophy size={44} className="mx-auto mb-3" color={C.gold} />
-        <p style={{ fontFamily: F.display, fontSize: 26, color: C.gold }}>Vainqueur de Match Amor</p>
+        <p style={{ fontFamily: F.display, fontSize: 26, color: C.gold }}>{tr("winnerTitle")}</p>
         {winner ? (
           <div className="flex flex-col items-center gap-2 mt-4">
             <span style={{ fontSize: 56 }}>{winner.animal}</span>
             <span style={{ fontFamily: F.display, fontSize: 22 }}>{winner.pseudo}</span>
           </div>
-        ) : <p className="opacity-60 mt-4">Calcul...</p>}
+        ) : <p className="opacity-60 mt-4">{tr("calculatingSimple")}</p>}
       </div>
-      {isAdmin && <div className="mt-8"><BigButton onClick={onRestart} color={C.violet} icon={RefreshCw}>Nouvelle partie</BigButton></div>}
+      {isAdmin && <div className="mt-8"><BigButton onClick={onRestart} color={C.violet} icon={RefreshCw}>{tr("newGameHome")}</BigButton></div>}
     </Stage>
   );
 }
@@ -2806,6 +3022,7 @@ function MatchAmorResults({ code, room, isAdmin, onRestart }) {
    BLIND TEST
 --------------------------------------------------------- */
 function CreateBlindTest({ onCreated, onBack }) {
+  const { lang, t: tr } = useLang();
   const [cats, setCats] = useState(["annees2000blind", "rapfr"]);
   const [nbTracks, setNbTracks] = useState(10);
   const [seconds, setSeconds] = useState(15);
@@ -2813,49 +3030,59 @@ function CreateBlindTest({ onCreated, onBack }) {
   const [questionTypes, setQuestionTypes] = useState({ titre: true, artiste: true, annee: false, origine: false });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [hostPlays, setHostPlays] = useState(false);
+  const [hostAnimal, setHostAnimal] = useState(null);
+  const [hostPseudo, setHostPseudo] = useState("");
 
   function toggleCat(id) { setCats((c) => (c.includes(id) ? c.filter((x) => x !== id) : [...c, id])); }
   function toggleType(t) { setQuestionTypes((s) => ({ ...s, [t]: !s[t] })); }
 
   async function create() {
-    if (cats.length === 0) return setError("Choisis au moins une catégorie musicale.");
+    if (cats.length === 0) return setError(tr("chooseCategoryError"));
     const types = Object.entries(questionTypes).filter(([, v]) => v).map(([k]) => k);
-    if (types.length === 0) return setError("Choisis au moins un type de question.");
+    if (types.length === 0) return setError(tr("chooseTypeError"));
     setLoading(true);
     setError("");
     const tracks = await pickBlindTracks(cats, nbTracks);
     setLoading(false);
-    if (tracks.length < 3) return setError("Pas assez de morceaux trouvés pour ces catégories, réessaie ou change de catégories.");
+    if (tracks.length < 3) return setError(tr("notEnoughTracks"));
     const code = genCode();
-    const state = { mode: "blindtest", phase: "lobby", code, settings: { seconds, effect, questionTypes: types }, tracks, currentIndex: -1, questionStartedAt: null, createdAt: Date.now() };
+    const state = { mode: "blindtest", phase: "lobby", code, settings: { seconds, effect, questionTypes: types, hostPlays }, tracks, currentIndex: -1, questionStartedAt: null, createdAt: Date.now() };
     await sSet(roomKey(code), state);
-    onCreated(code, state);
+    let hostPid = null;
+    if (hostPlays && hostAnimal) {
+      hostPid = uid();
+      const pseudo = hostPseudo.trim() || (lang === "en" ? "The host" : "L'hôte");
+      await sSet(playerKey(code, hostPid), { id: hostPid, pseudo, animal: hostAnimal, team: 1, joinedAt: Date.now() });
+      await sSet(scoreKey(code, hostPid), 0);
+    }
+    onCreated(code, state, hostPid);
   }
 
   return (
     <Stage wide>
       <ScreenHeader title="🎧 Blind Test — réglages" onBack={onBack} color={C.violet} />
-      <p className="text-xs opacity-50 mb-4 text-center">Extraits fournis par l'API iTunes (30s max, gratuit). Le son se joue depuis l'écran de l'hôte — les joueurs n'ont besoin que de leur téléphone pour répondre.</p>
-      <p className="text-sm opacity-70 mb-2 font-bold">Catégories musicales</p>
+      <p className="text-xs opacity-50 mb-4 text-center">{tr("apiHint")}</p>
+      <p className="text-sm opacity-70 mb-2 font-bold">{tr("musicCategoriesLabel")}</p>
       <div className="grid grid-cols-2 gap-2 mb-6">{BLIND_CATEGORIES.map((c) => (<Chip key={c.id} active={cats.includes(c.id)} onClick={() => toggleCat(c.id)}>{c.emoji} {c.label}</Chip>))}</div>
-      <p className="text-sm opacity-70 mb-2 font-bold">Types de questions</p>
+      <p className="text-sm opacity-70 mb-2 font-bold">{tr("questionTypesBlindLabel")}</p>
       <div className="flex flex-wrap gap-2 mb-6">
-        <Chip active={questionTypes.titre} onClick={() => toggleType("titre")}>Quel est le titre ?</Chip>
-        <Chip active={questionTypes.artiste} onClick={() => toggleType("artiste")}>Qui chante ?</Chip>
-        <Chip active={questionTypes.annee} onClick={() => toggleType("annee")}>Quelle année ?</Chip>
-        <Chip active={questionTypes.origine} onClick={() => toggleType("origine")}>Origine de l'artiste ?</Chip>
+        <Chip active={questionTypes.titre} onClick={() => toggleType("titre")}>{tr("titleQuestionLabel")}</Chip>
+        <Chip active={questionTypes.artiste} onClick={() => toggleType("artiste")}>{tr("artistQuestionLabel")}</Chip>
+        <Chip active={questionTypes.annee} onClick={() => toggleType("annee")}>{tr("yearQuestionLabel")}</Chip>
+        <Chip active={questionTypes.origine} onClick={() => toggleType("origine")}>{tr("originQuestionLabel")}</Chip>
       </div>
-      <p className="text-xs opacity-50 mb-4 text-center">Pour "Qui chante ?", les propositions restent cohérentes (groupe vs groupe, homme vs homme, femme vs femme) quand l'info est connue.</p>
-      <p className="text-sm opacity-70 mb-2 font-bold">Effet audio</p>
+      <p className="text-xs opacity-50 mb-4 text-center">{tr("consistencyHint")}</p>
+      <p className="text-sm opacity-70 mb-2 font-bold">{tr("audioEffectLabel")}</p>
       <div className="flex flex-wrap gap-2 mb-6">
-        <Chip active={effect === "normal"} onClick={() => setEffect("normal")}>Normal</Chip>
-        <Chip active={effect === "ralenti"} onClick={() => setEffect("ralenti")}>Ralenti 🐌</Chip>
-        <Chip active={effect === "accelere"} onClick={() => setEffect("accelere")}>Accéléré 🐇</Chip>
-        <Chip active={effect === "intro"} onClick={() => setEffect("intro")}>Intro très courte (2s) ⚡</Chip>
+        <Chip active={effect === "normal"} onClick={() => setEffect("normal")}>{tr("normalLabel")}</Chip>
+        <Chip active={effect === "ralenti"} onClick={() => setEffect("ralenti")}>{tr("slowLabel")}</Chip>
+        <Chip active={effect === "accelere"} onClick={() => setEffect("accelere")}>{tr("fastLabel")}</Chip>
+        <Chip active={effect === "intro"} onClick={() => setEffect("intro")}>{tr("introEffectLabel")}</Chip>
       </div>
-      <div className="grid grid-cols-2 gap-6 mb-8">
+      <div className="grid grid-cols-2 gap-6 mb-6">
         <div>
-          <p className="text-sm opacity-70 mb-2 font-bold">Nombre de morceaux</p>
+          <p className="text-sm opacity-70 mb-2 font-bold">{tr("nbTracksLabel")}</p>
           <div className="flex items-center gap-3">
             <button onClick={() => setNbTracks((n) => Math.max(5, n - 1))} className="rounded-full p-2" style={{ background: "rgba(255,255,255,0.1)" }}><Minus size={16} /></button>
             <span style={{ fontFamily: F.mono, fontSize: 22 }}>{nbTracks}</span>
@@ -2863,23 +3090,35 @@ function CreateBlindTest({ onCreated, onBack }) {
           </div>
         </div>
         <div>
-          <p className="text-sm opacity-70 mb-2 font-bold">Secondes par question</p>
+          <p className="text-sm opacity-70 mb-2 font-bold">{tr("secondsPerQuestionLabel")}</p>
           <div className="flex items-center gap-3">
-            <button onClick={() => setSeconds((n) => Math.max(5, n - 5))} className="rounded-full p-2" style={{ background: "rgba(255,255,255,0.1)" }}><Minus size={16} /></button>
+            <button onClick={() => setSeconds((n) => Math.max(10, n - 5))} className="rounded-full p-2" style={{ background: "rgba(255,255,255,0.1)" }}><Minus size={16} /></button>
             <span style={{ fontFamily: F.mono, fontSize: 22 }}>{seconds}s</span>
             <button onClick={() => setSeconds((n) => Math.min(30, n + 5))} className="rounded-full p-2" style={{ background: "rgba(255,255,255,0.1)" }}><Plus size={16} /></button>
           </div>
         </div>
       </div>
+      <p className="text-sm opacity-70 mb-2 font-bold">{tr("hostPlaysLabel")}</p>
+      <div className="flex flex-wrap gap-2 mb-3">
+        <Chip active={!hostPlays} onClick={() => setHostPlays(false)}>{tr("hostPlaysNo")}</Chip>
+        <Chip active={hostPlays} onClick={() => setHostPlays(true)}>{tr("hostPlaysYes")}</Chip>
+      </div>
+      {hostPlays && (
+        <div className="mb-6 rounded-2xl p-4" style={{ background: "rgba(255,255,255,0.04)" }}>
+          <input value={hostPseudo} onChange={(e) => setHostPseudo(e.target.value)} placeholder={tr("hostPseudoPlaceholder")} className="w-full mb-3 rounded-xl px-4 py-2" style={{ background: "rgba(255,255,255,0.08)", color: C.cream, border: "2px solid rgba(255,255,255,0.15)" }} />
+          <AvatarPicker animal={hostAnimal} onPick={setHostAnimal} taken={[]} />
+        </div>
+      )}
       {error && <p className="text-sm mb-4 text-center" style={{ color: C.pink }}>{error}</p>}
-      <BigButton onClick={create} color={C.violet} icon={Play} disabled={loading}>{loading ? "Recherche des morceaux..." : "Créer la salle"}</BigButton>
+      <BigButton onClick={create} color={C.violet} icon={Play} disabled={loading || (hostPlays && !hostAnimal)}>{loading ? tr("searchingTracks") : tr("createRoomBtn")}</BigButton>
     </Stage>
   );
 }
 
 const FALLBACK_ORIGINS = ["France", "États-Unis", "Royaume-Uni", "Belgique", "Canada", "Suède"];
 
-function BlindTestAdminGame({ code, room, onRoomChange, onFinished }) {
+function BlindTestAdminGame({ code, room, onRoomChange, onFinished, hostPid }) {
+  const { t: tr } = useLang();
   const track = room.tracks[room.currentIndex];
   const [questionKind] = useState(() => {
     const types = room.settings.questionTypes;
@@ -2898,6 +3137,7 @@ function BlindTestAdminGame({ code, room, onRoomChange, onFinished }) {
   const [provisional, setProvisional] = useState([]);
   const [autoLeft, setAutoLeft] = useState(7);
   const [options, setOptions] = useState([]);
+  const [hostSubmitted, setHostSubmitted] = useState(false);
   const audioRef = useRef(null);
   const advancingRef = useRef(false);
 
@@ -2908,10 +3148,10 @@ function BlindTestAdminGame({ code, room, onRoomChange, onFinished }) {
     track.artistOrigin;
 
   const questionLabel =
-    questionKind === "titre" ? "Quel est le titre ?" :
-    questionKind === "artiste" ? "Qui chante cette chanson ?" :
-    questionKind === "annee" ? "En quelle année est sortie cette chanson ?" :
-    "D'où vient cet artiste ?";
+    questionKind === "titre" ? tr("titleQuestionLabel") :
+    questionKind === "artiste" ? tr("whoSingsQuestion") :
+    questionKind === "annee" ? tr("whatYearQuestion") :
+    tr("whereFromQuestion");
 
   useEffect(() => {
     let pool = [];
@@ -2937,7 +3177,7 @@ function BlindTestAdminGame({ code, room, onRoomChange, onFinished }) {
   }, [room.currentIndex]);
 
   useEffect(() => {
-    setRevealed(false); advancingRef.current = false; setPlayerAnswers([]); setAutoLeft(7); setProvisional([]);
+    setRevealed(false); advancingRef.current = false; setPlayerAnswers([]); setAutoLeft(7); setProvisional([]); setHostSubmitted(false);
     const t = setInterval(async () => {
       const [keys, playerKeys] = await Promise.all([sList(`qz:${code}:answer:${room.currentIndex}:`), sList(`qz:${code}:player:`)]);
       setAnswersCount(keys.length);
@@ -3004,8 +3244,8 @@ function BlindTestAdminGame({ code, room, onRoomChange, onFinished }) {
     <Stage wide>
       <audio ref={audioRef} src={track.previewUrl} />
       <div className="flex items-center justify-between mb-4">
-        <span className="text-sm opacity-60">Morceau {room.currentIndex + 1} / {room.tracks.length}</span>
-        <span className="flex items-center gap-1 text-sm opacity-60"><Users size={14} /> {answersCount} réponses</span>
+        <span className="text-sm opacity-60">{tr("trackWordSingular")} {room.currentIndex + 1} / {room.tracks.length}</span>
+        <span className="flex items-center gap-1 text-sm opacity-60"><Users size={14} /> {answersCount} {tr("answersPluralWord")}</span>
         <span className="flex items-center gap-1" style={{ fontFamily: F.mono, fontSize: 20, color: left <= 5 ? C.pink : C.gold }}><Clock size={18} /> {left}s</span>
       </div>
       <div className="rounded-3xl p-8 mb-6 text-center" style={{ background: "rgba(255,255,255,0.06)" }}>
@@ -3016,14 +3256,23 @@ function BlindTestAdminGame({ code, room, onRoomChange, onFinished }) {
           </div>
         </div>
         {revealed && <p style={{ fontFamily: F.display, fontSize: 26, color: C.teal }}>{track.trackName} — {track.artistName}</p>}
-        {!revealed && <p className="text-sm opacity-60">🔊 Écoutez sur cet écran...</p>}
+        {!revealed && <p className="text-sm opacity-60">{tr("listeningOnScreen")}</p>}
       </div>
       {!revealed && options.length > 0 && (
-        <div className="grid grid-cols-2 gap-3 mb-6">{options.map((o, i) => (<div key={i} className="rounded-xl p-3 text-center" style={{ background: "rgba(255,255,255,0.08)", fontFamily: F.body, fontWeight: 700 }}>{o}</div>))}</div>
+        <div className="grid grid-cols-2 gap-3 mb-6">{options.map((o, i) => (
+          room.settings.hostPlays && hostPid ? (
+            <button key={i} disabled={hostSubmitted} onClick={async () => { setHostSubmitted(true); await sSet(answerKey(code, room.currentIndex, hostPid), { pid: hostPid, value: o, submittedAt: Date.now() }); }} className="rounded-xl p-3 text-center disabled:opacity-40" style={{ background: "rgba(255,255,255,0.08)", fontFamily: F.body, fontWeight: 700 }}>{o}</button>
+          ) : (
+            <div key={i} className="rounded-xl p-3 text-center" style={{ background: "rgba(255,255,255,0.08)", fontFamily: F.body, fontWeight: 700 }}>{o}</div>
+          )
+        ))}</div>
+      )}
+      {room.settings.hostPlays && hostPid && !revealed && (
+        <p className="text-xs opacity-60 text-center mb-4">{hostSubmitted ? tr("answerSubmitted") : "🎤"}</p>
       )}
       {revealed && playerAnswers.length > 0 && (
         <div className="rounded-2xl p-4 mb-4" style={{ background: "rgba(255,255,255,0.05)" }}>
-          <p className="text-sm font-bold mb-2 opacity-70">Réponses des joueurs</p>
+          <p className="text-sm font-bold mb-2 opacity-70">{tr("playerAnswersTitle")}</p>
           <div className="flex flex-col gap-2">
             {playerAnswers.map((a) => (
               <div key={a.pid} className="flex items-center gap-2 text-sm">
@@ -3039,7 +3288,7 @@ function BlindTestAdminGame({ code, room, onRoomChange, onFinished }) {
       )}
       {revealed && provisional.length > 0 && (
         <div className="rounded-2xl p-4 mb-6" style={{ background: "rgba(255,201,60,0.08)" }}>
-          <p className="text-sm font-bold mb-2" style={{ color: C.gold }}>🏆 Classement provisoire</p>
+          <p className="text-sm font-bold mb-2" style={{ color: C.gold }}>{tr("provisionalRanking")}</p>
           <div className="flex flex-col gap-1">
             {provisional.map((p, i) => (
               <div key={p.id} className="flex items-center gap-2 text-sm">
@@ -3052,12 +3301,13 @@ function BlindTestAdminGame({ code, room, onRoomChange, onFinished }) {
           </div>
         </div>
       )}
-      {revealed ? (<BigButton onClick={next} color={C.pink} icon={ArrowRight}>{room.currentIndex >= room.tracks.length - 1 ? "Voir le classement final" : `Morceau suivant (${autoLeft}s)`}</BigButton>) : (<BigButton onClick={collectAndScore} color={C.violet}>Révéler maintenant</BigButton>)}
+      {revealed ? (<BigButton onClick={next} color={C.pink} icon={ArrowRight}>{room.currentIndex >= room.tracks.length - 1 ? tr("finalRankingBtn") : `${tr("nextTrack")} (${autoLeft}s)`}</BigButton>) : (<BigButton onClick={collectAndScore} color={C.violet}>{tr("revealNow")}</BigButton>)}
     </Stage>
   );
 }
 
 function BlindTestPlayerGame({ code, pid, room }) {
+  const { t: tr } = useLang();
   const left = useCountdown(room.questionStartedAt, room.settings.seconds);
   const [submitted, setSubmitted] = useState(false);
   const [options, setOptions] = useState([]);
@@ -3098,35 +3348,35 @@ function BlindTestPlayerGame({ code, pid, room }) {
   return (
     <Stage>
       <div className="flex items-center justify-between mb-4">
-        <span className="text-xs opacity-60">Morceau {room.currentIndex + 1}/{room.tracks.length}</span>
+        <span className="text-xs opacity-60">{tr("trackWordSingular")} {room.currentIndex + 1}/{room.tracks.length}</span>
         <span style={{ fontFamily: F.mono, fontSize: 20, color: left <= 5 ? C.pink : C.gold }}>{left}s</span>
       </div>
       <div className="rounded-2xl p-5 mb-5 text-center" style={{ background: "rgba(255,255,255,0.06)" }}>
-        <p style={{ fontFamily: F.display, fontSize: 22 }}>🎧 Écoute sur l'écran principal !</p>
+        <p style={{ fontFamily: F.display, fontSize: 22 }}>{tr("mysteryTrack")}</p>
       </div>
       {!submitted && left > 0 ? (
         options.length > 0 ? (
           <div className="grid grid-cols-1 gap-3">{options.map((o, i) => (<button key={i} onClick={() => submit(o)} className="rounded-xl py-4 px-4 text-left" style={{ background: "rgba(255,255,255,0.08)", fontFamily: F.body, fontWeight: 700, fontSize: 17 }}>{o}</button>))}</div>
         ) : (
-          <p className="text-center opacity-60 mt-6">Chargement des options...</p>
+          <p className="text-center opacity-60 mt-6">{tr("loadingOptions")}</p>
         )
       ) : !revealed ? (
         <div className="text-center mt-6 opacity-90">
-          <p style={{ fontFamily: F.display, fontSize: 20 }}>{submitted ? "Réponse envoyée ✅" : "Temps écoulé ⏱️"}</p>
-          <p className="text-sm mt-1 opacity-70">En attente des autres joueurs...</p>
+          <p style={{ fontFamily: F.display, fontSize: 20 }}>{submitted ? tr("answerSubmitted") : tr("timeUp")}</p>
+          <p className="text-sm mt-1 opacity-70">{tr("waitingOthers")}</p>
         </div>
       ) : (
         <div className="mt-6">
           <p className="text-center mb-4" style={{ fontFamily: F.display, fontSize: 26, color: myPoints > 0 ? C.teal : C.cream }}>{myPoints > 0 ? `+${myPoints}` : myPoints} pts</p>
           {provisional.length > 0 && (
             <div className="rounded-2xl p-4" style={{ background: "rgba(255,201,60,0.08)" }}>
-              <p className="text-sm font-bold mb-2" style={{ color: C.gold }}>🏆 Classement provisoire</p>
+              <p className="text-sm font-bold mb-2" style={{ color: C.gold }}>{tr("provisionalRanking")}</p>
               <div className="flex flex-col gap-1">
                 {provisional.map((p, i) => (
                   <div key={p.id} className="flex items-center gap-2 text-sm" style={{ fontWeight: p.id === pid ? 800 : 400 }}>
                     <span className="opacity-60" style={{ width: 20 }}>{i + 1}.</span>
                     <span>{p.animal}</span>
-                    <span className="flex-1">{p.pseudo}{p.id === pid ? " (toi)" : ""}</span>
+                    <span className="flex-1">{p.pseudo}{p.id === pid ? tr("you") : ""}</span>
                     <span style={{ fontFamily: F.mono, color: C.teal }}>{p.score}</span>
                   </div>
                 ))}
@@ -3143,11 +3393,15 @@ function BlindTestPlayerGame({ code, pid, room }) {
    QUITTE OU DOUBLE — enchères
 --------------------------------------------------------- */
 function CreateEnchere({ onCreated, onBack }) {
+  const { lang, t: tr } = useLang();
   const [nbQuestions, setNbQuestions] = useState(10);
   const [bettingSeconds, setBettingSeconds] = useState(15);
   const [answerSeconds, setAnswerSeconds] = useState(20);
   const [startingPoints, setStartingPoints] = useState(10000);
   const [kidsMode, setKidsMode] = useState(false);
+  const [hostPlays, setHostPlays] = useState(false);
+  const [hostAnimal, setHostAnimal] = useState(null);
+  const [hostPseudo, setHostPseudo] = useState("");
 
   async function create() {
     const bank = kidsMode ? KIDS_QB : QB;
@@ -3156,23 +3410,30 @@ function CreateEnchere({ onCreated, onBack }) {
     const code = genCode();
     const state = {
       mode: "enchere", phase: "lobby", code,
-      settings: { bettingSeconds, answerSeconds, nbQuestions, startingPoints, kidsMode },
+      settings: { bettingSeconds, answerSeconds, nbQuestions, startingPoints, kidsMode, hostPlays },
       questions, currentIndex: -1, stage: "betting", stageStartedAt: null, createdAt: Date.now(),
     };
     await sSet(roomKey(code), state);
-    onCreated(code, state);
+    let hostPid = null;
+    if (hostPlays && hostAnimal) {
+      hostPid = uid();
+      const pseudo = hostPseudo.trim() || (lang === "en" ? "The host" : "L'hôte");
+      await sSet(playerKey(code, hostPid), { id: hostPid, pseudo, animal: hostAnimal, team: 1, joinedAt: Date.now() });
+      await sSet(scoreKey(code, hostPid), startingPoints);
+    }
+    onCreated(code, state, hostPid);
   }
 
   return (
     <Stage wide>
       <ScreenHeader title="💰 Quitte ou Double — réglages" onBack={onBack} color={C.gold} />
-      <p className="text-sm opacity-70 mb-4 text-center">Toutes les catégories sont mélangées automatiquement — pas de sélection à faire.</p>
+      <p className="text-sm opacity-70 mb-4 text-center">{tr("mixedCategoriesHint")}</p>
       <div className="mb-4">
-        <Chip active={kidsMode} onClick={() => setKidsMode((v) => !v)}>🎈 Mode Kids (fin primaire / collège)</Chip>
+        <Chip active={kidsMode} onClick={() => setKidsMode((v) => !v)}>{tr("kidsMode")}</Chip>
       </div>
       <div className="grid grid-cols-2 gap-6 mb-6">
         <div>
-          <p className="text-sm opacity-70 mb-2 font-bold">Nombre de questions</p>
+          <p className="text-sm opacity-70 mb-2 font-bold">{tr("nbQuestionsLabel")}</p>
           <div className="flex items-center gap-3">
             <button onClick={() => setNbQuestions((n) => Math.max(5, n - 1))} className="rounded-full p-2" style={{ background: "rgba(255,255,255,0.1)" }}><Minus size={16} /></button>
             <span style={{ fontFamily: F.mono, fontSize: 22 }}>{nbQuestions}</span>
@@ -3180,7 +3441,7 @@ function CreateEnchere({ onCreated, onBack }) {
           </div>
         </div>
         <div>
-          <p className="text-sm opacity-70 mb-2 font-bold">Capital de départ</p>
+          <p className="text-sm opacity-70 mb-2 font-bold">{tr("startingCapitalLabel")}</p>
           <div className="flex items-center gap-3">
             <button onClick={() => setStartingPoints((n) => Math.max(1000, n - 1000))} className="rounded-full p-2" style={{ background: "rgba(255,255,255,0.1)" }}><Minus size={16} /></button>
             <span style={{ fontFamily: F.mono, fontSize: 22 }}>{startingPoints}</span>
@@ -3188,28 +3449,40 @@ function CreateEnchere({ onCreated, onBack }) {
           </div>
         </div>
         <div>
-          <p className="text-sm opacity-70 mb-2 font-bold">Secondes pour miser</p>
+          <p className="text-sm opacity-70 mb-2 font-bold">{tr("bettingSecondsLabel")}</p>
           <div className="flex items-center gap-3">
-            <button onClick={() => setBettingSeconds((n) => Math.max(5, n - 5))} className="rounded-full p-2" style={{ background: "rgba(255,255,255,0.1)" }}><Minus size={16} /></button>
+            <button onClick={() => setBettingSeconds((n) => Math.max(10, n - 5))} className="rounded-full p-2" style={{ background: "rgba(255,255,255,0.1)" }}><Minus size={16} /></button>
             <span style={{ fontFamily: F.mono, fontSize: 22 }}>{bettingSeconds}s</span>
             <button onClick={() => setBettingSeconds((n) => Math.min(60, n + 5))} className="rounded-full p-2" style={{ background: "rgba(255,255,255,0.1)" }}><Plus size={16} /></button>
           </div>
         </div>
         <div>
-          <p className="text-sm opacity-70 mb-2 font-bold">Secondes pour répondre</p>
+          <p className="text-sm opacity-70 mb-2 font-bold">{tr("answerSecondsLabel")}</p>
           <div className="flex items-center gap-3">
-            <button onClick={() => setAnswerSeconds((n) => Math.max(5, n - 5))} className="rounded-full p-2" style={{ background: "rgba(255,255,255,0.1)" }}><Minus size={16} /></button>
+            <button onClick={() => setAnswerSeconds((n) => Math.max(10, n - 5))} className="rounded-full p-2" style={{ background: "rgba(255,255,255,0.1)" }}><Minus size={16} /></button>
             <span style={{ fontFamily: F.mono, fontSize: 22 }}>{answerSeconds}s</span>
             <button onClick={() => setAnswerSeconds((n) => Math.min(60, n + 5))} className="rounded-full p-2" style={{ background: "rgba(255,255,255,0.1)" }}><Plus size={16} /></button>
           </div>
         </div>
       </div>
-      <BigButton onClick={create} color={C.gold} icon={Play}>Créer la salle</BigButton>
+      <p className="text-sm opacity-70 mb-2 font-bold">{tr("hostPlaysLabel")}</p>
+      <div className="flex flex-wrap gap-2 mb-3">
+        <Chip active={!hostPlays} onClick={() => setHostPlays(false)}>{tr("hostPlaysNo")}</Chip>
+        <Chip active={hostPlays} onClick={() => setHostPlays(true)}>{tr("hostPlaysYes")}</Chip>
+      </div>
+      {hostPlays && (
+        <div className="mb-6 rounded-2xl p-4" style={{ background: "rgba(255,255,255,0.04)" }}>
+          <input value={hostPseudo} onChange={(e) => setHostPseudo(e.target.value)} placeholder={tr("hostPseudoPlaceholder")} className="w-full mb-3 rounded-xl px-4 py-2" style={{ background: "rgba(255,255,255,0.08)", color: C.cream, border: "2px solid rgba(255,255,255,0.15)" }} />
+          <AvatarPicker animal={hostAnimal} onPick={setHostAnimal} taken={[]} />
+        </div>
+      )}
+      <BigButton onClick={create} color={C.gold} icon={Play} disabled={hostPlays && !hostAnimal}>{tr("createRoomBtn")}</BigButton>
     </Stage>
   );
 }
 
-function EnchereAdminGame({ code, room, onRoomChange, onFinished }) {
+function EnchereAdminGame({ code, room, onRoomChange, onFinished, hostPid }) {
+  const { lang, t: tr } = useLang();
   const q = room.questions[room.currentIndex];
   const stage = room.stage;
   const left = useCountdown(room.stageStartedAt, stage === "betting" ? room.settings.bettingSeconds : room.settings.answerSeconds);
@@ -3217,6 +3490,10 @@ function EnchereAdminGame({ code, room, onRoomChange, onFinished }) {
   const [readyCount, setReadyCount] = useState(0);
   const [revealed, setRevealed] = useState(false);
   const [roundResults, setRoundResults] = useState([]);
+  const [hostScore, setHostScore] = useState(null);
+  const [hostBetVal, setHostBetVal] = useState(0);
+  const [hostBetSubmitted, setHostBetSubmitted] = useState(false);
+  const [hostAnswerSubmitted, setHostAnswerSubmitted] = useState(false);
   const advancingRef = useRef(false);
   const hint = DIFFICULTY_HINT[q.type] || DIFFICULTY_HINT.qcm;
 
@@ -3265,7 +3542,8 @@ function EnchereAdminGame({ code, room, onRoomChange, onFinished }) {
   }, [code, room, q, getActivePlayers]);
 
   useEffect(() => {
-    setRevealed(false); setRoundResults([]); advancingRef.current = false;
+    setRevealed(false); setRoundResults([]); advancingRef.current = false; setHostBetSubmitted(false); setHostAnswerSubmitted(false); setHostBetVal(0);
+    if (hostPid) (async () => { const s = (await sGet(scoreKey(code, hostPid))) ?? 0; setHostScore(s); })();
     const t = setInterval(async () => {
       const active = await getActivePlayers();
       setActiveCount(active.length);
@@ -3297,22 +3575,44 @@ function EnchereAdminGame({ code, room, onRoomChange, onFinished }) {
   }
 
   const cat = findCategory(q.category);
+  const catLabelText = cat ? (cat.id.startsWith("k_") ? kidsCategoryLabel(cat, lang) : categoryLabel(cat, lang)) : "";
 
   if (stage === "betting" && !revealed) {
     return (
       <Stage wide>
         <div className="flex items-center justify-between mb-4">
-          <span className="text-sm opacity-60">Question {room.currentIndex + 1} / {room.questions.length}</span>
-          <span className="flex items-center gap-1 text-sm opacity-60"><Users size={14} /> {readyCount}/{activeCount} ont misé</span>
+          <span className="text-sm opacity-60">{tr("questionWord")} {room.currentIndex + 1} / {room.questions.length}</span>
+          <span className="flex items-center gap-1 text-sm opacity-60"><Users size={14} /> {readyCount}/{activeCount} {tr("haveBetSuffix")}</span>
           <span className="flex items-center gap-1" style={{ fontFamily: F.mono, fontSize: 20, color: left <= 5 ? C.pink : C.gold }}><Clock size={18} /> {left}s</span>
         </div>
         <div className="rounded-3xl p-10 mb-6 text-center" style={{ background: "rgba(255,255,255,0.06)" }}>
-          <p className="text-xs opacity-60 mb-3">💰 Placez vos mises !</p>
-          <p className="uppercase tracking-widest mb-4" style={{ fontSize: 22, fontWeight: 800, color: C.gold }}>{cat?.emoji} {cat?.label}</p>
-          <p className="rounded-full inline-block px-4 py-2" style={{ background: "rgba(255,255,255,0.1)", fontFamily: F.display, fontSize: 18 }}>{hint.emoji} {hint.label}</p>
-          <p className="text-xs opacity-50 mt-4">La question sera révélée une fois toutes les mises reçues.</p>
+          <p className="text-xs opacity-60 mb-3">{tr("placeBets")}</p>
+          <p className="uppercase tracking-widest mb-4" style={{ fontSize: 22, fontWeight: 800, color: C.gold }}>{cat?.emoji} {catLabelText}</p>
+          <p className="rounded-full inline-block px-4 py-2" style={{ background: "rgba(255,255,255,0.1)", fontFamily: F.display, fontSize: 18 }}>{hint.emoji} {hintLabel(hint, lang)}</p>
+          <p className="text-xs opacity-50 mt-4">{tr("revealAfterBets")}</p>
         </div>
-        <BigButton onClick={advanceToAnswering} color={C.violet}>Révéler la question maintenant</BigButton>
+        {hostPid && hostScore > 0 && (
+          <div className="rounded-2xl p-4 mb-6" style={{ background: "rgba(255,255,255,0.05)", border: `2px solid ${C.violet}` }}>
+            <p className="text-sm font-bold mb-3" style={{ color: C.violet }}>{tr("yourBetHost")} {hostScore}</p>
+            {hostBetSubmitted ? (
+              <p className="text-sm opacity-70">{tr("betSentLabel")}</p>
+            ) : (
+              <div>
+                <div className="flex items-center justify-center gap-3 mb-3">
+                  <button onClick={() => setHostBetVal((v) => Math.max(0, Number(v) - 50))} className="rounded-full p-2" style={{ background: "rgba(255,255,255,0.1)" }}><Minus size={16} /></button>
+                  <input type="number" inputMode="numeric" value={hostBetVal} onFocus={() => { if (hostBetVal === 0) setHostBetVal(""); }} onChange={(e) => setHostBetVal(e.target.value === "" ? "" : Math.max(0, Math.min(hostScore, Number(e.target.value))))} className="text-center rounded-xl px-4 py-2" style={{ fontFamily: F.mono, fontSize: 24, color: C.cream, background: "rgba(255,255,255,0.08)", border: "2px solid rgba(255,255,255,0.2)", width: 140 }} />
+                  <button onClick={() => setHostBetVal((v) => Math.min(hostScore, Number(v) + 50))} className="rounded-full p-2" style={{ background: "rgba(255,255,255,0.1)" }}><Plus size={16} /></button>
+                </div>
+                <div className="flex gap-2 justify-center mb-3">
+                  <GhostButton small onClick={() => setHostBetVal(Math.round(hostScore / 2))}>{tr("halfBtn")}</GhostButton>
+                  <GhostButton small onClick={() => setHostBetVal(hostScore)}>{tr("allInBtn")}</GhostButton>
+                </div>
+                <BigButton onClick={async () => { const amount = Math.max(0, Math.min(hostScore, Number(hostBetVal) || 0)); setHostBetSubmitted(true); await sSet(betKey(code, room.currentIndex, hostPid), amount); }} color={C.violet}>{tr("validateMyBet")}</BigButton>
+              </div>
+            )}
+          </div>
+        )}
+        <BigButton onClick={advanceToAnswering} color={C.violet}>{tr("revealQuestionNow")}</BigButton>
       </Stage>
     );
   }
@@ -3320,27 +3620,42 @@ function EnchereAdminGame({ code, room, onRoomChange, onFinished }) {
   return (
     <Stage wide>
       <div className="flex items-center justify-between mb-4">
-        <span className="text-sm opacity-60">Question {room.currentIndex + 1} / {room.questions.length}</span>
-        <span className="flex items-center gap-1 text-sm opacity-60"><Users size={14} /> {readyCount}/{activeCount} réponses</span>
+        <span className="text-sm opacity-60">{tr("questionWord")} {room.currentIndex + 1} / {room.questions.length}</span>
+        <span className="flex items-center gap-1 text-sm opacity-60"><Users size={14} /> {readyCount}/{activeCount} {tr("answersWord")}</span>
         <span className="flex items-center gap-1" style={{ fontFamily: F.mono, fontSize: 20, color: left <= 5 ? C.pink : C.gold }}><Clock size={18} /> {left}s</span>
       </div>
       <div className="rounded-3xl p-8 mb-6 text-center" style={{ background: "rgba(255,255,255,0.06)" }}>
-        <p className="uppercase tracking-widest mb-3" style={{ fontSize: 20, fontWeight: 800, color: C.gold }}>{cat?.emoji} {cat?.label}</p>
+        <p className="uppercase tracking-widest mb-3" style={{ fontSize: 20, fontWeight: 800, color: C.gold }}>{cat?.emoji} {catLabelText}</p>
         <p style={{ fontFamily: F.display, fontSize: 32 }}>{q.text}</p>
         {q.type === "qcm" && (<div className="grid grid-cols-2 gap-3 mt-6">{q.options.map((o, i) => (<div key={i} className="rounded-xl p-3" style={{ background: revealed && i === q.answer ? C.teal : "rgba(255,255,255,0.08)", color: revealed && i === q.answer ? "#1B1030" : C.cream, fontFamily: F.body, fontWeight: 700, fontSize: 18 }}>{o}</div>))}</div>)}
-        {q.type === "vf" && (<div className="flex gap-4 justify-center mt-6"><div className="rounded-xl px-6 py-3" style={{ background: revealed && q.answer === true ? C.teal : "rgba(255,255,255,0.08)" }}>Vrai</div><div className="rounded-xl px-6 py-3" style={{ background: revealed && q.answer === false ? C.teal : "rgba(255,255,255,0.08)" }}>Faux</div></div>)}
+        {q.type === "vf" && (<div className="flex gap-4 justify-center mt-6"><div className="rounded-xl px-6 py-3" style={{ background: revealed && q.answer === true ? C.teal : "rgba(255,255,255,0.08)" }}>{tr("trueLabel")}</div><div className="rounded-xl px-6 py-3" style={{ background: revealed && q.answer === false ? C.teal : "rgba(255,255,255,0.08)" }}>{tr("falseLabel")}</div></div>)}
         {q.type === "carte" && (<div className="relative rounded-xl mt-6 mx-auto" style={{ width: "100%", maxWidth: 420, height: 220, background: "rgba(255,255,255,0.06)" }}>{MAP_ZONES.map((z) => (<div key={z.id} className="absolute rounded-full px-2 py-1 text-xs" style={{ left: `${z.x}%`, top: `${z.y}%`, transform: "translate(-50%,-50%)", background: revealed && z.id === q.answer ? C.teal : "rgba(255,255,255,0.12)", color: revealed && z.id === q.answer ? "#1B1030" : C.cream }}>{z.label}</div>))}</div>)}
-        {q.type === "echelle" && revealed && <p className="mt-6" style={{ fontFamily: F.mono, fontSize: 26, color: C.teal }}>Réponse : {q.answer} {q.unit || ""}</p>}
+        {q.type === "echelle" && revealed && <p className="mt-6" style={{ fontFamily: F.mono, fontSize: 26, color: C.teal }}>{tr("answerColonLabel")} {q.answer} {q.unit || ""}</p>}
       </div>
+      {hostPid && hostScore > 0 && !revealed && (
+        <div className="rounded-2xl p-4 mb-6" style={{ background: "rgba(255,255,255,0.05)", border: `2px solid ${C.violet}` }}>
+          <p className="text-sm font-bold mb-3" style={{ color: C.violet }}>{tr("hostAnswerTitle")}</p>
+          {hostAnswerSubmitted ? (
+            <p className="text-sm opacity-70">{tr("answerSubmitted")}</p>
+          ) : (
+            <QuestionInput
+              q={q}
+              scaleVal={hostBetVal}
+              setScaleVal={setHostBetVal}
+              onSubmit={async (value) => { setHostAnswerSubmitted(true); await sSet(answerKey(code, room.currentIndex, hostPid), { pid: hostPid, value, submittedAt: Date.now() }); }}
+            />
+          )}
+        </div>
+      )}
       {revealed && roundResults.length > 0 && (
         <div className="rounded-2xl p-4 mb-6" style={{ background: "rgba(255,255,255,0.05)" }}>
-          <p className="text-sm font-bold mb-2 opacity-70">Résultats de la mise</p>
+          <p className="text-sm font-bold mb-2 opacity-70">{tr("betResultsTitle")}</p>
           <div className="flex flex-col gap-2">
             {roundResults.sort((a, b) => b.newScore - a.newScore).map((p) => (
               <div key={p.id} className="flex items-center gap-2 text-sm">
                 <span>{p.animal}</span>
                 <span className="flex-1">{p.pseudo}</span>
-                <span className="opacity-60">mise {p.bet}</span>
+                <span className="opacity-60">{tr("betWord")} {p.bet}</span>
                 <span style={{ fontFamily: F.mono, color: p.delta > 0 ? C.teal : p.delta < 0 ? C.pink : "rgba(255,255,255,0.4)", minWidth: 60, textAlign: "right" }}>{p.delta > 0 ? `+${p.delta}` : p.delta}</span>
                 <span style={{ fontFamily: F.mono, fontWeight: 700 }}>{p.newScore}</span>
                 {p.newScore === 0 && <span style={{ color: C.pink, fontSize: 12 }}>💀</span>}
@@ -3349,12 +3664,13 @@ function EnchereAdminGame({ code, room, onRoomChange, onFinished }) {
           </div>
         </div>
       )}
-      {revealed ? (<BigButton onClick={next} color={C.pink} icon={ArrowRight}>{room.currentIndex >= room.questions.length - 1 ? "Voir le classement final" : "Question suivante"}</BigButton>) : (<BigButton onClick={collectResults} color={C.violet}>Révéler les résultats maintenant</BigButton>)}
+      {revealed ? (<BigButton onClick={next} color={C.pink} icon={ArrowRight}>{room.currentIndex >= room.questions.length - 1 ? tr("seeGrandFinal") : tr("nextQuestion")}</BigButton>) : (<BigButton onClick={collectResults} color={C.violet}>{tr("revealResultsBtn")}</BigButton>)}
     </Stage>
   );
 }
 
 function EnchèrePlayerGame({ code, pid, room }) {
+  const { lang, t: tr } = useLang();
   const q = room.questions[room.currentIndex];
   const stage = room.stage;
   const left = useCountdown(room.stageStartedAt, stage === "betting" ? room.settings.bettingSeconds : room.settings.answerSeconds);
@@ -3410,8 +3726,8 @@ function EnchèrePlayerGame({ code, pid, room }) {
       <Stage>
         <div className="text-center mt-10">
           <Skull size={40} className="mx-auto mb-3" color={C.pink} />
-          <p style={{ fontFamily: F.display, fontSize: 22 }}>Éliminé 💀</p>
-          <p className="text-sm opacity-70 mt-2">Tu es tombé à 0 point, tu ne peux plus miser. Regarde la suite sur l'écran principal !</p>
+          <p style={{ fontFamily: F.display, fontSize: 22 }}>{tr("eliminatedEnchereTitle")}</p>
+          <p className="text-sm opacity-70 mt-2">{tr("eliminatedEnchereHint")}</p>
         </div>
       </Stage>
     );
@@ -3419,6 +3735,7 @@ function EnchèrePlayerGame({ code, pid, room }) {
 
   if (stage === "betting") {
     const cat = findCategory(q.category);
+    const catLabelText = cat ? (cat.id.startsWith("k_") ? kidsCategoryLabel(cat, lang) : categoryLabel(cat, lang)) : "";
     return (
       <Stage>
         <div className="flex items-center justify-between mb-4">
@@ -3427,24 +3744,24 @@ function EnchèrePlayerGame({ code, pid, room }) {
           <span style={{ fontFamily: F.mono, fontSize: 20, color: left <= 5 ? C.pink : C.gold }}>{left}s</span>
         </div>
         <div className="rounded-2xl p-6 mb-5 text-center" style={{ background: "rgba(255,255,255,0.06)" }}>
-          <p className="uppercase tracking-widest mb-3" style={{ fontSize: 16, fontWeight: 800, color: C.gold }}>{cat?.emoji} {cat?.label}</p>
-          <p className="rounded-full inline-block px-4 py-2" style={{ background: "rgba(255,255,255,0.1)", fontFamily: F.display, fontSize: 16 }}>{hint.emoji} {hint.label}</p>
+          <p className="uppercase tracking-widest mb-3" style={{ fontSize: 16, fontWeight: 800, color: C.gold }}>{cat?.emoji} {catLabelText}</p>
+          <p className="rounded-full inline-block px-4 py-2" style={{ background: "rgba(255,255,255,0.1)", fontFamily: F.display, fontSize: 16 }}>{hint.emoji} {hintLabel(hint, lang)}</p>
         </div>
         {betSubmitted ? (
-          <div className="text-center mt-6 opacity-90"><p style={{ fontFamily: F.display, fontSize: 20 }}>Mise envoyée ✅</p><p className="text-sm mt-1 opacity-70">En attente de la question...</p></div>
+          <div className="text-center mt-6 opacity-90"><p style={{ fontFamily: F.display, fontSize: 20 }}>{tr("betSentLabel")}</p><p className="text-sm mt-1 opacity-70">{tr("waitingForQuestion")}</p></div>
         ) : (
           <div>
-            <p className="text-sm opacity-70 mb-2 text-center">Combien mises-tu ? (max {myScore ?? 0})</p>
+            <p className="text-sm opacity-70 mb-2 text-center">{tr("howMuchBet").replace("{max}", myScore ?? 0)}</p>
             <div className="flex items-center justify-center gap-3 mb-4">
               <button onClick={() => setBetVal((v) => Math.max(0, Number(v) - 50))} className="rounded-full p-2" style={{ background: "rgba(255,255,255,0.1)" }}><Minus size={16} /></button>
               <input type="number" inputMode="numeric" value={betVal} onFocus={() => { if (betVal === 0) setBetVal(""); }} onChange={(e) => setBetVal(e.target.value === "" ? "" : Math.max(0, Math.min(myScore ?? 0, Number(e.target.value))))} className="text-center rounded-xl px-4 py-2" style={{ fontFamily: F.mono, fontSize: 28, color: C.cream, background: "rgba(255,255,255,0.08)", border: "2px solid rgba(255,255,255,0.2)", width: 160 }} />
               <button onClick={() => setBetVal((v) => Math.min(myScore ?? 0, Number(v) + 50))} className="rounded-full p-2" style={{ background: "rgba(255,255,255,0.1)" }}><Plus size={16} /></button>
             </div>
             <div className="flex gap-2 justify-center mb-4">
-              <GhostButton small onClick={() => setBetVal(Math.round((myScore ?? 0) / 2))}>Moitié</GhostButton>
-              <GhostButton small onClick={() => setBetVal(myScore ?? 0)}>Tout miser</GhostButton>
+              <GhostButton small onClick={() => setBetVal(Math.round((myScore ?? 0) / 2))}>{tr("halfBtn")}</GhostButton>
+              <GhostButton small onClick={() => setBetVal(myScore ?? 0)}>{tr("allInBtn")}</GhostButton>
             </div>
-            <BigButton onClick={submitBet} color={C.gold}>Valider ma mise</BigButton>
+            <BigButton onClick={submitBet} color={C.gold}>{tr("validateMyBet")}</BigButton>
           </div>
         )}
       </Stage>
@@ -3457,15 +3774,15 @@ function EnchèrePlayerGame({ code, pid, room }) {
         <span className="text-xs opacity-60">Q{room.currentIndex + 1}/{room.questions.length}</span>
         <span style={{ fontFamily: F.mono, fontSize: 20, color: left <= 5 ? C.pink : C.gold }}>{left}s</span>
       </div>
-      <div className="rounded-2xl p-5 mb-5" style={{ background: "rgba(255,255,255,0.06)" }}><p className="uppercase tracking-widest mb-2" style={{ fontSize: 16, fontWeight: 800, color: C.gold }}>{findCategory(q.category)?.emoji} {findCategory(q.category)?.label}</p><p style={{ fontFamily: F.display, fontSize: 26 }}>{q.text}</p></div>
+      <div className="rounded-2xl p-5 mb-5" style={{ background: "rgba(255,255,255,0.06)" }}><p className="uppercase tracking-widest mb-2" style={{ fontSize: 16, fontWeight: 800, color: C.gold }}>{(() => { const c = findCategory(q.category); return c ? `${c.emoji} ${c.id.startsWith("k_") ? kidsCategoryLabel(c, lang) : categoryLabel(c, lang)}` : ""; })()}</p><p style={{ fontFamily: F.display, fontSize: 26 }}>{q.text}</p></div>
       {!submitted && left > 0 ? (
         <QuestionInput q={q} onSubmit={submitAnswer} scaleVal={betVal} setScaleVal={setBetVal} />
       ) : !revealed ? (
-        <div className="text-center mt-6 opacity-90"><p style={{ fontFamily: F.display, fontSize: 20 }}>{submitted ? "Réponse envoyée ✅" : "Temps écoulé ⏱️"}</p><p className="text-sm mt-1 opacity-70">En attente des autres joueurs...</p></div>
+        <div className="text-center mt-6 opacity-90"><p style={{ fontFamily: F.display, fontSize: 20 }}>{submitted ? tr("answerSubmitted") : tr("timeUp")}</p><p className="text-sm mt-1 opacity-70">{tr("waitingOthers")}</p></div>
       ) : (
         <div className="text-center mt-6">
           <p style={{ fontFamily: F.display, fontSize: 28, color: myDelta > 0 ? C.teal : myDelta < 0 ? C.pink : C.cream }}>{myDelta > 0 ? `+${myDelta}` : myDelta} pts</p>
-          <p className="text-sm opacity-70 mt-2">En attente de la question suivante...</p>
+          <p className="text-sm opacity-70 mt-2">{tr("waitingNextQuestion")}</p>
         </div>
       )}
     </Stage>
@@ -3560,7 +3877,6 @@ function QuizAppInner() {
         { emoji: "🃏", text: tr("explainClassicB3") },
         { emoji: "🏆", text: tr("explainClassicB4") },
       ]}
-      example={tr("explainClassicExample")}
     />
   );
   if (view === "explain-solo") return (
@@ -3611,7 +3927,6 @@ function QuizAppInner() {
         { emoji: "💀", text: tr("explainEnchereB4") },
         { emoji: "🏆", text: tr("explainEnchereB5") },
       ]}
-      example={tr("explainEnchereExample")}
     />
   );
 
@@ -3622,11 +3937,11 @@ function QuizAppInner() {
   if (view === "solo-quiz") return <SoloQuiz config={soloConfig} profile={soloProfile} onExit={() => setView("home")} />;
   if (view === "crash-test") return <CrashTest config={soloConfig} profile={soloProfile} onExit={() => setView("home")} />;
 
-  if (view === "matchamor-create") return <CreateMatchAmor onBack={() => setView("home")} onCreated={(c, r) => { setCode(c); setRoom(r); setView("admin-lobby"); }} />;
+  if (view === "matchamor-create") return <CreateMatchAmor onBack={() => setView("home")} onCreated={(c, r, hostPid) => { setCode(c); setRoom(r); setPid(hostPid || null); setView("admin-lobby"); }} />;
 
-  if (view === "blindtest-create") return <CreateBlindTest onBack={() => setView("home")} onCreated={(c, r) => { setCode(c); setRoom(r); setView("admin-lobby"); }} />;
+  if (view === "blindtest-create") return <CreateBlindTest onBack={() => setView("home")} onCreated={(c, r, hostPid) => { setCode(c); setRoom(r); setPid(hostPid || null); setView("admin-lobby"); }} />;
 
-  if (view === "enchere-create") return <CreateEnchere onBack={() => setView("home")} onCreated={(c, r) => { setCode(c); setRoom(r); setView("admin-lobby"); }} />;
+  if (view === "enchere-create") return <CreateEnchere onBack={() => setView("home")} onCreated={(c, r, hostPid) => { setCode(c); setRoom(r); setPid(hostPid || null); setView("admin-lobby"); }} />;
 
   if (view === "admin-create") return <CreateRoom onBack={() => setView("home")} onCreated={(c, r, hostPid) => {
     setCode(c); setRoom(r); setPid(hostPid || null);
@@ -3710,10 +4025,10 @@ function QuizAppInner() {
   if (view === "player-game" && room) return <PlayerGame code={code} pid={pid} room={room} assignedJokers={assignedJokers} usedJokersEver={usedJokersEver} setUsedJokersEver={setUsedJokersEver} />;
   if (view === "results") return <Results code={code} room={room} isAdmin={isAdmin} onRestart={resetAll} onPlayAgain={playAgain} />;
 
-  if (view === "admin-matchamor" && room) return <MatchAmorAdminGame code={code} room={room} onRoomChange={(r) => setRoom(r)} onFinished={(r) => { setRoom(r); setView("results-matchamor"); }} />;
-  if (view === "admin-blindgame" && room) return <BlindTestAdminGame code={code} room={room} onRoomChange={(r) => setRoom(r)} onFinished={(r) => { setRoom(r); setView("results"); }} />;
+  if (view === "admin-matchamor" && room) return <MatchAmorAdminGame code={code} room={room} onRoomChange={(r) => setRoom(r)} onFinished={(r) => { setRoom(r); setView("results-matchamor"); }} hostPid={pid} />;
+  if (view === "admin-blindgame" && room) return <BlindTestAdminGame code={code} room={room} onRoomChange={(r) => setRoom(r)} onFinished={(r) => { setRoom(r); setView("results"); }} hostPid={pid} />;
   if (view === "player-blindgame" && room) return <BlindTestPlayerGame code={code} pid={pid} room={room} />;
-  if (view === "admin-enchere" && room) return <EnchereAdminGame code={code} room={room} onRoomChange={(r) => setRoom(r)} onFinished={(r) => { setRoom(r); setView("results"); }} />;
+  if (view === "admin-enchere" && room) return <EnchereAdminGame code={code} room={room} onRoomChange={(r) => setRoom(r)} onFinished={(r) => { setRoom(r); setView("results"); }} hostPid={pid} />;
   if (view === "player-enchere" && room) return <EnchèrePlayerGame code={code} pid={pid} room={room} />;
   if (view === "player-matchamor" && room) return <PlayerMatchAmor code={code} pid={pid} room={room} />;
   if (view === "results-matchamor") return <MatchAmorResults code={code} room={room} isAdmin={isAdmin} onRestart={resetAll} />;
