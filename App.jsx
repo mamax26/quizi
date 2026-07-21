@@ -32,7 +32,7 @@ function storeLang(l) { try { localStorage.setItem(LANG_STORAGE_KEY, l); } catch
 
 const STRINGS = {
   fr: {
-    appTagline: "Culture générale, questions insolites, jokers vicieux. Un écran (TV ou téléphone casté) pour l'hôte, un téléphone par joueur.",
+    appTagline: "Culture générale, quiz insolites, blind test, jokers vicieux... enfin un jeu qui va animer nos soirées 🎉",
     createGame: "Créer une partie (hôte)",
     joinGame: "Rejoindre une partie",
     blindTestBtn: "Blind Test musical",
@@ -45,29 +45,29 @@ const STRINGS = {
     joinRoomBtn: "Rejoindre la salle",
     exampleLabel: "💡 Exemple concret",
     explainClassicTitle: "Quiz Classique",
-    explainClassicB1: "Chaque joueur répond depuis son téléphone, l'hôte affiche les questions sur un grand écran (TV, PC, tablette...).",
-    explainClassicB2: "Plus tu réponds vite ET juste, plus tu marques de points — de 50 à 100 points par bonne réponse selon ta rapidité.",
-    explainClassicB3: "Jokers en option : vole des points à un adversaire, bloque-le, réduis son temps de réponse...",
-    explainClassicB4: "Le classement se met à jour après chaque question, jusqu'au classement final et aux prix spéciaux.",
+    explainClassicB1: "Réponds juste aux questions.",
+    explainClassicB2: "Plus tu réponds vite, plus tu marques de points.",
+    explainClassicB3: "Utilise des jokers pour saboter les autres (ou te blinder).",
+    explainClassicB4: "Finis en tête et deviens la légende de la soirée. 👑",
     explainClassicExample: "Sur une question à 20 secondes : réponds juste en 2 secondes → 95 points. Réponds juste à la 19ᵉ seconde → seulement 51 points. Une mauvaise réponse ne rapporte rien (ou un malus si l'hôte l'a activé).",
     explainSoloTitle: "Jouer seul",
-    explainSoloB1: "Entraîne-toi à ton rythme, sans autres joueurs — parfait pour découvrir les catégories avant une vraie partie.",
-    explainSoloB2: "Mode Crash Test : le temps est illimité par question, mais 3 erreurs et c'est terminé !",
-    explainSoloB3: "Pas de jokers en solo : ils demandent un adversaire à cibler.",
+    explainSoloB1: "Teste-toi tranquille, à ton rythme.",
+    explainSoloB2: "Mode Crash Test : 3 erreurs et t'es cramé. 💀",
+    explainSoloB3: "Pas de jokers ici, juste toi contre les questions.",
     explainMatchAmorTitle: "Match Amor",
-    explainMatchAmorB1: "Chaque question élimine les joueurs qui se trompent — réponds juste pour rester en course.",
-    explainMatchAmorB2: "Si tout le monde se trompe (ou si tout le monde répond juste), personne n'est éliminé ce tour-ci.",
-    explainMatchAmorB3: "Le dernier joueur encore en vie remporte la partie.",
+    explainMatchAmorB1: "Une mauvaise réponse et t'es éliminé direct. ☠️",
+    explainMatchAmorB2: "Si tout le monde se plante (ou cartonne), personne ne saute.",
+    explainMatchAmorB3: "Le dernier survivant rafle toute la mise.",
     explainBlindTestTitle: "Blind Test musical",
-    explainBlindTestB1: "Le son se joue depuis l'écran de l'hôte — les joueurs répondent simplement depuis leur téléphone.",
-    explainBlindTestB2: "Choisis l'effet : normal, ralenti, accéléré, ou juste les 2 premières secondes de l'intro.",
-    explainBlindTestB3: "Types de questions : titre du morceau, artiste, année de sortie, origine de l'artiste.",
+    explainBlindTestB1: "Le son passe sur l'écran principal, à toi de deviner. 🎧",
+    explainBlindTestB2: "Titre, artiste, année, anecdote... reste concentré.",
+    explainBlindTestB3: "Le plus rapide et le plus juste rafle les points.",
     explainEnchereTitle: "Quitte ou Double",
-    explainEnchereB1: "Chaque joueur démarre avec le même capital de points (10 000 par défaut).",
-    explainEnchereB2: "Avant chaque question, tu vois seulement le thème et un indice de difficulté — à toi de miser le montant de ton choix.",
-    explainEnchereB3: "Bonne réponse : ta mise est doublée et ajoutée à ton total. Mauvaise réponse : tu perds ta mise.",
-    explainEnchereB4: "Si tu tombes à 0 point, tu es éliminé : impossible de miser à nouveau.",
-    explainEnchereB5: "À la fin des questions, le joueur avec le plus de points remporte la partie.",
+    explainEnchereB1: "Tu pars avec un gros tas de points. 💰",
+    explainEnchereB2: "Avant chaque question, mise ce que tu veux.",
+    explainEnchereB3: "Bonne réponse = mise doublée. Mauvaise = tout perdu.",
+    explainEnchereB4: "À 0 point, t'es cramé, fini pour toi. 💀",
+    explainEnchereB5: "Le plus riche à la fin remporte la partie.",
     explainEnchereExample: "Tu as 1000 points et tu mises 300 sur une question annoncée 🔴 Difficile. Bonne réponse → tu gagnes 300 pts (total 1300). Mauvaise réponse → tu perds ta mise (total 700).",
     roomSettingsTitle: "Réglages de la partie",
     categoriesLabel: "Catégories",
@@ -87,10 +87,10 @@ const STRINGS = {
     jokerAttribLabel: "Attribution des jokers",
     jokerManual: "Les joueurs choisissent eux-mêmes",
     jokerRandomLabel: "Attribution aléatoire 🎴",
-    jokerManualHint: "Chaque joueur choisira lui-même ses jokers parmi ceux activés ci-dessus (un seul de chaque type).",
-    jokerRandomHint: "L'ordinateur tire au sort les jokers de chaque joueur.",
+    jokerManualHint: "Chaque joueur choisit ses jokers lui-même.",
+    jokerRandomHint: "L'ordinateur tire les jokers au hasard.",
     jokersPerPlayerLabel: "Jokers par joueur :",
-    malusLabel: "Malus en cas de mauvaise réponse (bonus max toujours 100 pts)",
+    malusLabel: "Malus en cas de mauvaise réponse",
     malusNone: "Aucun",
     hostPlaysLabel: "L'hôte joue aussi ?",
     hostPlaysNo: "Non, juste animateur",
@@ -113,7 +113,7 @@ const STRINGS = {
     yourAvatarTitle: "Ton avatar",
     avatarHint: "Choisis ton animal (déjà pris = indisponible)",
     joinPartyBtn: "Rejoindre la partie",
-    jokerBoxTitle: "La boîte à jokers",
+    jokerBoxTitle: "Jokers activés",
     jokerTutoRandom: "Tirage au sort ce soir : tu repartiras avec {n} joker(s) parmi la liste ci-dessous. Un seul joker par question !",
     jokerTutoManual: "Sur l'écran suivant, choisis toi-même {n} joker(s) parmi la liste ci-dessous. Un seul joker par question !",
     noJokerThisGame: "Aucun joker activé pour cette partie.",
@@ -283,12 +283,12 @@ const STRINGS = {
     j_sondage_label: "Sondage", j_sondage_desc: "Affiche en direct le pourcentage de joueurs ayant choisi chaque réponse (QCM uniquement).",
     j_voleurtemps_label: "Voleur du Temps", j_voleurtemps_desc: "Vole 3 secondes à TOUS les autres joueurs sur cette question — le temps volé t'est intégralement reversé.",
     cat_animaux: "Animaux", cat_geo: "Géographie", cat_sport: "Sport", cat_films: "Films & Séries", cat_records: "Records inutiles",
-    cat_disney: "Disney", cat_bouffe: "Alimentation & Restauration", cat_logique: "Logique", cat_jv: "Jeux vidéo", cat_actu: "Ça a fait l'actu",
-    cat_ortho: "Pièges d'orthographe", cat_annees2000: "Ambiance Années 2000", cat_musique: "Culture Musicale", cat_adulte18: "Ambiance -18",
+    cat_disney: "Disney", cat_bouffe: "Alimentation", cat_logique: "Logique", cat_jv: "Jeux vidéo", cat_actu: "Ça a fait l'actu",
+    cat_ortho: "Orthographe", cat_annees2000: "Années 2000", cat_musique: "Culture Musicale", cat_adulte18: "Ambiance -18",
     kcat_animaux: "Animaux", kcat_nature: "Sciences & Nature", kcat_contes: "Contes & Dessins animés", kcat_sport: "Sport", kcat_geo: "Géo Facile", kcat_logique: "Logique Enfant",
   },
   en: {
-    appTagline: "General knowledge, quirky questions, nasty jokers. One screen (TV or casted phone) for the host, one phone per player.",
+    appTagline: "General knowledge, quirky quizzes, blind test, nasty jokers... finally a game that'll spice up game night 🎉",
     createGame: "Create a game (host)",
     joinGame: "Join a game",
     blindTestBtn: "Music Blind Test",
@@ -301,29 +301,29 @@ const STRINGS = {
     joinRoomBtn: "Join the room",
     exampleLabel: "💡 Concrete example",
     explainClassicTitle: "Classic Quiz",
-    explainClassicB1: "Each player answers from their phone, the host displays the questions on a big screen (TV, PC, tablet...).",
-    explainClassicB2: "The faster AND more accurate you are, the more points you score — from 50 to 100 points per correct answer depending on your speed.",
-    explainClassicB3: "Optional jokers: steal points from an opponent, block them, reduce their answer time...",
-    explainClassicB4: "The leaderboard updates after every question, up to the final ranking and special awards.",
+    explainClassicB1: "Answer the questions right.",
+    explainClassicB2: "The faster you answer, the more points you score.",
+    explainClassicB3: "Use jokers to sabotage others (or protect yourself).",
+    explainClassicB4: "Finish on top and become the legend of the night. 👑",
     explainClassicExample: "On a 20-second question: answer correctly in 2 seconds → 95 points. Answer correctly at second 19 → only 51 points. A wrong answer scores nothing (or a penalty if the host enabled it).",
     explainSoloTitle: "Play Solo",
-    explainSoloB1: "Practice at your own pace, no other players — perfect for discovering categories before a real game.",
-    explainSoloB2: "Crash Test mode: unlimited time per question, but 3 mistakes and it's over!",
-    explainSoloB3: "No jokers in solo mode: they need an opponent to target.",
+    explainSoloB1: "Test yourself, at your own pace.",
+    explainSoloB2: "Crash Test mode: 3 mistakes and you're toast. 💀",
+    explainSoloB3: "No jokers here, just you against the questions.",
     explainMatchAmorTitle: "Love Match",
-    explainMatchAmorB1: "Every question eliminates the players who get it wrong — answer correctly to stay in the game.",
-    explainMatchAmorB2: "If everyone gets it wrong (or everyone gets it right), no one is eliminated this round.",
-    explainMatchAmorB3: "The last player standing wins the game.",
+    explainMatchAmorB1: "One wrong answer and you're out. ☠️",
+    explainMatchAmorB2: "If everyone flops (or aces it), nobody's eliminated.",
+    explainMatchAmorB3: "The last one standing takes it all.",
     explainBlindTestTitle: "Music Blind Test",
-    explainBlindTestB1: "The sound plays from the host's screen — players simply answer from their phone.",
-    explainBlindTestB2: "Choose the effect: normal, slowed down, sped up, or just the first 2 seconds of the intro.",
-    explainBlindTestB3: "Question types: track title, artist, release year, artist's origin.",
+    explainBlindTestB1: "The sound plays on the main screen, guess away. 🎧",
+    explainBlindTestB2: "Title, artist, year, trivia... stay sharp.",
+    explainBlindTestB3: "Fastest and most accurate wins the points.",
     explainEnchereTitle: "Double or Nothing",
-    explainEnchereB1: "Every player starts with the same amount of points (10,000 by default).",
-    explainEnchereB2: "Before each question, you only see the theme and a difficulty hint — it's up to you to bet whatever amount you choose.",
-    explainEnchereB3: "Correct answer: your bet is doubled and added to your total. Wrong answer: you lose your bet.",
-    explainEnchereB4: "If you drop to 0 points, you're eliminated: no more betting.",
-    explainEnchereB5: "At the end of the questions, the player with the most points wins the game.",
+    explainEnchereB1: "You start with a big pile of points. 💰",
+    explainEnchereB2: "Before each question, bet whatever you want.",
+    explainEnchereB3: "Right answer = bet doubled. Wrong = all gone.",
+    explainEnchereB4: "Hit 0 points and you're done. 💀",
+    explainEnchereB5: "Richest player at the end wins it all.",
     explainEnchereExample: "You have 1000 points and bet 300 on a question marked 🔴 Hard. Correct answer → you gain 300 pts (total 1300). Wrong answer → you lose your bet (total 700).",
     roomSettingsTitle: "Game settings",
     categoriesLabel: "Categories",
@@ -343,10 +343,10 @@ const STRINGS = {
     jokerAttribLabel: "Joker assignment",
     jokerManual: "Players choose their own",
     jokerRandomLabel: "Random assignment 🎴",
-    jokerManualHint: "Each player will choose their own jokers among those enabled above (one of each type).",
-    jokerRandomHint: "The computer randomly draws each player's jokers.",
+    jokerManualHint: "Each player picks their own jokers.",
+    jokerRandomHint: "The computer draws jokers at random.",
     jokersPerPlayerLabel: "Jokers per player:",
-    malusLabel: "Penalty for a wrong answer (bonus is always capped at 100 pts)",
+    malusLabel: "Penalty for a wrong answer",
     malusNone: "None",
     hostPlaysLabel: "Does the host play too?",
     hostPlaysNo: "No, just hosting",
@@ -369,7 +369,7 @@ const STRINGS = {
     yourAvatarTitle: "Your avatar",
     avatarHint: "Pick your animal (already taken = unavailable)",
     joinPartyBtn: "Join the game",
-    jokerBoxTitle: "The joker box",
+    jokerBoxTitle: "Jokers enabled",
     jokerTutoRandom: "Tonight's random draw: you'll get {n} joker(s) from the list below. Only one joker per question!",
     jokerTutoManual: "On the next screen, choose {n} joker(s) yourself from the list below. Only one joker per question!",
     noJokerThisGame: "No jokers enabled for this game.",
@@ -539,8 +539,8 @@ const STRINGS = {
     j_sondage_label: "Poll", j_sondage_desc: "Shows live the percentage of players who picked each answer (multiple choice only).",
     j_voleurtemps_label: "Time Thief", j_voleurtemps_desc: "Steals 3 seconds from ALL other players on this question — the stolen time is fully credited to you.",
     cat_animaux: "Animals", cat_geo: "Geography", cat_sport: "Sports", cat_films: "Movies & TV Shows", cat_records: "Pointless Records",
-    cat_disney: "Disney", cat_bouffe: "Food & Dining", cat_logique: "Logic", cat_jv: "Video Games", cat_actu: "In the News",
-    cat_ortho: "Spelling Traps", cat_annees2000: "2000s Vibes", cat_musique: "Music Culture", cat_adulte18: "18+ Vibes",
+    cat_disney: "Disney", cat_bouffe: "Food", cat_logique: "Logic", cat_jv: "Video Games", cat_actu: "In the News",
+    cat_ortho: "Spelling", cat_annees2000: "2000s", cat_musique: "Music Culture", cat_adulte18: "18+ Vibes",
     kcat_animaux: "Animals", kcat_nature: "Science & Nature", kcat_contes: "Tales & Cartoons", kcat_sport: "Sports", kcat_geo: "Easy Geography", kcat_logique: "Kids Logic",
   },
 };
@@ -728,9 +728,9 @@ function ModeExplainer({ emoji, title, color, bullets, example, onContinue, onBa
       <ScreenHeader title={`${emoji} ${title}`} onBack={onBack} color={color} />
       <div className="flex flex-col gap-3 mb-6">
         {bullets.map((b, i) => (
-          <div key={i} className="rounded-2xl p-3 flex items-start gap-3" style={{ background: "rgba(255,255,255,0.06)" }}>
-            <span style={{ fontSize: 24, flexShrink: 0 }}>{b.emoji}</span>
-            <p className="text-sm opacity-90" style={{ lineHeight: 1.5 }}>{b.text}</p>
+          <div key={i} className="rounded-2xl p-4 flex items-center gap-4" style={{ background: "rgba(255,255,255,0.06)" }}>
+            <div className="flex items-center justify-center rounded-full flex-shrink-0" style={{ width: 42, height: 42, background: color, fontFamily: F.display, fontSize: 20, color: "#1B1030", fontWeight: 800 }}>{b.emoji || i + 1}</div>
+            <p style={{ fontFamily: F.display, fontSize: 21, lineHeight: 1.25 }}>{b.text}</p>
           </div>
         ))}
       </div>
@@ -1456,21 +1456,19 @@ function Stage({ children, wide }) {
 }
 function Logo() {
   return (
-    <div className="flex items-center justify-center gap-2 mb-8 select-none">
-      <span style={{ fontSize: 34 }}>🎉</span>
+    <div className="flex items-center justify-center mb-6 select-none">
       <h1
         style={{
           fontFamily: "'Lilita One', system-ui, sans-serif",
-          fontSize: 46,
+          fontSize: 56,
           letterSpacing: 1,
+          lineHeight: 1,
           color: C.gold,
-          transform: "rotate(-3deg)",
           textShadow: `3px 3px 0 ${C.pink}, -1px -1px 0 ${C.violet}, 0 0 22px rgba(255,201,60,0.35)`,
         }}
       >
         Quizi
       </h1>
-      <span style={{ fontSize: 34 }}>🎉</span>
     </div>
   );
 }
@@ -1508,7 +1506,7 @@ function GhostButton({ children, onClick, small }) {
 }
 function Chip({ children, active, onClick, disabled }) {
   return (
-    <button onClick={onClick} disabled={disabled} className="rounded-full px-4 py-2 text-sm font-bold transition-all disabled:opacity-30" style={{ fontFamily: F.body, background: active ? C.gold : "rgba(255,255,255,0.08)", color: active ? "#1B1030" : C.cream, border: `2px solid ${active ? C.gold : "rgba(255,255,255,0.2)"}` }}>
+    <button onClick={onClick} disabled={disabled} className="rounded-full px-4 py-2 text-sm font-bold transition-all disabled:opacity-30 text-left w-full whitespace-nowrap overflow-hidden text-ellipsis block" style={{ fontFamily: F.body, background: active ? C.gold : "rgba(255,255,255,0.08)", color: active ? "#1B1030" : C.cream, border: `2px solid ${active ? C.gold : "rgba(255,255,255,0.2)"}` }}>
       {children}
     </button>
   );
@@ -1548,7 +1546,7 @@ function Home({ onCreate, onJoin, onSolo, onMatchAmor, onBlindTest, onEnchere })
   const { lang, t: tr, setLang } = useLang();
   return (
     <Stage>
-      <div className="text-center mb-2 select-none" style={{ paddingTop: 4 }}>
+      <div className="text-center mb-5 select-none" style={{ paddingTop: 4 }}>
         <h1
           style={{
             fontFamily: "'Lilita One', system-ui, sans-serif",
@@ -1915,7 +1913,10 @@ function CreateRoom({ onCreated, onBack }) {
       {hostPlays && (
         <div className="mb-4 rounded-2xl p-4" style={{ background: "rgba(255,255,255,0.04)" }}>
           <p className="text-xs opacity-60 mb-2">{tr("hostPlaysWarning")}</p>
-          <input value={hostPseudo} onChange={(e) => setHostPseudo(e.target.value)} placeholder={tr("hostPseudoPlaceholder")} className="w-full mb-3 rounded-xl px-4 py-2" style={{ background: "rgba(255,255,255,0.08)", color: C.cream, border: "2px solid rgba(255,255,255,0.15)" }} />
+          <div className="flex gap-2 mb-3">
+            <input value={hostPseudo} onChange={(e) => setHostPseudo(e.target.value)} placeholder={tr("hostPseudoPlaceholder")} className="flex-1 rounded-xl px-4 py-2" style={{ background: "rgba(255,255,255,0.08)", color: C.cream, border: "2px solid rgba(255,255,255,0.15)" }} />
+            <button onClick={() => setHostPseudo(funPseudo())} className="rounded-xl px-3" style={{ background: C.gold }}><Sparkles size={18} color="#1B1030" /></button>
+          </div>
           <AvatarPicker animal={hostAnimal} onPick={setHostAnimal} taken={[]} />
         </div>
       )}
@@ -2038,23 +2039,15 @@ function JoinRoom({ onJoined, onBack, initialCode }) {
 function JokerTuto({ room, onDone }) {
   const { lang, t: tr } = useLang();
   const enabled = JOKERS.filter((j) => room?.settings?.jokers?.[j.id]);
-  const isRandom = room?.settings?.jokerRandom;
-  const n = room.settings.jokerRandomCount || 2;
   return (
     <Stage>
       <div className="text-center mb-2" style={{ fontSize: 40 }}>🎪</div>
-      <h2 className="text-center mb-3" style={{ fontFamily: F.display, fontSize: 26, color: C.gold }}>{tr("jokerBoxTitle")}</h2>
-      <p className="text-sm opacity-70 mb-5 text-center">
-        {(isRandom ? tr("jokerTutoRandom") : tr("jokerTutoManual")).replace("{n}", n)}
-      </p>
-      <div className="flex flex-col gap-3 mb-6">
+      <h2 className="text-center mb-5" style={{ fontFamily: F.display, fontSize: 26, color: C.gold }}>{tr("jokerBoxTitle")}</h2>
+      <div className="flex flex-col gap-2 mb-6">
         {enabled.map((j) => (
-          <div key={j.id} className="rounded-2xl p-3 flex items-center gap-3" style={{ background: "rgba(255,255,255,0.06)", border: "2px solid rgba(255,255,255,0.12)" }}>
-            <div className="rounded-full flex items-center justify-center flex-shrink-0" style={{ width: 46, height: 46, background: "rgba(255,255,255,0.1)", fontSize: 22 }}>{j.emoji}</div>
-            <div>
-              <p style={{ fontFamily: F.display, fontSize: 17, color: C.gold }}>{jokerLabel(j, lang)}</p>
-              <p className="text-xs opacity-80">{jokerDesc(j, lang)}</p>
-            </div>
+          <div key={j.id} className="rounded-xl px-4 py-3 flex items-center gap-3" style={{ background: "rgba(255,255,255,0.06)", border: "2px solid rgba(255,255,255,0.12)" }}>
+            <span style={{ fontSize: 22 }}>{j.emoji}</span>
+            <p style={{ fontFamily: F.display, fontSize: 17, color: C.gold, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{jokerLabel(j, lang)}</p>
           </div>
         ))}
         {enabled.length === 0 && <p className="text-sm opacity-60 text-center">{tr("noJokerThisGame")}</p>}
@@ -2066,63 +2059,44 @@ function JokerTuto({ room, onDone }) {
 
 function JokerDraw({ room, code, pid, onDone }) {
   const { lang, t: tr } = useLang();
-  const enabledIds = Object.entries(room.settings.jokers || {}).filter(([, v]) => v).map(([k]) => k);
-  const jokerDefs = JOKERS.filter((j) => enabledIds.includes(j.id));
-  const [deck] = useState(() => {
-    const arr = jokerDefs.map((j, i) => ({ ...j, backColor: CARD_BACK_COLORS[i % CARD_BACK_COLORS.length] }));
-    for (let i = arr.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [arr[i], arr[j]] = [arr[j], arr[i]]; }
-    return arr;
-  });
-  const [flipped, setFlipped] = useState([]);
-  const [confirmed, setConfirmed] = useState(false);
-  const count = Math.min(room.settings.jokerRandomCount || 2, deck.length);
-  const picked = flipped.map((i) => deck[i].id);
+  const [picked, setPicked] = useState(null);
 
-  function flip(i) { if (flipped.includes(i) || flipped.length >= count) return; setFlipped((f) => [...f, i]); }
-  async function confirm() { await sSet(`qz:${code}:playerjokers:${pid}`, picked); setConfirmed(true); }
+  useEffect(() => {
+    const enabledIds = Object.entries(room.settings.jokers || {}).filter(([, v]) => v).map(([k]) => k);
+    const jokerDefs = JOKERS.filter((j) => enabledIds.includes(j.id));
+    const shuffled = [...jokerDefs];
+    for (let i = shuffled.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]; }
+    const count = Math.min(room.settings.jokerRandomCount || 2, shuffled.length);
+    const chosen = shuffled.slice(0, count).map((j) => j.id);
+    (async () => { await sSet(`qz:${code}:playerjokers:${pid}`, chosen); setPicked(chosen); })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  if (confirmed) {
+  if (picked === null) {
     return (
       <Stage>
-        <div className="text-center mb-2" style={{ fontSize: 44 }}>🎉</div>
-        <h2 className="text-center mb-4" style={{ fontFamily: F.display, fontSize: 24, color: C.gold }}>{tr("yourJokersTitle")}</h2>
-        <div className="flex flex-col gap-3 mb-6">
-          {picked.map((id) => { const j = JOKERS.find((x) => x.id === id); return (
-            <div key={id} className="rounded-2xl p-3 flex items-center gap-3" style={{ background: "rgba(255,255,255,0.06)", border: "2px solid rgba(255,255,255,0.12)" }}>
-              <div className="rounded-full flex items-center justify-center flex-shrink-0" style={{ width: 46, height: 46, background: "rgba(255,255,255,0.1)", fontSize: 22 }}>{j.emoji}</div>
-              <div><p style={{ fontFamily: F.display, fontSize: 17, color: C.gold }}>{jokerLabel(j, lang)}</p><p className="text-xs opacity-80">{jokerDesc(j, lang)}</p></div>
-            </div>
-          ); })}
+        <div className="text-center mt-10">
+          <div className="text-center mb-4" style={{ fontSize: 44 }}>🎲</div>
+          <p className="opacity-70 text-center">{tr("loadingSimple")}</p>
         </div>
-        <BigButton onClick={() => onDone(picked)} color={C.gold}>{tr("joinRoomBtn")}</BigButton>
       </Stage>
     );
   }
 
   return (
     <Stage>
-      <ScreenHeader title={tr("drawJokersTitle")} color={C.gold} />
-      <p className="text-sm opacity-70 mb-4 text-center">{tr("drawChooseCards").replace("{n}", count).replace("{total}", deck.length)}</p>
-      <div className="grid grid-cols-3 gap-3 mb-6">
-        {deck.map((j, i) => {
-          const isFlipped = flipped.includes(i);
-          const Icon = j.icon;
-          return (
-            <button key={i} onClick={() => flip(i)} disabled={isFlipped || flipped.length >= count} className="rounded-2xl aspect-square flex flex-col items-center justify-center gap-1 transition-transform active:scale-95" style={isFlipped ? { background: C.gold, border: `2px solid ${C.gold}`, boxShadow: `0 4px 0 rgba(0,0,0,0.25)` } : { background: `linear-gradient(135deg, ${j.backColor}, ${j.backColor}99)`, border: "2px solid rgba(255,255,255,0.25)", boxShadow: `0 4px 0 rgba(0,0,0,0.2)` }}>
-              {isFlipped ? (<><Icon size={28} color="#1B1030" /><span style={{ fontFamily: F.display, fontSize: 13, color: "#1B1030", textAlign: "center", lineHeight: 1.15, padding: "0 2px" }}>{jokerLabel(j, lang)}</span></>) : (<span style={{ fontSize: 28 }}>🃏</span>)}
-            </button>
-          );
-        })}
-      </div>
-      {picked.length > 0 && (
-        <div className="mb-4">
-          <p className="text-xs opacity-70 mb-2 text-center">{tr("alreadyRevealed")}</p>
-          <div className="flex gap-2 justify-center flex-wrap">
-            {picked.map((id) => { const j = JOKERS.find((x) => x.id === id); return <span key={id} className="text-xs rounded-full px-3 py-1 flex items-center gap-1" style={{ background: C.gold, color: "#1B1030", fontWeight: 700 }}>{j.emoji} {jokerLabel(j, lang)}</span>; })}
+      <div className="text-center mb-2" style={{ fontSize: 44 }}>🎉</div>
+      <h2 className="text-center mb-4" style={{ fontFamily: F.display, fontSize: 24, color: C.gold }}>{tr("yourJokersTitle")}</h2>
+      <div className="flex flex-col gap-2 mb-6">
+        {picked.map((id) => { const j = JOKERS.find((x) => x.id === id); return (
+          <div key={id} className="rounded-xl px-4 py-3 flex items-center gap-3" style={{ background: "rgba(255,255,255,0.06)", border: "2px solid rgba(255,255,255,0.12)" }}>
+            <span style={{ fontSize: 22 }}>{j.emoji}</span>
+            <p style={{ fontFamily: F.display, fontSize: 17, color: C.gold, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{jokerLabel(j, lang)}</p>
           </div>
-        </div>
-      )}
-      <BigButton onClick={confirm} color={C.gold} disabled={flipped.length < count}>{tr("validateMyJokers")}</BigButton>
+        ); })}
+        {picked.length === 0 && <p className="text-sm opacity-60 text-center">{tr("noJokerThisGame")}</p>}
+      </div>
+      <BigButton onClick={() => onDone(picked)} color={C.gold}>{tr("joinRoomBtn")}</BigButton>
     </Stage>
   );
 }
@@ -3040,7 +3014,10 @@ function CreateMatchAmor({ onCreated, onBack }) {
       </div>
       {hostPlays && (
         <div className="mb-6 rounded-2xl p-4" style={{ background: "rgba(255,255,255,0.04)" }}>
-          <input value={hostPseudo} onChange={(e) => setHostPseudo(e.target.value)} placeholder={tr("hostPseudoPlaceholder")} className="w-full mb-3 rounded-xl px-4 py-2" style={{ background: "rgba(255,255,255,0.08)", color: C.cream, border: "2px solid rgba(255,255,255,0.15)" }} />
+          <div className="flex gap-2 mb-3">
+            <input value={hostPseudo} onChange={(e) => setHostPseudo(e.target.value)} placeholder={tr("hostPseudoPlaceholder")} className="flex-1 rounded-xl px-4 py-2" style={{ background: "rgba(255,255,255,0.08)", color: C.cream, border: "2px solid rgba(255,255,255,0.15)" }} />
+            <button onClick={() => setHostPseudo(funPseudo())} className="rounded-xl px-3" style={{ background: C.gold }}><Sparkles size={18} color="#1B1030" /></button>
+          </div>
           <AvatarPicker animal={hostAnimal} onPick={setHostAnimal} taken={[]} />
         </div>
       )}
@@ -3255,13 +3232,11 @@ function CreateBlindTest({ onCreated, onBack }) {
   return (
     <Stage wide>
       <ScreenHeader title="🎧 Blind Test — réglages" onBack={onBack} color={C.violet} />
-      <p className="text-xs opacity-50 mb-4 text-center">{tr("apiHint")}</p>
       <div className="flex items-center justify-between mb-2">
         <p className="text-sm opacity-70 font-bold">{tr("musicCategoriesLabel")}</p>
         <GhostButton onClick={toggleAllCats} small>{allCatsSelected ? tr("uncheckAll") : tr("checkAll")}</GhostButton>
       </div>
       <div className="grid grid-cols-2 gap-2 mb-6">{BLIND_CATEGORIES.map((c) => (<Chip key={c.id} active={cats.includes(c.id)} onClick={() => toggleCat(c.id)}>{c.emoji} {c.label}</Chip>))}</div>
-      <p className="text-xs opacity-50 mb-4 text-center">{tr("consistencyHint")}</p>
       <div className="grid grid-cols-2 gap-6 mb-6">
         <div>
           <p className="text-sm opacity-70 mb-2 font-bold">{tr("nbTracksLabel")}</p>
@@ -3287,7 +3262,10 @@ function CreateBlindTest({ onCreated, onBack }) {
       </div>
       {hostPlays && (
         <div className="mb-6 rounded-2xl p-4" style={{ background: "rgba(255,255,255,0.04)" }}>
-          <input value={hostPseudo} onChange={(e) => setHostPseudo(e.target.value)} placeholder={tr("hostPseudoPlaceholder")} className="w-full mb-3 rounded-xl px-4 py-2" style={{ background: "rgba(255,255,255,0.08)", color: C.cream, border: "2px solid rgba(255,255,255,0.15)" }} />
+          <div className="flex gap-2 mb-3">
+            <input value={hostPseudo} onChange={(e) => setHostPseudo(e.target.value)} placeholder={tr("hostPseudoPlaceholder")} className="flex-1 rounded-xl px-4 py-2" style={{ background: "rgba(255,255,255,0.08)", color: C.cream, border: "2px solid rgba(255,255,255,0.15)" }} />
+            <button onClick={() => setHostPseudo(funPseudo())} className="rounded-xl px-3" style={{ background: C.gold }}><Sparkles size={18} color="#1B1030" /></button>
+          </div>
           <AvatarPicker animal={hostAnimal} onPick={setHostAnimal} taken={[]} />
         </div>
       )}
@@ -3663,7 +3641,6 @@ function CreateEnchere({ onCreated, onBack }) {
   return (
     <Stage wide>
       <ScreenHeader title="💰 Quitte ou Double — réglages" onBack={onBack} color={C.gold} />
-      <p className="text-sm opacity-70 mb-4 text-center">{tr("mixedCategoriesHint")}</p>
       <div className="mb-4">
         <Chip active={kidsMode} onClick={() => setKidsMode((v) => !v)}>{tr("kidsMode")}</Chip>
       </div>
@@ -3708,7 +3685,10 @@ function CreateEnchere({ onCreated, onBack }) {
       </div>
       {hostPlays && (
         <div className="mb-6 rounded-2xl p-4" style={{ background: "rgba(255,255,255,0.04)" }}>
-          <input value={hostPseudo} onChange={(e) => setHostPseudo(e.target.value)} placeholder={tr("hostPseudoPlaceholder")} className="w-full mb-3 rounded-xl px-4 py-2" style={{ background: "rgba(255,255,255,0.08)", color: C.cream, border: "2px solid rgba(255,255,255,0.15)" }} />
+          <div className="flex gap-2 mb-3">
+            <input value={hostPseudo} onChange={(e) => setHostPseudo(e.target.value)} placeholder={tr("hostPseudoPlaceholder")} className="flex-1 rounded-xl px-4 py-2" style={{ background: "rgba(255,255,255,0.08)", color: C.cream, border: "2px solid rgba(255,255,255,0.15)" }} />
+            <button onClick={() => setHostPseudo(funPseudo())} className="rounded-xl px-3" style={{ background: C.gold }}><Sparkles size={18} color="#1B1030" /></button>
+          </div>
           <AvatarPicker animal={hostAnimal} onPick={setHostAnimal} taken={[]} />
         </div>
       )}
@@ -4153,10 +4133,10 @@ function QuizAppInner() {
       onBack={() => setView("home")}
       onContinue={() => setView("admin-create")}
       bullets={[
-        { emoji: "📱", text: tr("explainClassicB1") },
-        { emoji: "⚡", text: tr("explainClassicB2") },
-        { emoji: "🃏", text: tr("explainClassicB3") },
-        { emoji: "🏆", text: tr("explainClassicB4") },
+        { text: tr("explainClassicB1") },
+        { text: tr("explainClassicB2") },
+        { text: tr("explainClassicB3") },
+        { text: tr("explainClassicB4") },
       ]}
     />
   );
@@ -4166,9 +4146,9 @@ function QuizAppInner() {
       onBack={() => setView("home")}
       onContinue={() => setView("solo-home")}
       bullets={[
-        { emoji: "🎯", text: tr("explainSoloB1") },
-        { emoji: "💀", text: tr("explainSoloB2") },
-        { emoji: "🚫", text: tr("explainSoloB3") },
+        { text: tr("explainSoloB1") },
+        { text: tr("explainSoloB2") },
+        { text: tr("explainSoloB3") },
       ]}
     />
   );
@@ -4178,9 +4158,9 @@ function QuizAppInner() {
       onBack={() => setView("home")}
       onContinue={() => setView("matchamor-create")}
       bullets={[
-        { emoji: "⚔️", text: tr("explainMatchAmorB1") },
-        { emoji: "🔥", text: tr("explainMatchAmorB2") },
-        { emoji: "🏆", text: tr("explainMatchAmorB3") },
+        { text: tr("explainMatchAmorB1") },
+        { text: tr("explainMatchAmorB2") },
+        { text: tr("explainMatchAmorB3") },
       ]}
     />
   );
@@ -4190,9 +4170,9 @@ function QuizAppInner() {
       onBack={() => setView("home")}
       onContinue={() => setView("blindtest-create")}
       bullets={[
-        { emoji: "🔊", text: tr("explainBlindTestB1") },
-        { emoji: "🎚️", text: tr("explainBlindTestB2") },
-        { emoji: "❓", text: tr("explainBlindTestB3") },
+        { text: tr("explainBlindTestB1") },
+        { text: tr("explainBlindTestB2") },
+        { text: tr("explainBlindTestB3") },
       ]}
     />
   );
@@ -4202,11 +4182,11 @@ function QuizAppInner() {
       onBack={() => setView("home")}
       onContinue={() => setView("enchere-create")}
       bullets={[
-        { emoji: "💵", text: tr("explainEnchereB1") },
-        { emoji: "🎯", text: tr("explainEnchereB2") },
-        { emoji: "✅", text: tr("explainEnchereB3") },
-        { emoji: "💀", text: tr("explainEnchereB4") },
-        { emoji: "🏆", text: tr("explainEnchereB5") },
+        { text: tr("explainEnchereB1") },
+        { text: tr("explainEnchereB2") },
+        { text: tr("explainEnchereB3") },
+        { text: tr("explainEnchereB4") },
+        { text: tr("explainEnchereB5") },
       ]}
     />
   );
