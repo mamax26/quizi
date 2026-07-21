@@ -91,7 +91,7 @@ const STRINGS = {
     jokerManualHint: "Chaque joueur choisit ses jokers lui-même.",
     jokerRandomHint: "L'ordinateur tire les jokers au hasard.",
     jokersPerPlayerLabel: "Jokers par joueur :",
-    malusLabel: "Malus en cas de mauvaise réponse",
+    malusLabel: "Malus si mauvaise réponse",
     malusNone: "Aucun",
     hostPlaysLabel: "L'hôte joue aussi ?",
     hostPlaysNo: "Non, juste animateur",
@@ -204,6 +204,7 @@ const STRINGS = {
     scoreOnTotal: "Score : {score} pts sur {total}",
     backToHome: "Retour à l'accueil",
     correctAnswerMsg: "Bonne réponse ! 🎉",
+    closestWinsHint: "💡 Le plus près l'emporte !",
     wrongAnswerMsg: "Raté !",
     wrongAnswerCrashMsg: "Raté ! 💔",
     answerColonLabel: "Réponse :",
@@ -348,7 +349,7 @@ const STRINGS = {
     jokerManualHint: "Each player picks their own jokers.",
     jokerRandomHint: "The computer draws jokers at random.",
     jokersPerPlayerLabel: "Jokers per player:",
-    malusLabel: "Penalty for a wrong answer",
+    malusLabel: "Penalty if wrong",
     malusNone: "None",
     hostPlaysLabel: "Does the host play too?",
     hostPlaysNo: "No, just hosting",
@@ -461,6 +462,7 @@ const STRINGS = {
     scoreOnTotal: "Score: {score} pts out of {total}",
     backToHome: "Back to home",
     correctAnswerMsg: "Correct answer! 🎉",
+    closestWinsHint: "💡 Closest guess wins!",
     wrongAnswerMsg: "Wrong!",
     wrongAnswerCrashMsg: "Wrong! 💔",
     answerColonLabel: "Answer:",
@@ -2620,6 +2622,7 @@ function AdminGame({ code, room, onRoomChange, onFinished, hostPid, hostAssigned
       <div className="rounded-3xl p-8 mb-6 text-center" style={{ background: "rgba(255,255,255,0.06)" }}>
         <p className="uppercase tracking-widest mb-3" style={{ fontSize: 20, fontWeight: 800, color: C.gold }}>{cat?.emoji} {catLabelText}</p>
         <p style={{ fontFamily: F.display, fontSize: 32 }}>{q.text}</p>
+        {q.type === "echelle" && !revealed && <p className="text-sm opacity-70 mt-3">{tr("closestWinsHint")}</p>}
         {q.type === "qcm" && (<div className="grid grid-cols-2 gap-3 mt-6">{q.options.map((o, i) => (<div key={i} className="rounded-xl p-3" style={{ background: revealed && i === q.answer ? C.teal : "rgba(255,255,255,0.08)", color: revealed && i === q.answer ? "#1B1030" : C.cream, fontFamily: F.body, fontWeight: 700, fontSize: 18 }}>{o}</div>))}</div>)}
         {q.type === "vf" && (<div className="flex gap-4 justify-center mt-6"><div className="rounded-xl px-6 py-3" style={{ background: revealed && q.answer === true ? C.teal : "rgba(255,255,255,0.08)" }}>{tr("trueLabel")}</div><div className="rounded-xl px-6 py-3" style={{ background: revealed && q.answer === false ? C.teal : "rgba(255,255,255,0.08)" }}>{tr("falseLabel")}</div></div>)}
         {q.type === "carte" && (<div className="relative rounded-xl mt-6 mx-auto" style={{ width: "100%", maxWidth: 420, height: 220, background: "rgba(255,255,255,0.06)" }}>{MAP_ZONES.map((z) => (<div key={z.id} className="absolute rounded-full px-2 py-1 text-xs" style={{ left: `${z.x}%`, top: `${z.y}%`, transform: "translate(-50%,-50%)", background: revealed && z.id === q.answer ? C.teal : "rgba(255,255,255,0.12)", color: revealed && z.id === q.answer ? "#1B1030" : C.cream }}>{z.label}</div>))}</div>)}
@@ -2872,7 +2875,7 @@ function PlayerGameCore({ code, pid, room, assignedJokers, usedJokersEver, setUs
       </div>
       {speedDeadline != null && <p className="text-xs text-center mb-2" style={{ color: C.pink }}>{tr("timeReducedMsg")}</p>}
       <div>
-        <div className="rounded-2xl p-5 mb-5" style={{ background: "rgba(255,255,255,0.06)" }}><p className="uppercase tracking-widest mb-2" style={{ fontSize: 16, fontWeight: 800, color: C.gold }}>{findCategory(q.category)?.emoji} {(() => { const c = findCategory(q.category); return c ? (c.id.startsWith("k_") ? kidsCategoryLabel(c, lang) : categoryLabel(c, lang)) : ""; })()}</p><p style={{ fontFamily: F.display, fontSize: 26 }}>{q.text}</p></div>
+        <div className="rounded-2xl p-5 mb-5" style={{ background: "rgba(255,255,255,0.06)" }}><p className="uppercase tracking-widest mb-2" style={{ fontSize: 16, fontWeight: 800, color: C.gold }}>{findCategory(q.category)?.emoji} {(() => { const c = findCategory(q.category); return c ? (c.id.startsWith("k_") ? kidsCategoryLabel(c, lang) : categoryLabel(c, lang)) : ""; })()}</p><p style={{ fontFamily: F.display, fontSize: 26 }}>{q.text}</p>{q.type === "echelle" && <p className="text-xs opacity-70 mt-1">{tr("closestWinsHint")}</p>}</div>
         {jokerUsed?.id === "copieur" && (
           <div className="rounded-xl p-3 mb-4 text-center text-sm" style={{ background: "rgba(255,201,60,0.1)", color: C.gold }}>
             {copyPeek === null ? tr("waitingForTargetAnswer").replace("{name}", jokerUsed.targetPseudo || tr("yourTargetFallback")) : tr("targetAnswered").replace("{name}", jokerUsed.targetPseudo || tr("yourTargetFallbackCap")).replace("{value}", q.type === "qcm" ? q.options[copyPeek] : q.type === "vf" ? (copyPeek ? tr("trueLabel") : tr("falseLabel")) : q.type === "carte" ? MAP_ZONES.find((z) => z.id === copyPeek)?.label : copyPeek)}
@@ -3195,6 +3198,7 @@ function MatchAmorAdminGame({ code, room, onRoomChange, onFinished, hostPid }) {
       <div className="rounded-3xl p-8 mb-6 text-center" style={{ background: "rgba(255,255,255,0.06)" }}>
         <p className="uppercase tracking-widest mb-3" style={{ fontSize: 20, fontWeight: 800, color: C.gold }}>{cat?.emoji} {catLabelText}</p>
         <p style={{ fontFamily: F.display, fontSize: 32 }}>{q.text}</p>
+        {q.type === "echelle" && !revealed && <p className="text-sm opacity-70 mt-3">{tr("closestWinsHint")}</p>}
         {revealed && (
           <div className="mt-6">
             {q.type === "echelle" ? (
@@ -3261,7 +3265,7 @@ function PlayerMatchAmor({ code, pid, room }) {
         <span className="text-xs opacity-60">{room.alive.length} {tr("inRace")}</span>
         <span style={{ fontFamily: F.mono, fontSize: 20, color: left <= 5 ? C.pink : C.gold }}>{left}s</span>
       </div>
-      <div className="rounded-2xl p-5 mb-5" style={{ background: "rgba(255,255,255,0.06)" }}><p className="uppercase tracking-widest mb-2" style={{ fontSize: 16, fontWeight: 800, color: C.gold }}>{findCategory(q.category)?.emoji} {(() => { const c = findCategory(q.category); return c ? (c.id.startsWith("k_") ? kidsCategoryLabel(c, lang) : categoryLabel(c, lang)) : ""; })()}</p><p style={{ fontFamily: F.display, fontSize: 26 }}>{q.text}</p></div>
+      <div className="rounded-2xl p-5 mb-5" style={{ background: "rgba(255,255,255,0.06)" }}><p className="uppercase tracking-widest mb-2" style={{ fontSize: 16, fontWeight: 800, color: C.gold }}>{findCategory(q.category)?.emoji} {(() => { const c = findCategory(q.category); return c ? (c.id.startsWith("k_") ? kidsCategoryLabel(c, lang) : categoryLabel(c, lang)) : ""; })()}</p><p style={{ fontFamily: F.display, fontSize: 26 }}>{q.text}</p>{q.type === "echelle" && <p className="text-xs opacity-70 mt-1">{tr("closestWinsHint")}</p>}</div>
       {!submitted && left > 0 ? (
         <QuestionInput q={q} onSubmit={submit} scaleVal={scaleVal} setScaleVal={setScaleVal} />
       ) : (
@@ -3402,11 +3406,13 @@ function BlindTestAdminGame({ code, room, onRoomChange, onFinished, hostPid }) {
     });
     const pool = valid.length > 0 ? valid : ["titre"];
     return pool[Math.floor(Math.random() * pool.length)];
-  }, [room.currentIndex, track]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [room.currentIndex, track.trackName]);
   const triviaQuestion = useMemo(() => {
     if (questionKind !== "trivia" || !track.trivia || track.trivia.length === 0) return null;
     return track.trivia[Math.floor(Math.random() * track.trivia.length)];
-  }, [room.currentIndex, questionKind, track]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [room.currentIndex, questionKind, track.trackName]);
   const left = useCountdown(room.questionStartedAt, room.settings.seconds);
   const [answersCount, setAnswersCount] = useState(0);
   const [revealed, setRevealed] = useState(false);
@@ -3898,7 +3904,8 @@ function EnchereAdminGame({ code, room, onRoomChange, onFinished, hostPid }) {
       }
     }, 1000);
     return () => clearInterval(t);
-  }, [room.currentIndex, stage, code, getActivePlayers, advanceToAnswering, collectResults, revealed]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [room.currentIndex, stage, code]);
 
   useEffect(() => {
     if (left === 0) {
