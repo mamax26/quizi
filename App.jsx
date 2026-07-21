@@ -71,6 +71,7 @@ const STRINGS = {
     explainEnchereExample: "Tu as 1000 points et tu mises 300 sur une question annoncée 🔴 Difficile. Bonne réponse → tu gagnes 300 pts (total 1300). Mauvaise réponse → tu perds ta mise (total 700).",
     roomSettingsTitle: "Réglages de la partie",
     categoriesLabel: "Catégories",
+    sectionFormatTitle: "Format de la partie",
     checkAll: "Tout cocher",
     uncheckAll: "Tout décocher",
     kidsMode: "🎈 Mode Kids (10-14 ans)",
@@ -327,6 +328,7 @@ const STRINGS = {
     explainEnchereExample: "You have 1000 points and bet 300 on a question marked 🔴 Hard. Correct answer → you gain 300 pts (total 1300). Wrong answer → you lose your bet (total 700).",
     roomSettingsTitle: "Game settings",
     categoriesLabel: "Categories",
+    sectionFormatTitle: "Game format",
     checkAll: "Check all",
     uncheckAll: "Uncheck all",
     kidsMode: "🎈 Kids Mode (ages 10-14)",
@@ -1481,6 +1483,17 @@ function ScreenHeader({ title, onBack, color = C.gold }) {
     </div>
   );
 }
+function SettingSection({ number, icon, title, color, children }) {
+  return (
+    <div className="rounded-2xl p-4 mb-4" style={{ background: "rgba(255,255,255,0.04)", borderTop: "1px solid rgba(255,255,255,0.08)", borderRight: "1px solid rgba(255,255,255,0.08)", borderBottom: "1px solid rgba(255,255,255,0.08)", borderLeft: `4px solid ${color}` }}>
+      <div className="flex items-center gap-2 mb-3">
+        <div className="flex items-center justify-center rounded-full flex-shrink-0" style={{ width: 24, height: 24, background: color, color: "#1B1030", fontFamily: F.display, fontSize: 13, fontWeight: 800 }}>{number}</div>
+        <p style={{ fontFamily: F.display, fontSize: 16, color }}>{icon} {title}</p>
+      </div>
+      {children}
+    </div>
+  );
+}
 function BigButton({ children, onClick, color = C.pink, disabled, icon: Icon }) {
   const textColor = (color === C.violet || color === C.orange) ? C.cream : "#1B1030";
   return (
@@ -1512,7 +1525,7 @@ function Chip({ children, active, onClick, disabled }) {
   );
 }
 
-function CategoryPicker({ cats, setCats, kidsMode, setKidsMode }) {
+function CategoryPicker({ cats, setCats, kidsMode, setKidsMode, hideTitle }) {
   const { lang, t: tr } = useLang();
   const options = kidsMode ? KIDS_CATEGORIES : CATEGORIES;
   const allSelected = options.length > 0 && options.every((c) => cats.includes(c.id));
@@ -1525,8 +1538,8 @@ function CategoryPicker({ cats, setCats, kidsMode, setKidsMode }) {
   }
   return (
     <>
-      <div className="flex items-center justify-between mb-2">
-        <p className="text-sm opacity-70 font-bold">{tr("categoriesLabel")}</p>
+      <div className={`flex items-center mb-2 ${hideTitle ? "justify-end" : "justify-between"}`}>
+        {!hideTitle && <p className="text-sm opacity-70 font-bold">{tr("categoriesLabel")}</p>}
         <GhostButton onClick={toggleAll} small>{allSelected ? tr("uncheckAll") : tr("checkAll")}</GhostButton>
       </div>
       {setKidsMode && (
@@ -1863,65 +1876,80 @@ function CreateRoom({ onCreated, onBack }) {
   return (
     <Stage wide>
       <ScreenHeader title={tr("roomSettingsTitle")} onBack={onBack} />
-      <CategoryPicker cats={cats} setCats={setCats} kidsMode={kidsMode} setKidsMode={setKidsMode} />
-      <div className="grid grid-cols-2 gap-6 mb-6">
-        <div>
-          <p className="text-sm opacity-70 mb-2 font-bold">{tr("nbQuestionsLabel")}</p>
-          <div className="flex items-center gap-3">
-            <button onClick={() => setNbQuestions((n) => Math.max(5, n - 1))} className="rounded-full p-2" style={{ background: "rgba(255,255,255,0.1)" }}><Minus size={16} /></button>
-            <span style={{ fontFamily: F.mono, fontSize: 22 }}>{nbQuestions}</span>
-            <button onClick={() => setNbQuestions((n) => Math.min(30, n + 1))} className="rounded-full p-2" style={{ background: "rgba(255,255,255,0.1)" }}><Plus size={16} /></button>
+
+      <SettingSection number={1} icon="🎯" title={tr("categoriesLabel")} color={C.teal}>
+        <CategoryPicker cats={cats} setCats={setCats} kidsMode={kidsMode} setKidsMode={setKidsMode} hideTitle />
+      </SettingSection>
+
+      <SettingSection number={2} icon="⏱️" title={tr("sectionFormatTitle")} color={C.gold}>
+        <div className="grid grid-cols-2 gap-6">
+          <div>
+            <p className="text-sm opacity-70 mb-2 font-bold">{tr("nbQuestionsLabel")}</p>
+            <div className="flex items-center gap-3">
+              <button onClick={() => setNbQuestions((n) => Math.max(5, n - 1))} className="rounded-full p-2" style={{ background: "rgba(255,255,255,0.1)" }}><Minus size={16} /></button>
+              <span style={{ fontFamily: F.mono, fontSize: 22 }}>{nbQuestions}</span>
+              <button onClick={() => setNbQuestions((n) => Math.min(30, n + 1))} className="rounded-full p-2" style={{ background: "rgba(255,255,255,0.1)" }}><Plus size={16} /></button>
+            </div>
+          </div>
+          <div>
+            <p className="text-sm opacity-70 mb-2 font-bold">{tr("secondsPerQuestionLabel")}</p>
+            <div className="flex items-center gap-3">
+              <button onClick={() => setSeconds((n) => Math.max(10, n - 5))} className="rounded-full p-2" style={{ background: "rgba(255,255,255,0.1)" }}><Minus size={16} /></button>
+              <span style={{ fontFamily: F.mono, fontSize: 22 }}>{seconds}s</span>
+              <button onClick={() => setSeconds((n) => Math.min(60, n + 5))} className="rounded-full p-2" style={{ background: "rgba(255,255,255,0.1)" }}><Plus size={16} /></button>
+            </div>
           </div>
         </div>
-        <div>
-          <p className="text-sm opacity-70 mb-2 font-bold">{tr("secondsPerQuestionLabel")}</p>
-          <div className="flex items-center gap-3">
-            <button onClick={() => setSeconds((n) => Math.max(10, n - 5))} className="rounded-full p-2" style={{ background: "rgba(255,255,255,0.1)" }}><Minus size={16} /></button>
-            <span style={{ fontFamily: F.mono, fontSize: 22 }}>{seconds}s</span>
-            <button onClick={() => setSeconds((n) => Math.min(60, n + 5))} className="rounded-full p-2" style={{ background: "rgba(255,255,255,0.1)" }}><Plus size={16} /></button>
-          </div>
+      </SettingSection>
+
+      <SettingSection number={3} icon="👥" title={tr("teamsModeLabel")} color={C.violet}>
+        <div className="grid grid-cols-2 gap-2">{[1, 2, 3, 4].map((n) => (<Chip key={n} active={teamsMode === n} onClick={() => setTeamsMode(n)}>{n === 1 ? tr("soloForAll") : `${n} ${tr("teamsCount")}`}</Chip>))}</div>
+      </SettingSection>
+
+      <SettingSection number={4} icon="🃏" title={tr("jokersEnabledLabel")} color={C.pink}>
+        <div className="grid grid-cols-2 gap-2">{JOKERS.map((j) => (<Chip key={j.id} active={jokers[j.id]} onClick={() => toggleJoker(j.id)}>{jokerLabel(j, lang)}</Chip>))}</div>
+      </SettingSection>
+
+      <SettingSection number={5} icon="🎲" title={tr("jokerAttribLabel")} color={C.mint}>
+        <div className="flex flex-wrap gap-2 mb-3">
+          <Chip active={!jokerRandom} onClick={() => setJokerRandom(false)}>{tr("jokerManual")}</Chip>
+          <Chip active={jokerRandom} onClick={() => setJokerRandom(true)}>{tr("jokerRandomLabel")}</Chip>
         </div>
-      </div>
-      <p className="text-sm opacity-70 mb-2 font-bold">{tr("teamsModeLabel")}</p>
-      <div className="grid grid-cols-2 gap-2 mb-6">{[1, 2, 3, 4].map((n) => (<Chip key={n} active={teamsMode === n} onClick={() => setTeamsMode(n)}>{n === 1 ? tr("soloForAll") : `${n} ${tr("teamsCount")}`}</Chip>))}</div>
-      <p className="text-sm opacity-70 mb-2 font-bold">{tr("jokersEnabledLabel")}</p>
-      <div className="grid grid-cols-2 gap-2 mb-6">{JOKERS.map((j) => (<Chip key={j.id} active={jokers[j.id]} onClick={() => toggleJoker(j.id)}>{jokerLabel(j, lang)}</Chip>))}</div>
-
-      <p className="text-sm opacity-70 mb-2 font-bold">{tr("jokerAttribLabel")}</p>
-      <div className="flex flex-wrap gap-2 mb-3">
-        <Chip active={!jokerRandom} onClick={() => setJokerRandom(false)}>{tr("jokerManual")}</Chip>
-        <Chip active={jokerRandom} onClick={() => setJokerRandom(true)}>{tr("jokerRandomLabel")}</Chip>
-      </div>
-      <p className="text-xs opacity-50 mb-3">{jokerRandom ? tr("jokerRandomHint") : tr("jokerManualHint")}</p>
-      <div className="flex items-center gap-3 mb-6">
-        <span className="text-sm opacity-70">{tr("jokersPerPlayerLabel")}</span>
-        <button onClick={() => setJokerRandomCount((n) => Math.max(1, n - 1))} className="rounded-full p-2" style={{ background: "rgba(255,255,255,0.1)" }}><Minus size={16} /></button>
-        <span style={{ fontFamily: F.mono, fontSize: 20 }}>{jokerRandomCount}</span>
-        <button onClick={() => setJokerRandomCount((n) => Math.min(JOKERS.length, n + 1))} className="rounded-full p-2" style={{ background: "rgba(255,255,255,0.1)" }}><Plus size={16} /></button>
-      </div>
-
-      <p className="text-sm opacity-70 mb-2 font-bold">{tr("malusLabel")}</p>
-      <div className="flex flex-wrap gap-2 mb-6">
-        {[0, -25, -50, -100].map((m) => (<Chip key={m} active={malus === m} onClick={() => setMalus(m)}>{m === 0 ? tr("malusNone") : `${m} pts`}</Chip>))}
-      </div>
-
-      <p className="text-sm opacity-70 mb-2 font-bold">{tr("hostPlaysLabel")}</p>
-      <div className="flex flex-wrap gap-2 mb-3">
-        <Chip active={!hostPlays} onClick={() => setHostPlays(false)}>{tr("hostPlaysNo")}</Chip>
-        <Chip active={hostPlays} onClick={() => setHostPlays(true)}>{tr("hostPlaysYes")}</Chip>
-      </div>
-      {hostPlays && (
-        <div className="mb-4 rounded-2xl p-4" style={{ background: "rgba(255,255,255,0.04)" }}>
-          <p className="text-xs opacity-60 mb-2">{tr("hostPlaysWarning")}</p>
-          <div className="flex gap-2 mb-3">
-            <input value={hostPseudo} onChange={(e) => setHostPseudo(e.target.value)} placeholder={tr("hostPseudoPlaceholder")} className="flex-1 rounded-xl px-4 py-2" style={{ background: "rgba(255,255,255,0.08)", color: C.cream, border: "2px solid rgba(255,255,255,0.15)" }} />
-            <button onClick={() => setHostPseudo(funPseudo())} className="rounded-xl px-3" style={{ background: C.gold }}><Sparkles size={18} color="#1B1030" /></button>
-          </div>
-          <AvatarPicker animal={hostAnimal} onPick={setHostAnimal} taken={[]} />
+        <p className="text-xs opacity-50 mb-3">{jokerRandom ? tr("jokerRandomHint") : tr("jokerManualHint")}</p>
+        <div className="flex items-center gap-3">
+          <span className="text-sm opacity-70">{tr("jokersPerPlayerLabel")}</span>
+          <button onClick={() => setJokerRandomCount((n) => Math.max(1, n - 1))} className="rounded-full p-2" style={{ background: "rgba(255,255,255,0.1)" }}><Minus size={16} /></button>
+          <span style={{ fontFamily: F.mono, fontSize: 20 }}>{jokerRandomCount}</span>
+          <button onClick={() => setJokerRandomCount((n) => Math.min(JOKERS.length, n + 1))} className="rounded-full p-2" style={{ background: "rgba(255,255,255,0.1)" }}><Plus size={16} /></button>
         </div>
-      )}
+      </SettingSection>
 
-      <BigButton onClick={create} color={C.pink} icon={Play} disabled={hostPlays && !hostAnimal}>{tr("createRoomBtn")}</BigButton>
+      <SettingSection number={6} icon="⚠️" title={tr("malusLabel")} color={C.orange}>
+        <div className="flex flex-wrap gap-2">
+          {[0, -25, -50, -100].map((m) => (<Chip key={m} active={malus === m} onClick={() => setMalus(m)}>{m === 0 ? tr("malusNone") : `${m} pts`}</Chip>))}
+        </div>
+      </SettingSection>
+
+      <SettingSection number={7} icon="🎤" title={tr("hostPlaysLabel")} color={C.teal}>
+        <div className="flex flex-wrap gap-2 mb-3">
+          <Chip active={!hostPlays} onClick={() => setHostPlays(false)}>{tr("hostPlaysNo")}</Chip>
+          <Chip active={hostPlays} onClick={() => setHostPlays(true)}>{tr("hostPlaysYes")}</Chip>
+        </div>
+        {hostPlays && (
+          <div className="rounded-xl p-3" style={{ background: "rgba(255,255,255,0.05)" }}>
+            <p className="text-xs opacity-60 mb-2">{tr("hostPlaysWarning")}</p>
+            <div className="flex gap-2 mb-3">
+              <input value={hostPseudo} onChange={(e) => setHostPseudo(e.target.value)} placeholder={tr("hostPseudoPlaceholder")} className="flex-1 rounded-xl px-4 py-2" style={{ background: "rgba(255,255,255,0.08)", color: C.cream, border: "2px solid rgba(255,255,255,0.15)" }} />
+              <button onClick={() => setHostPseudo(funPseudo())} className="rounded-xl px-3" style={{ background: C.gold }}><Sparkles size={18} color="#1B1030" /></button>
+            </div>
+            <AvatarPicker animal={hostAnimal} onPick={setHostAnimal} taken={[]} />
+          </div>
+        )}
+      </SettingSection>
+
+      <div className="mt-6">
+        <BigButton onClick={create} color={C.pink} icon={Play} disabled={hostPlays && !hostAnimal}>{tr("createRoomBtn")}</BigButton>
+      </div>
     </Stage>
   );
 }
@@ -3000,28 +3028,38 @@ function CreateMatchAmor({ onCreated, onBack }) {
     <Stage wide>
       <ScreenHeader title={tr("matchAmorSettingsTitle")} onBack={onBack} color={C.pink} />
       <p className="text-sm opacity-70 mb-4 text-center">{tr("matchAmorIntro")}</p>
-      <CategoryPicker cats={cats} setCats={setCats} kidsMode={kidsMode} setKidsMode={setKidsMode} />
-      <p className="text-sm opacity-70 mb-2 font-bold">{tr("secondsPerQuestionLabel")}</p>
-      <div className="flex items-center gap-3 mb-6">
-        <button onClick={() => setSeconds((n) => Math.max(10, n - 5))} className="rounded-full p-2" style={{ background: "rgba(255,255,255,0.1)" }}><Minus size={16} /></button>
-        <span style={{ fontFamily: F.mono, fontSize: 22 }}>{seconds}s</span>
-        <button onClick={() => setSeconds((n) => Math.min(60, n + 5))} className="rounded-full p-2" style={{ background: "rgba(255,255,255,0.1)" }}><Plus size={16} /></button>
-      </div>
-      <p className="text-sm opacity-70 mb-2 font-bold">{tr("hostPlaysLabel")}</p>
-      <div className="flex flex-wrap gap-2 mb-3">
-        <Chip active={!hostPlays} onClick={() => setHostPlays(false)}>{tr("hostPlaysNo")}</Chip>
-        <Chip active={hostPlays} onClick={() => setHostPlays(true)}>{tr("hostPlaysYes")}</Chip>
-      </div>
-      {hostPlays && (
-        <div className="mb-6 rounded-2xl p-4" style={{ background: "rgba(255,255,255,0.04)" }}>
-          <div className="flex gap-2 mb-3">
-            <input value={hostPseudo} onChange={(e) => setHostPseudo(e.target.value)} placeholder={tr("hostPseudoPlaceholder")} className="flex-1 rounded-xl px-4 py-2" style={{ background: "rgba(255,255,255,0.08)", color: C.cream, border: "2px solid rgba(255,255,255,0.15)" }} />
-            <button onClick={() => setHostPseudo(funPseudo())} className="rounded-xl px-3" style={{ background: C.gold }}><Sparkles size={18} color="#1B1030" /></button>
-          </div>
-          <AvatarPicker animal={hostAnimal} onPick={setHostAnimal} taken={[]} />
+
+      <SettingSection number={1} icon="🎯" title={tr("categoriesLabel")} color={C.teal}>
+        <CategoryPicker cats={cats} setCats={setCats} kidsMode={kidsMode} setKidsMode={setKidsMode} hideTitle />
+      </SettingSection>
+
+      <SettingSection number={2} icon="⏱️" title={tr("secondsPerQuestionLabel")} color={C.gold}>
+        <div className="flex items-center gap-3">
+          <button onClick={() => setSeconds((n) => Math.max(10, n - 5))} className="rounded-full p-2" style={{ background: "rgba(255,255,255,0.1)" }}><Minus size={16} /></button>
+          <span style={{ fontFamily: F.mono, fontSize: 22 }}>{seconds}s</span>
+          <button onClick={() => setSeconds((n) => Math.min(60, n + 5))} className="rounded-full p-2" style={{ background: "rgba(255,255,255,0.1)" }}><Plus size={16} /></button>
         </div>
-      )}
-      <BigButton onClick={create} color={C.pink} icon={Skull} disabled={hostPlays && !hostAnimal}>{tr("createMatchAmorRoom")}</BigButton>
+      </SettingSection>
+
+      <SettingSection number={3} icon="🎤" title={tr("hostPlaysLabel")} color={C.teal}>
+        <div className="flex flex-wrap gap-2 mb-3">
+          <Chip active={!hostPlays} onClick={() => setHostPlays(false)}>{tr("hostPlaysNo")}</Chip>
+          <Chip active={hostPlays} onClick={() => setHostPlays(true)}>{tr("hostPlaysYes")}</Chip>
+        </div>
+        {hostPlays && (
+          <div className="rounded-xl p-3" style={{ background: "rgba(255,255,255,0.05)" }}>
+            <div className="flex gap-2 mb-3">
+              <input value={hostPseudo} onChange={(e) => setHostPseudo(e.target.value)} placeholder={tr("hostPseudoPlaceholder")} className="flex-1 rounded-xl px-4 py-2" style={{ background: "rgba(255,255,255,0.08)", color: C.cream, border: "2px solid rgba(255,255,255,0.15)" }} />
+              <button onClick={() => setHostPseudo(funPseudo())} className="rounded-xl px-3" style={{ background: C.gold }}><Sparkles size={18} color="#1B1030" /></button>
+            </div>
+            <AvatarPicker animal={hostAnimal} onPick={setHostAnimal} taken={[]} />
+          </div>
+        )}
+      </SettingSection>
+
+      <div className="mt-6">
+        <BigButton onClick={create} color={C.pink} icon={Skull} disabled={hostPlays && !hostAnimal}>{tr("createMatchAmorRoom")}</BigButton>
+      </div>
     </Stage>
   );
 }
@@ -3232,45 +3270,55 @@ function CreateBlindTest({ onCreated, onBack }) {
   return (
     <Stage wide>
       <ScreenHeader title="🎧 Blind Test — réglages" onBack={onBack} color={C.violet} />
-      <div className="flex items-center justify-between mb-2">
-        <p className="text-sm opacity-70 font-bold">{tr("musicCategoriesLabel")}</p>
-        <GhostButton onClick={toggleAllCats} small>{allCatsSelected ? tr("uncheckAll") : tr("checkAll")}</GhostButton>
-      </div>
-      <div className="grid grid-cols-2 gap-2 mb-6">{BLIND_CATEGORIES.map((c) => (<Chip key={c.id} active={cats.includes(c.id)} onClick={() => toggleCat(c.id)}>{c.emoji} {c.label}</Chip>))}</div>
-      <div className="grid grid-cols-2 gap-6 mb-6">
-        <div>
-          <p className="text-sm opacity-70 mb-2 font-bold">{tr("nbTracksLabel")}</p>
-          <div className="flex items-center gap-3">
-            <button onClick={() => setNbTracks((n) => Math.max(5, n - 1))} className="rounded-full p-2" style={{ background: "rgba(255,255,255,0.1)" }}><Minus size={16} /></button>
-            <span style={{ fontFamily: F.mono, fontSize: 22 }}>{nbTracks}</span>
-            <button onClick={() => setNbTracks((n) => Math.min(25, n + 1))} className="rounded-full p-2" style={{ background: "rgba(255,255,255,0.1)" }}><Plus size={16} /></button>
+
+      <SettingSection number={1} icon="🎵" title={tr("musicCategoriesLabel")} color={C.teal}>
+        <div className="flex justify-end mb-2">
+          <GhostButton onClick={toggleAllCats} small>{allCatsSelected ? tr("uncheckAll") : tr("checkAll")}</GhostButton>
+        </div>
+        <div className="grid grid-cols-2 gap-2">{BLIND_CATEGORIES.map((c) => (<Chip key={c.id} active={cats.includes(c.id)} onClick={() => toggleCat(c.id)}>{c.emoji} {c.label}</Chip>))}</div>
+      </SettingSection>
+
+      <SettingSection number={2} icon="⏱️" title={tr("sectionFormatTitle")} color={C.gold}>
+        <div className="grid grid-cols-2 gap-6">
+          <div>
+            <p className="text-sm opacity-70 mb-2 font-bold">{tr("nbTracksLabel")}</p>
+            <div className="flex items-center gap-3">
+              <button onClick={() => setNbTracks((n) => Math.max(5, n - 1))} className="rounded-full p-2" style={{ background: "rgba(255,255,255,0.1)" }}><Minus size={16} /></button>
+              <span style={{ fontFamily: F.mono, fontSize: 22 }}>{nbTracks}</span>
+              <button onClick={() => setNbTracks((n) => Math.min(25, n + 1))} className="rounded-full p-2" style={{ background: "rgba(255,255,255,0.1)" }}><Plus size={16} /></button>
+            </div>
+          </div>
+          <div>
+            <p className="text-sm opacity-70 mb-2 font-bold">{tr("secondsPerQuestionLabel")}</p>
+            <div className="flex items-center gap-3">
+              <button onClick={() => setSeconds((n) => Math.max(10, n - 5))} className="rounded-full p-2" style={{ background: "rgba(255,255,255,0.1)" }}><Minus size={16} /></button>
+              <span style={{ fontFamily: F.mono, fontSize: 22 }}>{seconds}s</span>
+              <button onClick={() => setSeconds((n) => Math.min(30, n + 5))} className="rounded-full p-2" style={{ background: "rgba(255,255,255,0.1)" }}><Plus size={16} /></button>
+            </div>
           </div>
         </div>
-        <div>
-          <p className="text-sm opacity-70 mb-2 font-bold">{tr("secondsPerQuestionLabel")}</p>
-          <div className="flex items-center gap-3">
-            <button onClick={() => setSeconds((n) => Math.max(10, n - 5))} className="rounded-full p-2" style={{ background: "rgba(255,255,255,0.1)" }}><Minus size={16} /></button>
-            <span style={{ fontFamily: F.mono, fontSize: 22 }}>{seconds}s</span>
-            <button onClick={() => setSeconds((n) => Math.min(30, n + 5))} className="rounded-full p-2" style={{ background: "rgba(255,255,255,0.1)" }}><Plus size={16} /></button>
-          </div>
+      </SettingSection>
+
+      <SettingSection number={3} icon="🎤" title={tr("hostPlaysLabel")} color={C.teal}>
+        <div className="flex flex-wrap gap-2 mb-3">
+          <Chip active={!hostPlays} onClick={() => setHostPlays(false)}>{tr("hostPlaysNo")}</Chip>
+          <Chip active={hostPlays} onClick={() => setHostPlays(true)}>{tr("hostPlaysYes")}</Chip>
         </div>
-      </div>
-      <p className="text-sm opacity-70 mb-2 font-bold">{tr("hostPlaysLabel")}</p>
-      <div className="flex flex-wrap gap-2 mb-3">
-        <Chip active={!hostPlays} onClick={() => setHostPlays(false)}>{tr("hostPlaysNo")}</Chip>
-        <Chip active={hostPlays} onClick={() => setHostPlays(true)}>{tr("hostPlaysYes")}</Chip>
-      </div>
-      {hostPlays && (
-        <div className="mb-6 rounded-2xl p-4" style={{ background: "rgba(255,255,255,0.04)" }}>
-          <div className="flex gap-2 mb-3">
-            <input value={hostPseudo} onChange={(e) => setHostPseudo(e.target.value)} placeholder={tr("hostPseudoPlaceholder")} className="flex-1 rounded-xl px-4 py-2" style={{ background: "rgba(255,255,255,0.08)", color: C.cream, border: "2px solid rgba(255,255,255,0.15)" }} />
-            <button onClick={() => setHostPseudo(funPseudo())} className="rounded-xl px-3" style={{ background: C.gold }}><Sparkles size={18} color="#1B1030" /></button>
+        {hostPlays && (
+          <div className="rounded-xl p-3" style={{ background: "rgba(255,255,255,0.05)" }}>
+            <div className="flex gap-2 mb-3">
+              <input value={hostPseudo} onChange={(e) => setHostPseudo(e.target.value)} placeholder={tr("hostPseudoPlaceholder")} className="flex-1 rounded-xl px-4 py-2" style={{ background: "rgba(255,255,255,0.08)", color: C.cream, border: "2px solid rgba(255,255,255,0.15)" }} />
+              <button onClick={() => setHostPseudo(funPseudo())} className="rounded-xl px-3" style={{ background: C.gold }}><Sparkles size={18} color="#1B1030" /></button>
+            </div>
+            <AvatarPicker animal={hostAnimal} onPick={setHostAnimal} taken={[]} />
           </div>
-          <AvatarPicker animal={hostAnimal} onPick={setHostAnimal} taken={[]} />
-        </div>
-      )}
+        )}
+      </SettingSection>
+
       {error && <p className="text-sm mb-4 text-center" style={{ color: C.pink }}>{error}</p>}
-      <BigButton onClick={create} color={C.violet} icon={Play} disabled={loading || (hostPlays && !hostAnimal)}>{loading ? tr("searchingTracks") : tr("createRoomBtn")}</BigButton>
+      <div className="mt-2">
+        <BigButton onClick={create} color={C.violet} icon={Play} disabled={loading || (hostPlays && !hostAnimal)}>{loading ? tr("searchingTracks") : tr("createRoomBtn")}</BigButton>
+      </div>
     </Stage>
   );
 }
@@ -3641,58 +3689,67 @@ function CreateEnchere({ onCreated, onBack }) {
   return (
     <Stage wide>
       <ScreenHeader title="💰 Quitte ou Double — réglages" onBack={onBack} color={C.gold} />
-      <div className="mb-4">
+
+      <SettingSection number={1} icon="🎈" title={tr("kidsMode")} color={C.teal}>
         <Chip active={kidsMode} onClick={() => setKidsMode((v) => !v)}>{tr("kidsMode")}</Chip>
+      </SettingSection>
+
+      <SettingSection number={2} icon="⏱️" title={tr("sectionFormatTitle")} color={C.gold}>
+        <div className="grid grid-cols-2 gap-6">
+          <div>
+            <p className="text-sm opacity-70 mb-2 font-bold">{tr("nbQuestionsLabel")}</p>
+            <div className="flex items-center gap-3">
+              <button onClick={() => setNbQuestions((n) => Math.max(5, n - 1))} className="rounded-full p-2" style={{ background: "rgba(255,255,255,0.1)" }}><Minus size={16} /></button>
+              <span style={{ fontFamily: F.mono, fontSize: 22 }}>{nbQuestions}</span>
+              <button onClick={() => setNbQuestions((n) => Math.min(25, n + 1))} className="rounded-full p-2" style={{ background: "rgba(255,255,255,0.1)" }}><Plus size={16} /></button>
+            </div>
+          </div>
+          <div>
+            <p className="text-sm opacity-70 mb-2 font-bold">{tr("startingCapitalLabel")}</p>
+            <div className="flex items-center gap-3">
+              <button onClick={() => setStartingPoints((n) => Math.max(1000, n - 1000))} className="rounded-full p-2" style={{ background: "rgba(255,255,255,0.1)" }}><Minus size={16} /></button>
+              <span style={{ fontFamily: F.mono, fontSize: 22 }}>{startingPoints}</span>
+              <button onClick={() => setStartingPoints((n) => Math.min(50000, n + 1000))} className="rounded-full p-2" style={{ background: "rgba(255,255,255,0.1)" }}><Plus size={16} /></button>
+            </div>
+          </div>
+          <div>
+            <p className="text-sm opacity-70 mb-2 font-bold">{tr("bettingSecondsLabel")}</p>
+            <div className="flex items-center gap-3">
+              <button onClick={() => setBettingSeconds((n) => Math.max(10, n - 5))} className="rounded-full p-2" style={{ background: "rgba(255,255,255,0.1)" }}><Minus size={16} /></button>
+              <span style={{ fontFamily: F.mono, fontSize: 22 }}>{bettingSeconds}s</span>
+              <button onClick={() => setBettingSeconds((n) => Math.min(60, n + 5))} className="rounded-full p-2" style={{ background: "rgba(255,255,255,0.1)" }}><Plus size={16} /></button>
+            </div>
+          </div>
+          <div>
+            <p className="text-sm opacity-70 mb-2 font-bold">{tr("answerSecondsLabel")}</p>
+            <div className="flex items-center gap-3">
+              <button onClick={() => setAnswerSeconds((n) => Math.max(10, n - 5))} className="rounded-full p-2" style={{ background: "rgba(255,255,255,0.1)" }}><Minus size={16} /></button>
+              <span style={{ fontFamily: F.mono, fontSize: 22 }}>{answerSeconds}s</span>
+              <button onClick={() => setAnswerSeconds((n) => Math.min(60, n + 5))} className="rounded-full p-2" style={{ background: "rgba(255,255,255,0.1)" }}><Plus size={16} /></button>
+            </div>
+          </div>
+        </div>
+      </SettingSection>
+
+      <SettingSection number={3} icon="🎤" title={tr("hostPlaysLabel")} color={C.teal}>
+        <div className="flex flex-wrap gap-2 mb-3">
+          <Chip active={!hostPlays} onClick={() => setHostPlays(false)}>{tr("hostPlaysNo")}</Chip>
+          <Chip active={hostPlays} onClick={() => setHostPlays(true)}>{tr("hostPlaysYes")}</Chip>
+        </div>
+        {hostPlays && (
+          <div className="rounded-xl p-3" style={{ background: "rgba(255,255,255,0.05)" }}>
+            <div className="flex gap-2 mb-3">
+              <input value={hostPseudo} onChange={(e) => setHostPseudo(e.target.value)} placeholder={tr("hostPseudoPlaceholder")} className="flex-1 rounded-xl px-4 py-2" style={{ background: "rgba(255,255,255,0.08)", color: C.cream, border: "2px solid rgba(255,255,255,0.15)" }} />
+              <button onClick={() => setHostPseudo(funPseudo())} className="rounded-xl px-3" style={{ background: C.gold }}><Sparkles size={18} color="#1B1030" /></button>
+            </div>
+            <AvatarPicker animal={hostAnimal} onPick={setHostAnimal} taken={[]} />
+          </div>
+        )}
+      </SettingSection>
+
+      <div className="mt-6">
+        <BigButton onClick={create} color={C.gold} icon={Play} disabled={hostPlays && !hostAnimal}>{tr("createRoomBtn")}</BigButton>
       </div>
-      <div className="grid grid-cols-2 gap-6 mb-6">
-        <div>
-          <p className="text-sm opacity-70 mb-2 font-bold">{tr("nbQuestionsLabel")}</p>
-          <div className="flex items-center gap-3">
-            <button onClick={() => setNbQuestions((n) => Math.max(5, n - 1))} className="rounded-full p-2" style={{ background: "rgba(255,255,255,0.1)" }}><Minus size={16} /></button>
-            <span style={{ fontFamily: F.mono, fontSize: 22 }}>{nbQuestions}</span>
-            <button onClick={() => setNbQuestions((n) => Math.min(25, n + 1))} className="rounded-full p-2" style={{ background: "rgba(255,255,255,0.1)" }}><Plus size={16} /></button>
-          </div>
-        </div>
-        <div>
-          <p className="text-sm opacity-70 mb-2 font-bold">{tr("startingCapitalLabel")}</p>
-          <div className="flex items-center gap-3">
-            <button onClick={() => setStartingPoints((n) => Math.max(1000, n - 1000))} className="rounded-full p-2" style={{ background: "rgba(255,255,255,0.1)" }}><Minus size={16} /></button>
-            <span style={{ fontFamily: F.mono, fontSize: 22 }}>{startingPoints}</span>
-            <button onClick={() => setStartingPoints((n) => Math.min(50000, n + 1000))} className="rounded-full p-2" style={{ background: "rgba(255,255,255,0.1)" }}><Plus size={16} /></button>
-          </div>
-        </div>
-        <div>
-          <p className="text-sm opacity-70 mb-2 font-bold">{tr("bettingSecondsLabel")}</p>
-          <div className="flex items-center gap-3">
-            <button onClick={() => setBettingSeconds((n) => Math.max(10, n - 5))} className="rounded-full p-2" style={{ background: "rgba(255,255,255,0.1)" }}><Minus size={16} /></button>
-            <span style={{ fontFamily: F.mono, fontSize: 22 }}>{bettingSeconds}s</span>
-            <button onClick={() => setBettingSeconds((n) => Math.min(60, n + 5))} className="rounded-full p-2" style={{ background: "rgba(255,255,255,0.1)" }}><Plus size={16} /></button>
-          </div>
-        </div>
-        <div>
-          <p className="text-sm opacity-70 mb-2 font-bold">{tr("answerSecondsLabel")}</p>
-          <div className="flex items-center gap-3">
-            <button onClick={() => setAnswerSeconds((n) => Math.max(10, n - 5))} className="rounded-full p-2" style={{ background: "rgba(255,255,255,0.1)" }}><Minus size={16} /></button>
-            <span style={{ fontFamily: F.mono, fontSize: 22 }}>{answerSeconds}s</span>
-            <button onClick={() => setAnswerSeconds((n) => Math.min(60, n + 5))} className="rounded-full p-2" style={{ background: "rgba(255,255,255,0.1)" }}><Plus size={16} /></button>
-          </div>
-        </div>
-      </div>
-      <p className="text-sm opacity-70 mb-2 font-bold">{tr("hostPlaysLabel")}</p>
-      <div className="flex flex-wrap gap-2 mb-3">
-        <Chip active={!hostPlays} onClick={() => setHostPlays(false)}>{tr("hostPlaysNo")}</Chip>
-        <Chip active={hostPlays} onClick={() => setHostPlays(true)}>{tr("hostPlaysYes")}</Chip>
-      </div>
-      {hostPlays && (
-        <div className="mb-6 rounded-2xl p-4" style={{ background: "rgba(255,255,255,0.04)" }}>
-          <div className="flex gap-2 mb-3">
-            <input value={hostPseudo} onChange={(e) => setHostPseudo(e.target.value)} placeholder={tr("hostPseudoPlaceholder")} className="flex-1 rounded-xl px-4 py-2" style={{ background: "rgba(255,255,255,0.08)", color: C.cream, border: "2px solid rgba(255,255,255,0.15)" }} />
-            <button onClick={() => setHostPseudo(funPseudo())} className="rounded-xl px-3" style={{ background: C.gold }}><Sparkles size={18} color="#1B1030" /></button>
-          </div>
-          <AvatarPicker animal={hostAnimal} onPick={setHostAnimal} taken={[]} />
-        </div>
-      )}
-      <BigButton onClick={create} color={C.gold} icon={Play} disabled={hostPlays && !hostAnimal}>{tr("createRoomBtn")}</BigButton>
     </Stage>
   );
 }
