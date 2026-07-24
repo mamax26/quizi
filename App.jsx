@@ -53,7 +53,7 @@ const STRINGS = {
     explainSoloTitle: "Jouer seul",
     explainSoloB1: "Teste-toi à ton rythme.",
     explainSoloB2: "Mode Crash Test : 3 erreurs et t'es cramé. 💀",
-    explainSoloB3: "Pas de jokers ici, juste toi contre les questions.",
+    explainSoloB3: "Seul le joker 50/50 est disponible en mode Crash Test.",
     explainMatchAmorTitle: "Match Amor",
     explainMatchAmorB1: "Une mauvaise réponse et t'es éliminé direct. ☠️",
     explainMatchAmorB2: "Si tout le monde se plante, personne ne saute.",
@@ -206,6 +206,7 @@ const STRINGS = {
     backToHome: "Retour à l'accueil",
     correctAnswerMsg: "Bonne réponse ! 🎉",
     closestWinsHint: "💡 Le plus près l'emporte !",
+    toleranceHint: "💡 Marge acceptée : ± {n}",
     wrongAnswerMsg: "Raté !",
     wrongAnswerCrashMsg: "Raté ! 💔",
     answerColonLabel: "Réponse :",
@@ -312,7 +313,7 @@ const STRINGS = {
     explainSoloTitle: "Play Solo",
     explainSoloB1: "Test yourself at your own pace.",
     explainSoloB2: "Crash Test mode: 3 mistakes and you're toast. 💀",
-    explainSoloB3: "No jokers here, just you against the questions.",
+    explainSoloB3: "Only the 50/50 joker is available, in Crash Test mode.",
     explainMatchAmorTitle: "Love Match",
     explainMatchAmorB1: "One wrong answer and you're out. ☠️",
     explainMatchAmorB2: "If everyone flops, nobody's eliminated.",
@@ -465,6 +466,7 @@ const STRINGS = {
     backToHome: "Back to home",
     correctAnswerMsg: "Correct answer! 🎉",
     closestWinsHint: "💡 Closest guess wins!",
+    toleranceHint: "💡 Accepted margin: ± {n}",
     wrongAnswerMsg: "Wrong!",
     wrongAnswerCrashMsg: "Wrong! 💔",
     answerColonLabel: "Answer:",
@@ -1964,6 +1966,7 @@ function SoloQuiz({ config, profile, onExit }) {
       <div className="rounded-2xl p-5 mb-5" style={{ background: "rgba(255,255,255,0.06)" }}>
         <p className="uppercase tracking-widest mb-2" style={{ fontSize: 16, fontWeight: 800, color: C.gold }}>{findCategory(q.category)?.emoji} {(() => { const c = findCategory(q.category); return c ? (c.id.startsWith("k_") ? kidsCategoryLabel(c, lang) : categoryLabel(c, lang)) : ""; })()}</p>
         <p style={{ fontFamily: F.display, fontSize: 26 }}>{q.text}</p>
+        {q.type === "echelle" && !answered && <p className="text-xs opacity-70 mt-2">{tr("toleranceHint").replace("{n}", echelleMargin(q))}</p>}
       </div>
       {!answered ? (
         <QuestionInput q={q} onSubmit={checkAnswer} scaleVal={scaleVal} setScaleVal={setScaleVal} />
@@ -2026,7 +2029,7 @@ function CrashTest({ config, profile, onExit }) {
         </div>
       ) : (
         <>
-          <div className="rounded-2xl p-5 mb-5" style={{ background: "rgba(255,255,255,0.06)" }}><p className="uppercase tracking-widest mb-2" style={{ fontSize: 16, fontWeight: 800, color: C.gold }}>{findCategory(q.category)?.emoji} {(() => { const c = findCategory(q.category); return c ? (c.id.startsWith("k_") ? kidsCategoryLabel(c, lang) : categoryLabel(c, lang)) : ""; })()}</p><p style={{ fontFamily: F.display, fontSize: 26 }}>{q.text}</p></div>
+          <div className="rounded-2xl p-5 mb-5" style={{ background: "rgba(255,255,255,0.06)" }}><p className="uppercase tracking-widest mb-2" style={{ fontSize: 16, fontWeight: 800, color: C.gold }}>{findCategory(q.category)?.emoji} {(() => { const c = findCategory(q.category); return c ? (c.id.startsWith("k_") ? kidsCategoryLabel(c, lang) : categoryLabel(c, lang)) : ""; })()}</p><p style={{ fontFamily: F.display, fontSize: 26 }}>{q.text}</p>{q.type === "echelle" && !answered && <p className="text-xs opacity-70 mt-2">{tr("toleranceHint").replace("{n}", echelleMargin(q))}</p>}</div>
           {!answered ? (
             <>
               <QuestionInput q={q} onSubmit={checkAnswer} scaleVal={scaleVal} setScaleVal={setScaleVal} hiddenOptions={hiddenOptions} />
@@ -2099,7 +2102,8 @@ function CreateRoom({ onCreated, onBack }) {
     let mixed = [...byType.qcm.slice(0, targetQcm), ...byType.vf.slice(0, targetVf), ...byType.echelle.slice(0, targetEchelle)];
     if (mixed.length < nbQuestions) mixed = [...mixed, ...fullPool.filter((q) => !mixed.includes(q))];
     for (let i = mixed.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [mixed[i], mixed[j]] = [mixed[j], mixed[i]]; }
-    const questions = mixed.slice(0, nbQuestions);
+    let questions = mixed.slice(0, nbQuestions);
+    for (let i = questions.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [questions[i], questions[j]] = [questions[j], questions[i]]; }
     const code = genCode();
     const state = { phase: "lobby", code, settings: { seconds, jokers, teamsMode, malus, jokerRandom, jokerRandomCount, kidsMode, hostPlays }, questions, currentIndex: -1, questionStartedAt: null, createdAt: Date.now() };
     await sSet(roomKey(code), state);
@@ -2591,7 +2595,7 @@ function AdminGame({ code, room, onRoomChange, onFinished, hostPid, hostAssigned
   const [revealed, setRevealed] = useState(false);
   const [playerAnswers, setPlayerAnswers] = useState([]);
   const [provisional, setProvisional] = useState([]);
-  const [autoLeft, setAutoLeft] = useState(7);
+  const [autoLeft, setAutoLeft] = useState(10);
   const [hostScaleVal, setHostScaleVal] = useState(0);
   const [hostSubmitted, setHostSubmitted] = useState(false);
   const [hostJokerUsed, setHostJokerUsed] = useState(null);
@@ -2679,7 +2683,7 @@ function AdminGame({ code, room, onRoomChange, onFinished, hostPid, hostAssigned
     const withScores = await Promise.all(players.map(async (p) => ({ ...p, score: (await sGet(scoreKey(code, p.id))) || 0 })));
     withScores.sort((a, b) => b.score - a.score);
     setProvisional(withRankChange(withScores, prevRankRef));
-    setAutoLeft(7);
+    setAutoLeft(10);
     setRevealed(true);
   }, [code, q, room]);
 
@@ -2794,15 +2798,6 @@ function AdminGame({ code, room, onRoomChange, onFinished, hostPid, hostAssigned
         <span className="flex items-center gap-1 text-sm opacity-60"><Users size={14} /> {answersCount} {tr("answersWord")}</span>
         <span className="flex items-center gap-1" style={{ fontFamily: F.mono, fontSize: 20, color: left <= 5 ? C.pink : C.gold }}><Clock size={18} /> {left}s</span>
       </div>
-      <div className="rounded-3xl p-8 mb-6 text-center" style={{ background: "rgba(255,255,255,0.06)" }}>
-        <p className="uppercase tracking-widest mb-3" style={{ fontSize: 20, fontWeight: 800, color: C.gold }}>{cat?.emoji} {catLabelText}</p>
-        <p style={{ fontFamily: F.display, fontSize: 32 }}>{q.text}</p>
-        {q.type === "echelle" && !revealed && <p className="text-sm opacity-70 mt-3">{tr("closestWinsHint")}</p>}
-        {q.type === "qcm" && (<div className="grid grid-cols-2 gap-3 mt-6">{q.options.map((o, i) => (<div key={i} className="rounded-xl p-3" style={{ background: revealed && i === q.answer ? C.teal : "rgba(255,255,255,0.08)", color: revealed && i === q.answer ? "#1B1030" : C.cream, fontFamily: F.body, fontWeight: 700, fontSize: 18 }}>{o}</div>))}</div>)}
-        {q.type === "vf" && (<div className="flex gap-4 justify-center mt-6"><div className="rounded-xl px-6 py-3" style={{ background: revealed && q.answer === true ? C.teal : "rgba(255,255,255,0.08)" }}>{tr("trueLabel")}</div><div className="rounded-xl px-6 py-3" style={{ background: revealed && q.answer === false ? C.teal : "rgba(255,255,255,0.08)" }}>{tr("falseLabel")}</div></div>)}
-        {q.type === "carte" && (<div className="relative rounded-xl mt-6 mx-auto" style={{ width: "100%", maxWidth: 420, height: 220, background: "rgba(255,255,255,0.06)" }}>{MAP_ZONES.map((z) => (<div key={z.id} className="absolute rounded-full px-2 py-1 text-xs" style={{ left: `${z.x}%`, top: `${z.y}%`, transform: "translate(-50%,-50%)", background: revealed && z.id === q.answer ? C.teal : "rgba(255,255,255,0.12)", color: revealed && z.id === q.answer ? "#1B1030" : C.cream }}>{z.label}</div>))}</div>)}
-        {q.type === "echelle" && revealed && <p className="mt-6" style={{ fontFamily: F.mono, fontSize: 26, color: C.teal }}>{lang === "en" ? `Answer: ${q.answer} ${q.unit || ""}` : `Réponse : ${q.answer} ${q.unit || ""}`}</p>}
-      </div>
       {room.settings.hostPlays && hostPid && !revealed && (
         <div className="rounded-2xl p-4 mb-6" style={{ background: "rgba(255,255,255,0.05)", border: `2px solid ${C.violet}` }}>
           <p className="text-sm font-bold mb-3" style={{ color: C.violet }}>{tr("hostAnswerTitle")}</p>
@@ -2851,6 +2846,15 @@ function AdminGame({ code, room, onRoomChange, onFinished, hostPid, hostAssigned
           )}
         </div>
       )}
+      <div className="rounded-3xl p-8 mb-6 text-center" style={{ background: "rgba(255,255,255,0.06)" }}>
+        <p className="uppercase tracking-widest mb-3" style={{ fontSize: 20, fontWeight: 800, color: C.gold }}>{cat?.emoji} {catLabelText}</p>
+        <p style={{ fontFamily: F.display, fontSize: 32 }}>{q.text}</p>
+        {q.type === "echelle" && !revealed && <p className="text-sm opacity-70 mt-3">{tr("closestWinsHint")}</p>}
+        {q.type === "qcm" && (<div className="grid grid-cols-2 gap-3 mt-6">{q.options.map((o, i) => (<div key={i} className="rounded-xl p-3" style={{ background: revealed && i === q.answer ? C.teal : "rgba(255,255,255,0.08)", color: revealed && i === q.answer ? "#1B1030" : C.cream, fontFamily: F.body, fontWeight: 700, fontSize: 18 }}>{o}</div>))}</div>)}
+        {q.type === "vf" && (<div className="flex gap-4 justify-center mt-6"><div className="rounded-xl px-6 py-3" style={{ background: revealed && q.answer === true ? C.teal : "rgba(255,255,255,0.08)" }}>{tr("trueLabel")}</div><div className="rounded-xl px-6 py-3" style={{ background: revealed && q.answer === false ? C.teal : "rgba(255,255,255,0.08)" }}>{tr("falseLabel")}</div></div>)}
+        {q.type === "carte" && (<div className="relative rounded-xl mt-6 mx-auto" style={{ width: "100%", maxWidth: 420, height: 220, background: "rgba(255,255,255,0.06)" }}>{MAP_ZONES.map((z) => (<div key={z.id} className="absolute rounded-full px-2 py-1 text-xs" style={{ left: `${z.x}%`, top: `${z.y}%`, transform: "translate(-50%,-50%)", background: revealed && z.id === q.answer ? C.teal : "rgba(255,255,255,0.12)", color: revealed && z.id === q.answer ? "#1B1030" : C.cream }}>{z.label}</div>))}</div>)}
+        {q.type === "echelle" && revealed && <p className="mt-6" style={{ fontFamily: F.mono, fontSize: 26, color: C.teal }}>{lang === "en" ? `Answer: ${q.answer} ${q.unit || ""}` : `Réponse : ${q.answer} ${q.unit || ""}`}</p>}
+      </div>
       {revealed && playerAnswers.length > 0 && (
         <div className="rounded-2xl p-4 mb-4" style={{ background: "rgba(255,255,255,0.05)" }}>
           <p className="text-sm font-bold mb-2 opacity-70">{tr("playerAnswersTitle")}</p>
@@ -3104,7 +3108,11 @@ function PlayerGameCore({ code, pid, room, assignedJokers, usedJokersEver, setUs
         <div className="mt-6">
           <div className="text-center mb-4">
             <p style={{ fontFamily: F.display, fontSize: 26, color: myPoints > 0 ? C.teal : myPoints < 0 ? C.pink : C.cream }}>{myPoints > 0 ? `+${myPoints}` : myPoints} pts</p>
-            {q.type === "echelle" && <p className="text-sm opacity-70 mt-1">{lang === "en" ? `Answer: ${q.answer} ${q.unit || ""}` : `Réponse : ${q.answer} ${q.unit || ""}`}</p>}
+            {!allAnswers.find((a) => a.pid === pid)?.correct && (
+              <p className="text-sm opacity-70 mt-1">
+                {tr("answerColonLabel")} {q.type === "qcm" ? q.options[q.answer] : q.type === "vf" ? (q.answer ? tr("trueLabel") : tr("falseLabel")) : q.type === "carte" ? MAP_ZONES.find((z) => z.id === q.answer)?.label : `${q.answer} ${q.unit || ""}`}
+              </p>
+            )}
             {targeters.length > 0 && (
               <p className="text-sm mt-3 rounded-xl py-2 px-3 inline-block" style={{ background: "rgba(255,61,127,0.15)", color: C.pink }}>
                 {tr("targetedByMsg").replace("{names}", targeters.join(", ")).replace("{verb}", targeters.length > 1 ? tr("targetedVerbPlural") : tr("targetedVerbSingular"))}
@@ -3213,7 +3221,11 @@ function Results({ code, room, isAdmin, onRestart, onPlayAgain }) {
             ))}
           </div>
           {awards}
-          {isAdmin && <div className="mt-8 flex flex-col gap-3"><BigButton onClick={onPlayAgain} color={C.teal} icon={RefreshCw}>{tr("replaySame")}</BigButton><GhostButton onClick={onRestart}>{tr("newGameHome")}</GhostButton></div>}
+          {isAdmin ? (
+            <div className="mt-8 flex flex-col gap-3"><BigButton onClick={onPlayAgain} color={C.teal} icon={RefreshCw}>{tr("replaySame")}</BigButton><GhostButton onClick={onRestart}>{tr("newGameHome")}</GhostButton></div>
+          ) : (
+            <div className="mt-8"><BigButton onClick={onRestart} color={C.violet}>{tr("backToHome")}</BigButton></div>
+          )}
         </div>
       </Stage>
     );
@@ -3231,7 +3243,11 @@ function Results({ code, room, isAdmin, onRestart, onPlayAgain }) {
           {ranking.length === 0 && <p className="text-center opacity-60">{tr("calculating")}</p>}
         </div>
         {awards}
-        {isAdmin && <div className="mt-8 flex flex-col gap-3"><BigButton onClick={onPlayAgain} color={C.teal} icon={RefreshCw}>{tr("replaySame")}</BigButton><GhostButton onClick={onRestart}>{tr("newGameHome")}</GhostButton></div>}
+        {isAdmin ? (
+          <div className="mt-8 flex flex-col gap-3"><BigButton onClick={onPlayAgain} color={C.teal} icon={RefreshCw}>{tr("replaySame")}</BigButton><GhostButton onClick={onRestart}>{tr("newGameHome")}</GhostButton></div>
+        ) : (
+          <div className="mt-8"><BigButton onClick={onRestart} color={C.violet}>{tr("backToHome")}</BigButton></div>
+        )}
       </div>
     </Stage>
   );
@@ -3341,6 +3357,8 @@ function MatchAmorAdminGame({ code, room, onRoomChange, onFinished, hostPid }) {
     const newAlive = eliminated.length === room.alive.length ? room.alive : room.alive.filter((pid) => correctPids.has(pid));
     setPendingAlive(newAlive);
     setEliminatedThisRound(eliminated.length === room.alive.length ? [] : eliminated);
+    await sSet(`qz:${code}:matchamor_eliminated:${room.currentIndex}`, eliminated.length === room.alive.length ? [] : eliminated);
+    await sSet(revealedKey(code, room.currentIndex), true);
     setRevealed(true);
   }, [code, q, room]);
 
@@ -3370,6 +3388,21 @@ function MatchAmorAdminGame({ code, room, onRoomChange, onFinished, hostPid }) {
         <span className="text-sm opacity-60"><Skull size={14} className="inline mr-1" /> {room.alive.length} {tr("inRace")}</span>
         <span className="flex items-center gap-1" style={{ fontFamily: F.mono, fontSize: 20, color: left <= 5 ? C.pink : C.gold }}><Clock size={18} /> {left}s</span>
       </div>
+      {hostPid && room.alive.includes(hostPid) && !revealed && (
+        <div className="rounded-2xl p-4 mb-6" style={{ background: "rgba(255,255,255,0.05)", border: `2px solid ${C.violet}` }}>
+          <p className="text-sm font-bold mb-3" style={{ color: C.violet }}>{tr("hostAnswerTitle")}</p>
+          {hostSubmitted ? (
+            <p className="text-sm opacity-70">{tr("answerSubmitted")}</p>
+          ) : (
+            <QuestionInput
+              q={q}
+              scaleVal={hostScaleVal}
+              setScaleVal={setHostScaleVal}
+              onSubmit={async (value) => { setHostSubmitted(true); await sSet(answerKey(code, room.currentIndex, hostPid), { pid: hostPid, value, submittedAt: Date.now() }); }}
+            />
+          )}
+        </div>
+      )}
       <div className="rounded-3xl p-8 mb-6 text-center" style={{ background: "rgba(255,255,255,0.06)" }}>
         <p className="uppercase tracking-widest mb-3" style={{ fontSize: 20, fontWeight: 800, color: C.gold }}>{cat?.emoji} {catLabelText}</p>
         <p style={{ fontFamily: F.display, fontSize: 32 }}>{q.text}</p>
@@ -3394,21 +3427,6 @@ function MatchAmorAdminGame({ code, room, onRoomChange, onFinished, hostPid }) {
           </div>
         )}
       </div>
-      {hostPid && room.alive.includes(hostPid) && !revealed && (
-        <div className="rounded-2xl p-4 mb-6" style={{ background: "rgba(255,255,255,0.05)", border: `2px solid ${C.violet}` }}>
-          <p className="text-sm font-bold mb-3" style={{ color: C.violet }}>{tr("hostAnswerTitle")}</p>
-          {hostSubmitted ? (
-            <p className="text-sm opacity-70">{tr("answerSubmitted")}</p>
-          ) : (
-            <QuestionInput
-              q={q}
-              scaleVal={hostScaleVal}
-              setScaleVal={setHostScaleVal}
-              onSubmit={async (value) => { setHostSubmitted(true); await sSet(answerKey(code, room.currentIndex, hostPid), { pid: hostPid, value, submittedAt: Date.now() }); }}
-            />
-          )}
-        </div>
-      )}
       {revealed ? (<BigButton onClick={next} color={C.pink} icon={ArrowRight}>{(pendingAlive || room.alive).length <= 1 ? tr("seeWinner") : tr("nextQuestion")}</BigButton>) : (<BigButton onClick={collect} color={C.violet}>{tr("revealNow")}</BigButton>)}
     </Stage>
   );
@@ -3421,7 +3439,24 @@ function PlayerMatchAmor({ code, pid, room }) {
   const left = useCountdown(room.questionStartedAt, room.settings.seconds);
   const [submitted, setSubmitted] = useState(false);
   const [scaleVal, setScaleVal] = useState(0);
-  useEffect(() => { setSubmitted(false); setScaleVal(0); }, [room.currentIndex]);
+  const [revealed, setRevealed] = useState(false);
+  const [justEliminated, setJustEliminated] = useState(false);
+  useEffect(() => { setSubmitted(false); setScaleVal(0); setRevealed(false); setJustEliminated(false); }, [room.currentIndex]);
+
+  useEffect(() => {
+    if (!(submitted || left === 0)) return;
+    let stop = false;
+    const t = setInterval(async () => {
+      const isRevealed = await sGet(revealedKey(code, room.currentIndex));
+      if (stop || !isRevealed) return;
+      clearInterval(t);
+      const eliminated = await sGet(`qz:${code}:matchamor_eliminated:${room.currentIndex}`);
+      setJustEliminated((eliminated || []).includes(pid));
+      setRevealed(true);
+    }, 800);
+    return () => { stop = true; clearInterval(t); };
+  }, [submitted, left, code, room.currentIndex, pid]);
+
   async function submit(value) { if (submitted || left === 0) return; setSubmitted(true); await sSet(answerKey(code, room.currentIndex, pid), { pid, value, submittedAt: Date.now() }); }
 
   if (!alive) return (
@@ -3440,11 +3475,18 @@ function PlayerMatchAmor({ code, pid, room }) {
         <span className="text-xs opacity-60">{room.alive.length} {tr("inRace")}</span>
         <span style={{ fontFamily: F.mono, fontSize: 20, color: left <= 5 ? C.pink : C.gold }}>{left}s</span>
       </div>
-      <div className="rounded-2xl p-5 mb-5" style={{ background: "rgba(255,255,255,0.06)" }}><p className="uppercase tracking-widest mb-2" style={{ fontSize: 16, fontWeight: 800, color: C.gold }}>{findCategory(q.category)?.emoji} {(() => { const c = findCategory(q.category); return c ? (c.id.startsWith("k_") ? kidsCategoryLabel(c, lang) : categoryLabel(c, lang)) : ""; })()}</p><p style={{ fontFamily: F.display, fontSize: 26 }}>{q.text}</p>{q.type === "echelle" && <p className="text-xs opacity-70 mt-1">{tr("closestWinsHint")}</p>}</div>
+      <div className="rounded-2xl p-5 mb-5" style={{ background: "rgba(255,255,255,0.06)" }}><p className="uppercase tracking-widest mb-2" style={{ fontSize: 16, fontWeight: 800, color: C.gold }}>{findCategory(q.category)?.emoji} {(() => { const c = findCategory(q.category); return c ? (c.id.startsWith("k_") ? kidsCategoryLabel(c, lang) : categoryLabel(c, lang)) : ""; })()}</p><p style={{ fontFamily: F.display, fontSize: 26 }}>{q.text}</p>{q.type === "echelle" && !revealed && <p className="text-xs opacity-70 mt-1">{tr("closestWinsHint")}</p>}</div>
       {!submitted && left > 0 ? (
         <QuestionInput q={q} onSubmit={submit} scaleVal={scaleVal} setScaleVal={setScaleVal} />
-      ) : (
+      ) : !revealed ? (
         <div className="text-center mt-6 opacity-70"><p style={{ fontFamily: F.display, fontSize: 20 }}>{submitted ? tr("answerSubmitted") : tr("timeUp")}</p><p className="text-sm mt-1">{tr("suspenseMsg")}</p></div>
+      ) : (
+        <div className="text-center mt-6">
+          <p style={{ fontFamily: F.display, fontSize: 20, color: justEliminated ? C.pink : C.teal }}>{justEliminated ? "💔" : "✅"}</p>
+          <p className="text-sm opacity-70 mt-1">
+            {tr("answerColonLabel")} {q.type === "qcm" ? q.options[q.answer] : q.type === "vf" ? (q.answer ? tr("trueLabel") : tr("falseLabel")) : q.type === "carte" ? MAP_ZONES.find((z) => z.id === q.answer)?.label : `${q.answer} ${q.unit || ""}`}
+          </p>
+        </div>
       )}
     </Stage>
   );
@@ -3467,7 +3509,7 @@ function MatchAmorResults({ code, room, isAdmin, onRestart }) {
           </div>
         ) : <p className="opacity-60 mt-4">{tr("calculatingSimple")}</p>}
       </div>
-      {isAdmin && <div className="mt-8"><BigButton onClick={onRestart} color={C.violet} icon={RefreshCw}>{tr("newGameHome")}</BigButton></div>}
+      {isAdmin ? <div className="mt-8"><BigButton onClick={onRestart} color={C.violet} icon={RefreshCw}>{tr("newGameHome")}</BigButton></div> : <div className="mt-8"><BigButton onClick={onRestart} color={C.violet}>{tr("backToHome")}</BigButton></div>}
     </Stage>
   );
 }
@@ -3593,7 +3635,7 @@ function BlindTestAdminGame({ code, room, onRoomChange, onFinished, hostPid }) {
   const [revealed, setRevealed] = useState(false);
   const [playerAnswers, setPlayerAnswers] = useState([]);
   const [provisional, setProvisional] = useState([]);
-  const [autoLeft, setAutoLeft] = useState(7);
+  const [autoLeft, setAutoLeft] = useState(10);
   const [paused, setPaused] = useState(false);
   const [options, setOptions] = useState([]);
   const [hostSubmitted, setHostSubmitted] = useState(false);
@@ -3653,7 +3695,7 @@ function BlindTestAdminGame({ code, room, onRoomChange, onFinished, hostPid }) {
   }, [room.currentIndex]);
 
   useEffect(() => {
-    setRevealed(false); advancingRef.current = false; setPlayerAnswers([]); setAutoLeft(7); setProvisional([]); setHostSubmitted(false); setPaused(false);
+    setRevealed(false); advancingRef.current = false; setPlayerAnswers([]); setAutoLeft(10); setProvisional([]); setHostSubmitted(false); setPaused(false);
     const t = setInterval(async () => {
       const [keys, playerKeys] = await Promise.all([sList(`qz:${code}:answer:${room.currentIndex}:`), sList(`qz:${code}:player:`)]);
       setAnswersCount(keys.length);
@@ -3693,6 +3735,7 @@ function BlindTestAdminGame({ code, room, onRoomChange, onFinished, hostPid }) {
     const withPlayers = answers.map((a) => { const p = players.find((pp) => pp.id === a.pid); return { ...a, pseudo: p?.pseudo || "?", animal: p?.animal || "❓", correct: a.value === correctValue, points: pointsByPid[a.pid] || 0 }; });
     setPlayerAnswers(withPlayers);
     await sSet(revealDetailKey(code, room.currentIndex), withPlayers.map((a) => ({ pid: a.pid, pseudo: a.pseudo, animal: a.animal, correct: a.correct, points: a.points, value: a.value })));
+    await sSet(`qz:${code}:blindcorrect:${room.currentIndex}`, correctValue);
     for (const p of players) { await sSet(pointsDeltaKey(code, room.currentIndex, p.id), pointsByPid[p.id] || 0); }
     await sSet(revealedKey(code, room.currentIndex), true);
     const withScores = await Promise.all(players.map(async (p) => ({ ...p, score: (await sGet(scoreKey(code, p.id))) || 0 })));
@@ -3798,10 +3841,11 @@ function BlindTestPlayerGame({ code, pid, room }) {
   const [myPoints, setMyPoints] = useState(0);
   const [provisional, setProvisional] = useState([]);
   const [allAnswers, setAllAnswers] = useState([]);
+  const [correctValue, setCorrectValue] = useState(null);
   const prevRankRef = useRef({});
 
   useEffect(() => {
-    setSubmitted(false); setOptions([]); setRevealed(false); setMyPoints(0); setProvisional([]); setAllAnswers([]);
+    setSubmitted(false); setOptions([]); setRevealed(false); setMyPoints(0); setProvisional([]); setAllAnswers([]); setCorrectValue(null);
     let stop = false;
     const t = setInterval(async () => {
       const opts = await sGet(`qz:${code}:blindoptions:${room.currentIndex}`);
@@ -3817,10 +3861,11 @@ function BlindTestPlayerGame({ code, pid, room }) {
       const isRevealed = await sGet(revealedKey(code, room.currentIndex));
       if (stop || !isRevealed) return;
       clearInterval(t);
-      const [myDelta, playerKeys, detail] = await Promise.all([
+      const [myDelta, playerKeys, detail, correct] = await Promise.all([
         sGet(pointsDeltaKey(code, room.currentIndex, pid)),
         sList(`qz:${code}:player:`),
         sGet(revealDetailKey(code, room.currentIndex)),
+        sGet(`qz:${code}:blindcorrect:${room.currentIndex}`),
       ]);
       setMyPoints(myDelta || 0);
       const players = (await Promise.all(playerKeys.map((k) => sGet(k)))).filter(Boolean);
@@ -3828,6 +3873,7 @@ function BlindTestPlayerGame({ code, pid, room }) {
       withScores.sort((a, b) => b.score - a.score);
       setProvisional(withRankChange(withScores, prevRankRef));
       setAllAnswers(detail || []);
+      setCorrectValue(correct ?? null);
       setRevealed(true);
     }, 800);
     return () => { stop = true; clearInterval(t); };
@@ -3857,7 +3903,10 @@ function BlindTestPlayerGame({ code, pid, room }) {
         </div>
       ) : (
         <div className="mt-6">
-          <p className="text-center mb-4" style={{ fontFamily: F.display, fontSize: 26, color: myPoints > 0 ? C.teal : C.cream }}>{myPoints > 0 ? `+${myPoints}` : myPoints} pts</p>
+          <p className="text-center mb-2" style={{ fontFamily: F.display, fontSize: 26, color: myPoints > 0 ? C.teal : C.cream }}>{myPoints > 0 ? `+${myPoints}` : myPoints} pts</p>
+          {correctValue !== null && !allAnswers.find((a) => a.pid === pid)?.correct && (
+            <p className="text-center text-sm opacity-70 mb-4">{tr("answerColonLabel")} {correctValue}</p>
+          )}
           {allAnswers.length > 0 && (
             <div className="rounded-2xl p-4 mb-4" style={{ background: "rgba(255,255,255,0.05)" }}>
               <p className="text-sm font-bold mb-2 opacity-70">{tr("playerAnswersTitle")}</p>
@@ -4106,11 +4155,6 @@ function EnchereAdminGame({ code, room, onRoomChange, onFinished, hostPid }) {
           <span className="flex items-center gap-1 text-sm opacity-60"><Users size={14} /> {readyCount}/{activeCount} {tr("haveBetSuffix")}</span>
           <span className="flex items-center gap-1" style={{ fontFamily: F.mono, fontSize: 20, color: left <= 5 ? C.pink : C.gold }}><Clock size={18} /> {left}s</span>
         </div>
-        <div className="rounded-3xl p-10 mb-6 text-center" style={{ background: "rgba(255,255,255,0.06)" }}>
-          <p className="text-xs opacity-60 mb-3">{tr("placeBets")}</p>
-          <p className="uppercase tracking-widest mb-4" style={{ fontSize: 22, fontWeight: 800, color: C.gold }}>{cat?.emoji} {catLabelText}</p>
-          <p className="text-xs opacity-50 mt-4">{tr("revealAfterBets")}</p>
-        </div>
         {hostPid && hostScore > 0 && (
           <div className="rounded-2xl p-4 mb-6" style={{ background: "rgba(255,255,255,0.05)", border: `2px solid ${C.violet}` }}>
             <p className="text-sm font-bold mb-3" style={{ color: C.violet }}>{tr("yourBetHost")} {hostScore}</p>
@@ -4132,6 +4176,11 @@ function EnchereAdminGame({ code, room, onRoomChange, onFinished, hostPid }) {
             )}
           </div>
         )}
+        <div className="rounded-3xl p-10 mb-6 text-center" style={{ background: "rgba(255,255,255,0.06)" }}>
+          <p className="text-xs opacity-60 mb-3">{tr("placeBets")}</p>
+          <p className="uppercase tracking-widest mb-4" style={{ fontSize: 22, fontWeight: 800, color: C.gold }}>{cat?.emoji} {catLabelText}</p>
+          <p className="text-xs opacity-50 mt-4">{tr("revealAfterBets")}</p>
+        </div>
         <BigButton onClick={advanceToAnswering} color={C.violet}>{tr("revealQuestionNow")}</BigButton>
       </Stage>
     );
@@ -4142,16 +4191,6 @@ function EnchereAdminGame({ code, room, onRoomChange, onFinished, hostPid }) {
       <div className="flex items-center justify-between mb-4">
         <span className="text-sm opacity-60">{tr("questionWord")} {room.currentIndex + 1} / {room.questions.length}</span>
         <span className="flex items-center gap-1 text-sm opacity-60"><Users size={14} /> {readyCount}/{activeCount} {tr("answersWord")}</span>
-        <span className="flex items-center gap-1" style={{ fontFamily: F.mono, fontSize: 20, color: left <= 5 ? C.pink : C.gold }}><Clock size={18} /> {left}s</span>
-      </div>
-      <div className="rounded-3xl p-8 mb-6 text-center" style={{ background: "rgba(255,255,255,0.06)" }}>
-        <p className="uppercase tracking-widest mb-3" style={{ fontSize: 20, fontWeight: 800, color: C.gold }}>{cat?.emoji} {catLabelText}</p>
-        <p style={{ fontFamily: F.display, fontSize: 32 }}>{q.text}</p>
-        {q.type === "qcm" && (<div className="grid grid-cols-2 gap-3 mt-6">{q.options.map((o, i) => (<div key={i} className="rounded-xl p-3" style={{ background: revealed && i === q.answer ? C.teal : "rgba(255,255,255,0.08)", color: revealed && i === q.answer ? "#1B1030" : C.cream, fontFamily: F.body, fontWeight: 700, fontSize: 18 }}>{o}</div>))}</div>)}
-        {q.type === "vf" && (<div className="flex gap-4 justify-center mt-6"><div className="rounded-xl px-6 py-3" style={{ background: revealed && q.answer === true ? C.teal : "rgba(255,255,255,0.08)" }}>{tr("trueLabel")}</div><div className="rounded-xl px-6 py-3" style={{ background: revealed && q.answer === false ? C.teal : "rgba(255,255,255,0.08)" }}>{tr("falseLabel")}</div></div>)}
-        {q.type === "carte" && (<div className="relative rounded-xl mt-6 mx-auto" style={{ width: "100%", maxWidth: 420, height: 220, background: "rgba(255,255,255,0.06)" }}>{MAP_ZONES.map((z) => (<div key={z.id} className="absolute rounded-full px-2 py-1 text-xs" style={{ left: `${z.x}%`, top: `${z.y}%`, transform: "translate(-50%,-50%)", background: revealed && z.id === q.answer ? C.teal : "rgba(255,255,255,0.12)", color: revealed && z.id === q.answer ? "#1B1030" : C.cream }}>{z.label}</div>))}</div>)}
-        {q.type === "echelle" && revealed && <p className="mt-6" style={{ fontFamily: F.mono, fontSize: 26, color: C.teal }}>{tr("answerColonLabel")} {q.answer} {q.unit || ""}</p>}
-      </div>
       {hostPid && hostScore > 0 && !revealed && (
         <div className="rounded-2xl p-4 mb-6" style={{ background: "rgba(255,255,255,0.05)", border: `2px solid ${C.violet}` }}>
           <p className="text-sm font-bold mb-3" style={{ color: C.violet }}>{tr("hostAnswerTitle")}</p>
@@ -4167,6 +4206,16 @@ function EnchereAdminGame({ code, room, onRoomChange, onFinished, hostPid }) {
           )}
         </div>
       )}
+        <span className="flex items-center gap-1" style={{ fontFamily: F.mono, fontSize: 20, color: left <= 5 ? C.pink : C.gold }}><Clock size={18} /> {left}s</span>
+      </div>
+      <div className="rounded-3xl p-8 mb-6 text-center" style={{ background: "rgba(255,255,255,0.06)" }}>
+        <p className="uppercase tracking-widest mb-3" style={{ fontSize: 20, fontWeight: 800, color: C.gold }}>{cat?.emoji} {catLabelText}</p>
+        <p style={{ fontFamily: F.display, fontSize: 32 }}>{q.text}</p>
+        {q.type === "qcm" && (<div className="grid grid-cols-2 gap-3 mt-6">{q.options.map((o, i) => (<div key={i} className="rounded-xl p-3" style={{ background: revealed && i === q.answer ? C.teal : "rgba(255,255,255,0.08)", color: revealed && i === q.answer ? "#1B1030" : C.cream, fontFamily: F.body, fontWeight: 700, fontSize: 18 }}>{o}</div>))}</div>)}
+        {q.type === "vf" && (<div className="flex gap-4 justify-center mt-6"><div className="rounded-xl px-6 py-3" style={{ background: revealed && q.answer === true ? C.teal : "rgba(255,255,255,0.08)" }}>{tr("trueLabel")}</div><div className="rounded-xl px-6 py-3" style={{ background: revealed && q.answer === false ? C.teal : "rgba(255,255,255,0.08)" }}>{tr("falseLabel")}</div></div>)}
+        {q.type === "carte" && (<div className="relative rounded-xl mt-6 mx-auto" style={{ width: "100%", maxWidth: 420, height: 220, background: "rgba(255,255,255,0.06)" }}>{MAP_ZONES.map((z) => (<div key={z.id} className="absolute rounded-full px-2 py-1 text-xs" style={{ left: `${z.x}%`, top: `${z.y}%`, transform: "translate(-50%,-50%)", background: revealed && z.id === q.answer ? C.teal : "rgba(255,255,255,0.12)", color: revealed && z.id === q.answer ? "#1B1030" : C.cream }}>{z.label}</div>))}</div>)}
+        {q.type === "echelle" && revealed && <p className="mt-6" style={{ fontFamily: F.mono, fontSize: 26, color: C.teal }}>{tr("answerColonLabel")} {q.answer} {q.unit || ""}</p>}
+      </div>
       {revealed && roundResults.length > 0 && (
         <div className="rounded-2xl p-4 mb-6" style={{ background: "rgba(255,255,255,0.05)" }}>
           <p className="text-sm font-bold mb-2 opacity-70">{tr("betResultsTitle")}</p>
@@ -4314,6 +4363,11 @@ function EnchèrePlayerGame({ code, pid, room }) {
       ) : (
         <div className="text-center mt-6">
           <p style={{ fontFamily: F.display, fontSize: 28, color: myDelta > 0 ? C.teal : myDelta < 0 ? C.pink : C.cream }}>{myDelta > 0 ? `+${myDelta}` : myDelta} pts</p>
+          {myDelta <= 0 && (
+            <p className="text-sm opacity-70 mt-1">
+              {tr("answerColonLabel")} {q.type === "qcm" ? q.options[q.answer] : q.type === "vf" ? (q.answer ? tr("trueLabel") : tr("falseLabel")) : q.type === "carte" ? MAP_ZONES.find((z) => z.id === q.answer)?.label : `${q.answer} ${q.unit || ""}`}
+            </p>
+          )}
           {allBets.length > 0 && (
             <div className="rounded-2xl p-4 mb-4 mt-4 text-left" style={{ background: "rgba(255,255,255,0.05)" }}>
               <p className="text-sm font-bold mb-2 opacity-70">{tr("betResultsTitle")}</p>
@@ -4420,7 +4474,14 @@ function QuizAppInner() {
         await sSet(victimKey(code, p.id), 0);
       }
     }
-    const resetRoom = { ...room, phase: "lobby", currentIndex: -1, questionStartedAt: null, stage: room.mode === "enchere" ? "betting" : room.stage, stageStartedAt: null };
+    const reshuffle = (arr) => { const a = [...arr]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+    const resetRoom = {
+      ...room,
+      phase: "lobby", currentIndex: -1, questionStartedAt: null,
+      stage: room.mode === "enchere" ? "betting" : room.stage, stageStartedAt: null,
+      ...(room.questions ? { questions: reshuffle(room.questions) } : {}),
+      ...(room.tracks ? { tracks: reshuffle(room.tracks) } : {}),
+    };
     await sSet(roomKey(code), resetRoom);
     setRoom(resetRoom);
     setUsedJokersEver([]);
